@@ -44,7 +44,7 @@ services:
   app:
     image: hector-researchos:${RESEARCHOS_VERSION:-1.0.0}
     build:
-      context: ../upstream/hector
+      context: ..
       dockerfile: Dockerfile.researchos
     depends_on:
       db:

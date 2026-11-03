@@ -32,7 +32,7 @@ services:
 
   app:
     build:
-      context: ./upstream/hector
+      context: .
       dockerfile: Dockerfile.researchos
     depends_on:
       db:

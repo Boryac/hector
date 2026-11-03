@@ -13,7 +13,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
-UP="$ROOT/upstream/hector"
+UP="$ROOT"
 WEB="$UP/web"
 FAST=0
 [ "${1:-}" = "--fast" ] && FAST=1
@@ -111,7 +111,7 @@ DB_OK=0
 if [ -n "${RESEARCHOS_DATABASE_URL:-}" ]; then
   DB_OK=1
 else
-  # 开发包惯例：本地 PostgreSQL 在 127.0.0.1:55432，口令见 upstream/hector/.env.researchos
+  # 开发包惯例：本地 PostgreSQL 在 127.0.0.1:55432，口令见仓库根 .env.researchos
   if [ -f "$UP/.env.researchos" ]; then
     # shellcheck disable=SC1091
     set -a; . "$UP/.env.researchos"; set +a
@@ -122,7 +122,7 @@ fi
 if [ "$FAST" = 1 ]; then
   report SKIP "端到端（迁移+API+PDF）" "--fast 模式跳过"
 elif [ "$DB_OK" = 0 ]; then
-  report SKIP "端到端（迁移+API+PDF）" "没有 RESEARCHOS_DATABASE_URL，也未找到 upstream/hector/.env.researchos"
+  report SKIP "端到端（迁移+API+PDF）" "没有 RESEARCHOS_DATABASE_URL，也未找到仓库根 .env.researchos"
 else
   echo "-- 端到端：使用 ${RESEARCHOS_DATABASE_URL%%\?*}@***（口令已隐去）"
   # 5.1 迁移幂等
@@ -134,7 +134,6 @@ else
     else
       report FAIL "数据库迁移（执行两次，幂等）"
     fi
-    rm -f "$UP/bin/researchos-verify.exe"
   else
     report FAIL "构建 researchos 二进制"
   fi
@@ -142,7 +141,7 @@ else
   VERIFY_PORT=18499
   OUT_DIR="$(mktemp -d)"
   (cd "$UP" && RESEARCHOS_ADDR="127.0.0.1:$VERIFY_PORT" RESEARCHOS_WEB_DIR=web/.build \
-    ./bin/researchos.exe serve >/dev/null 2>&1 &
+    ./bin/researchos-verify.exe serve >/dev/null 2>&1 &
     echo $! > "$OUT_DIR/pid")
   SRV_UP=0
   for _ in $(seq 1 15); do
@@ -175,10 +174,11 @@ else
   else
     report FAIL "服务启动 + /health" "15s 内未就绪"
   fi
-  # 收尾：杀掉临时服务
+  # 收尾：杀掉临时服务并清理构建产物
   if [ -f "$OUT_DIR/pid" ]; then
     kill "$(cat "$OUT_DIR/pid")" >/dev/null 2>&1 || true
   fi
+  rm -f "$UP/bin/researchos-verify.exe"
   rm -rf "$OUT_DIR"
 fi
 
