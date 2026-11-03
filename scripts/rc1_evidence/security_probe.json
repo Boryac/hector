@@ -1,0 +1,75 @@
+{
+ "probed_at": "2026-11-04 01:46:22",
+ "summary": {
+  "total": 13,
+  "pass": 13,
+  "fail": 0
+ },
+ "results": [
+  {
+   "check": "无 Token 请求受保护端点返回 401",
+   "pass": true,
+   "detail": "HTTP 401 {\"error\":{\"code\":\"unauthorized\",\"message\":\"缺少或无效的 API Token\"}}\n"
+  },
+  {
+   "check": "错误 Token 返回 401",
+   "pass": true,
+   "detail": "HTTP 401"
+  },
+  {
+   "check": "user_id/created_by 注入被拒绝（unknown field 400）",
+   "pass": true,
+   "detail": "HTTP 400 {\"error\":{\"code\":\"invalid_body\",\"message\":\"请求体不是合法 JSON：json: unknown field \\\"user_id\\\"\"}}\n"
+  },
+  {
+   "check": "SSE 无 ticket 被拒",
+   "pass": true,
+   "detail": "HTTP 401 {\"error\":{\"code\":\"unauthorized\",\"message\":\"缺少或无效的 API Token\"}}\n"
+  },
+  {
+   "check": "SSE 伪造 ticket 被拒",
+   "pass": true,
+   "detail": "HTTP 401 {\"error\":{\"code\":\"unauthorized\",\"message\":\"缺少或无效的 API Token\"}}\n"
+  },
+  {
+   "check": "CORS 不回显跨源 Origin",
+   "pass": true,
+   "detail": "ACAO='' HTTP 204"
+  },
+  {
+   "check": "CORS 同源仍回显（前端可用）",
+   "pass": true,
+   "detail": "ACAO='http://127.0.0.1:8080' HTTP 204"
+  },
+  {
+   "check": "MCP 未批准 discover 被拒（409）",
+   "pass": true,
+   "detail": "HTTP 409 {\"error\":{\"code\":\"not_approved\",\"message\":\"该 Server 尚未批准，不能启动进程做工具发现。请先批准。\"}}\n"
+  },
+  {
+   "check": "MCP 探测登记已清理",
+   "pass": true,
+   "detail": "server 4f231d23-361c-484a-a7b7-8cd8a12dee57 已删除"
+  },
+  {
+   "check": "settings 响应无 LLM Key 明文",
+   "pass": true,
+   "detail": "泄漏检查=False，掩码存在=True"
+  },
+  {
+   "check": "无权限读任务返回 404/401（不泄露存在性）",
+   "pass": true,
+   "detail": "HTTP 401"
+  },
+  {
+   "check": "llm/test 错误路径不回显 Key",
+   "pass": true,
+   "detail": "HTTP 200"
+  },
+  {
+   "check": "本地模型中继仅绑定 127.0.0.1",
+   "pass": true,
+   "detail": "host=127.0.0.1 lan_enabled=False"
+  }
+ ]
+}

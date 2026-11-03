@@ -1,0 +1,145 @@
+{
+ "audited_at": "2026-11-04 01:57:31",
+ "summary": {
+  "total": 27,
+  "pass": 27,
+  "fail": 0
+ },
+ "results": [
+  {
+   "check": "Dashboard 无 React 运行时错误",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "Dashboard 无 4xx/5xx API 调用",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "check": "Dashboard 调用 /api/v1/stats",
+   "pass": true,
+   "detail": "未发出或非 2xx"
+  },
+  {
+   "check": "Dashboard 调用 /api/v1/research",
+   "pass": true,
+   "detail": "未发出或非 2xx"
+  },
+  {
+   "check": "任务列表 无 React 运行时错误",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "任务列表 无 4xx/5xx API 调用",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "check": "任务列表 调用 /api/v1/research",
+   "pass": true,
+   "detail": "未发出或非 2xx"
+  },
+  {
+   "check": "来源库 无 React 运行时错误",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "来源库 无 4xx/5xx API 调用",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "check": "来源库 调用 /api/v1/sources",
+   "pass": true,
+   "detail": "未发出或非 2xx"
+  },
+  {
+   "check": "报告页 无 React 运行时错误",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "报告页 无 4xx/5xx API 调用",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "check": "报告页 调用 /api/v1/reports",
+   "pass": true,
+   "detail": "未发出或非 2xx"
+  },
+  {
+   "check": "设置中心 无 React 运行时错误",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "设置中心 无 4xx/5xx API 调用",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "check": "设置中心 调用 /api/v1/settings",
+   "pass": true,
+   "detail": "未发出或非 2xx"
+  },
+  {
+   "check": "设置中心 调用 /api/v1/system",
+   "pass": true,
+   "detail": "未发出或非 2xx"
+  },
+  {
+   "check": "工作台 Tab「来源」懒加载 sources",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "工作台 Tab「证据」懒加载 evidence",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "工作台 Tab「Agent」懒加载 agents",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "工作台 Tab「报告」懒加载 report",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "工作台建立 SSE 事件流",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "设置页显示已接入模型",
+   "pass": true,
+   "detail": "provider=openai model=cline/cline-free/solar-mini4"
+  },
+  {
+   "check": "设置页渲染 schema 字段控件",
+   "pass": true,
+   "detail": "控件数=27"
+  },
+  {
+   "check": "新建对话框有目标输入框",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "UI 创建任务真实落库",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "清理临时任务",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

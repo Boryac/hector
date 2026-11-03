@@ -1,0 +1,1657 @@
+{
+ "key": "C-open",
+ "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+ "goal": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+ "depth": "deep",
+ "created_at": "2026-11-04 01:48:34",
+ "model_id_expected": "cline/cline-free/solar-mini4",
+ "wall_seconds": 366.8,
+ "status": "completed",
+ "planner_mode": "llm",
+ "task_detail": {
+  "id": "87de3043-6ab4-432b-b149-7bbd81561997",
+  "title": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+  "goal": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+  "depth": "deep",
+  "scope": {},
+  "max_agents": 4,
+  "max_duration_seconds": 1800,
+  "enable_verification": true,
+  "status": "completed",
+  "created_by": "local-user",
+  "planner_mode": "llm",
+  "plan": {
+   "goal": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+   "research_questions": [
+    {
+     "id": "q1",
+     "question": "企业知识库场景下 RAG 技术的完整落地路径是什么？",
+     "priority": "high"
+    },
+    {
+     "id": "q2",
+     "question": "企业知识库 RAG 面临的主要技术挑战有哪些？",
+     "priority": "high"
+    },
+    {
+     "id": "q3",
+     "question": "企业知识库 RAG 的工程最佳实践有哪些？",
+     "priority": "high"
+    }
+   ],
+   "subtasks": [
+    {
+     "id": "search_01_rag_landscape",
+     "title": "企业知识库 RAG 落地路径检索",
+     "agent_role": "researcher",
+     "inputs": [],
+     "outputs": [
+      "企业知识库 RAG 落地路径的关键阶段、架构组件、决策因素"
+     ],
+     "depends_on": [],
+     "node_type": "search",
+     "query": "RAG 企业知识库 落地路径 架构 流程 阶段 最佳实践"
+    },
+    {
+     "id": "analyze_01_rag_landscape",
+     "title": "企业知识库 RAG 落地路径分析",
+     "agent_role": "analyst",
+     "inputs": [
+      "search_01_rag_landscape"
+     ],
+     "outputs": [
+      "企业知识库 RAG 落地路径的阶段化模型、关键技术组件和成功因素"
+     ],
+     "depends_on": [
+      "search_01_rag_landscape"
+     ],
+     "node_type": "analyze",
+     "query": "分析检索结果，梳理企业知识库 RAG 落地的阶段、架构、数据准备、评估和运维要点"
+    },
+    {
+     "id": "search_02_rag_challenges",
+     "title": "企业知识库 RAG 技术挑战检索",
+     "agent_role": "researcher",
+     "inputs": [],
+     "outputs": [
+      "企业知识库 RAG 面临的检索、生成、数据、工程和治理挑战"
+     ],
+     "depends_on": [],
+     "node_type": "search",
+     "query": "RAG 企业知识库 检索质量 幻觉 文档切片 向量索引 数据更新 评估 挑战"
+    },
+    {
+     "id": "analyze_02_rag_challenges",
+     "title": "企业知识库 RAG 技术挑战分析",
+     "agent_role": "analyst",
+     "inputs": [
+      "search_02_rag_challenges"
+     ],
+     "outputs": [
+      "企业知识库 RAG 主要技术挑战的分类、成因和影响程度"
+     ],
+     "depends_on": [
+      "search_02_rag_challenges"
+     ],
+     "node_type": "analyze",
+     "query": "分析检索结果，归纳企业知识库 RAG 的检索质量、幻觉、数据维护、安全合规和评估挑战"
+    },
+    {
+     "id": "search_03_rag_best_practices",
+     "title": "企业知识库 RAG 工程最佳实践检索",
+     "agent_role": "researcher",
+     "inputs": [],
+     "outputs": [
+      "企业知识库 RAG 工程实践的检索、生成、缓存、监控、安全和合规建议"
+     ],
+     "depends_on": [],
+     "node_type": "search",
+     "query": "RAG 企业知识库 工程最佳实践 混合检索 重排 缓存 提示工程 监控 评估 安全 合规"
+    },
+    {
+     "id": "analyze_03_rag_best_practices",
+     "title": "企业知识库 RAG 工程最佳实践分析",
+     "agent_role": "analyst",
+     "inputs": [
+      "search_03_rag_best_practices"
+     ],
+     "outputs": [
+      "企业知识库 RAG 工程最佳实践清单、评估指标和风险控制措施"
+     ],
+     "depends_on": [
+      "search_03_rag_best_practices"
+     ],
+     "node_type": "analyze",
+     "query": "分析检索结果，提炼企业知识库 RAG 的工程最佳实践、度量指标和落地建议"
+    },
+    {
+     "id": "verify_rag_enterprise_rag",
+     "title": "企业知识库 RAG 交叉验证",
+     "agent_role": "verifier",
+     "inputs": [
+      "analyze_01_rag_landscape",
+      "analyze_02_rag_challenges",
+      "analyze_03_rag_best_practices"
+     ],
+     "outputs": [
+      "三组分析结果的一致性结论、证据缺口和需要进一步验证的假设"
+     ],
+     "depends_on": [
+      "analyze_01_rag_landscape",
+      "analyze_02_rag_challenges",
+      "analyze_03_rag_best_practices"
+     ],
+     "node_type": "verify",
+     "query": "交叉验证三组分析结果，检查落地路径、技术挑战与工程最佳实践之间的一致性和证据充分性"
+    },
+    {
+     "id": "synthesize_rag_enterprise_rag",
+     "title": "企业知识库 RAG 综合研究报告",
+     "agent_role": "synthesizer",
+     "inputs": [
+      "verify_rag_enterprise_rag"
+     ],
+     "outputs": [
+      "企业知识库 RAG 落地路径、技术挑战与工程最佳实践的综合结论"
+     ],
+     "depends_on": [
+      "verify_rag_enterprise_rag"
+     ],
+     "node_type": "synthesize",
+     "query": "综合落地路径、技术挑战和工程最佳实践，形成企业知识库 RAG 深度研究报告"
+    }
+   ],
+   "workflow": {
+    "nodes": null,
+    "edges": null
+   },
+   "risks_and_gaps": [
+    "公开资料多集中于概念或单点技术，缺少覆盖企业知识库全链路的统一案例",
+    "不同企业知识库规模、数据类型和合规要求差异大，难以形成通用落地标准",
+    "检索质量、幻觉率和用户满意度等指标缺乏统一基准",
+    "数据更新、权限控制、版本管理和成本优化等工程细节在公开资料中不够充分",
+    "交叉验证依赖公开资料，可能存在来源偏差或过时信息"
+   ]
+  },
+  "workflow": {
+   "nodes": [
+    {
+     "id": "search_01_rag_landscape",
+     "type": "search",
+     "title": "企业知识库 RAG 落地路径检索",
+     "agent_role": "researcher",
+     "depends_on": []
+    },
+    {
+     "id": "analyze_01_rag_landscape",
+     "type": "analyze",
+     "title": "企业知识库 RAG 落地路径分析",
+     "agent_role": "analyst",
+     "depends_on": [
+      "search_01_rag_landscape"
+     ]
+    },
+    {
+     "id": "search_02_rag_challenges",
+     "type": "search",
+     "title": "企业知识库 RAG 技术挑战检索",
+     "agent_role": "researcher",
+     "depends_on": []
+    },
+    {
+     "id": "analyze_02_rag_challenges",
+     "type": "analyze",
+     "title": "企业知识库 RAG 技术挑战分析",
+     "agent_role": "analyst",
+     "depends_on": [
+      "search_02_rag_challenges"
+     ]
+    },
+    {
+     "id": "search_03_rag_best_practices",
+     "type": "search",
+     "title": "企业知识库 RAG 工程最佳实践检索",
+     "agent_role": "researcher",
+     "depends_on": []
+    },
+    {
+     "id": "analyze_03_rag_best_practices",
+     "type": "analyze",
+     "title": "企业知识库 RAG 工程最佳实践分析",
+     "agent_role": "analyst",
+     "depends_on": [
+      "search_03_rag_best_practices"
+     ]
+    },
+    {
+     "id": "verify_rag_enterprise_rag",
+     "type": "verify",
+     "title": "企业知识库 RAG 交叉验证",
+     "agent_role": "verifier",
+     "depends_on": [
+      "analyze_01_rag_landscape",
+      "analyze_02_rag_challenges",
+      "analyze_03_rag_best_practices"
+     ]
+    },
+    {
+     "id": "synthesize_rag_enterprise_rag",
+     "type": "synthesize",
+     "title": "企业知识库 RAG 综合研究报告",
+     "agent_role": "synthesizer",
+     "depends_on": [
+      "verify_rag_enterprise_rag"
+     ]
+    }
+   ],
+   "edges": [
+    {
+     "source": "search_01_rag_landscape",
+     "target": "analyze_01_rag_landscape"
+    },
+    {
+     "source": "search_02_rag_challenges",
+     "target": "analyze_02_rag_challenges"
+    },
+    {
+     "source": "search_03_rag_best_practices",
+     "target": "analyze_03_rag_best_practices"
+    },
+    {
+     "source": "analyze_01_rag_landscape",
+     "target": "verify_rag_enterprise_rag"
+    },
+    {
+     "source": "analyze_02_rag_challenges",
+     "target": "verify_rag_enterprise_rag"
+    },
+    {
+     "source": "analyze_03_rag_best_practices",
+     "target": "verify_rag_enterprise_rag"
+    },
+    {
+     "source": "verify_rag_enterprise_rag",
+     "target": "synthesize_rag_enterprise_rag"
+    }
+   ]
+  },
+  "stats": {
+   "claims": 17,
+   "finished_at": "2026-11-03T17:54:40Z",
+   "nodes_done": 8,
+   "nodes_total": 8,
+   "sources": 8
+  },
+  "created_at": "2026-11-04T01:48:34.399532+08:00",
+  "updated_at": "2026-11-04T01:54:40.185288+08:00",
+  "started_at": "2026-11-04T01:49:16.512815+08:00",
+  "finished_at": "2026-11-04T01:54:40.185288+08:00",
+  "nodes": [
+   {
+    "id": "search_01_rag_landscape",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "title": "企业知识库 RAG 落地路径检索",
+    "type": "search",
+    "agent_role": "researcher",
+    "agent_name": "",
+    "depends_on": [],
+    "position": 0,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "fallback_query": "RAG",
+     "query": "RAG 企业知识库 落地路径 架构 流程 阶段 最佳实践"
+    },
+    "output": {
+     "failed": 2,
+     "fetched": 3,
+     "providers": [
+      "github",
+      "hackernews",
+      "wikipedia",
+      "bing"
+     ],
+     "query": "RAG 企业知识库 落地路径 架构 流程 阶段 最佳实践",
+     "result_count": 8,
+     "source_ids": [
+      "83fd7b68-f4fc-478c-ba6d-8cc5168aaea7",
+      "fcee8398-c401-476c-8be3-0bcd34ae147c",
+      "5c9191fd-180d-435b-b666-908e761f3d03",
+      "5212d2de-ca8a-48d5-9f15-aa7448acb5ff",
+      "983f29ae-ed85-4151-945b-ce408fcef002",
+      "86dd55c3-1dd3-4f5d-b9c1-af63e9673c93",
+      "55c4d8e3-a512-4e0c-a8f6-86b14a8bf3ce",
+      "ca8dbbad-f3bb-49a6-ae9c-662d352d2a72"
+     ],
+     "trace": [
+      {
+       "count": 8,
+       "duration_ms": 500,
+       "provider": "bing"
+      },
+      {
+       "count": 0,
+       "duration_ms": 571,
+       "provider": "hackernews"
+      },
+      {
+       "count": 0,
+       "duration_ms": 611,
+       "provider": "wikipedia"
+      },
+      {
+       "count": 0,
+       "duration_ms": 636,
+       "provider": "github"
+      }
+     ]
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:49:14.256475+08:00",
+    "updated_at": "2026-11-04T01:49:18.635498+08:00",
+    "started_at": "2026-11-04T01:49:16.648695+08:00",
+    "completed_at": "2026-11-04T01:49:18.635498+08:00"
+   },
+   {
+    "id": "analyze_01_rag_landscape",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "title": "企业知识库 RAG 落地路径分析",
+    "type": "analyze",
+    "agent_role": "analyst",
+    "agent_name": "",
+    "depends_on": [
+     "search_01_rag_landscape"
+    ],
+    "position": 1,
+    "status": "completed",
+    "attempts": 2,
+    "max_attempts": 3,
+    "input": {
+     "question": "企业知识库 RAG 落地路径分析"
+    },
+    "output": {
+     "claims": 7,
+     "llm_used": true,
+     "model": "cline/cline-free/solar-mini4",
+     "question": "企业知识库 RAG 落地路径分析",
+     "source_n": 2,
+     "tokens": 20179
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 20179,
+    "created_at": "2026-11-04T01:49:14.258191+08:00",
+    "updated_at": "2026-11-04T01:54:39.377574+08:00",
+    "started_at": "2026-11-04T01:49:18.648699+08:00",
+    "completed_at": "2026-11-04T01:54:39.377574+08:00"
+   },
+   {
+    "id": "search_02_rag_challenges",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "title": "企业知识库 RAG 技术挑战检索",
+    "type": "search",
+    "agent_role": "researcher",
+    "agent_name": "",
+    "depends_on": [],
+    "position": 2,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "fallback_query": "RAG",
+     "query": "RAG 企业知识库 检索质量 幻觉 文档切片 向量索引 数据更新 评估 挑战"
+    },
+    "output": {
+     "failed": 1,
+     "fetched": 4,
+     "providers": [
+      "github",
+      "hackernews",
+      "wikipedia",
+      "bing"
+     ],
+     "query": "RAG 企业知识库 检索质量 幻觉 文档切片 向量索引 数据更新 评估 挑战",
+     "result_count": 8,
+     "source_ids": [
+      "83fd7b68-f4fc-478c-ba6d-8cc5168aaea7",
+      "fcee8398-c401-476c-8be3-0bcd34ae147c",
+      "5c9191fd-180d-435b-b666-908e761f3d03",
+      "5212d2de-ca8a-48d5-9f15-aa7448acb5ff",
+      "983f29ae-ed85-4151-945b-ce408fcef002",
+      "86dd55c3-1dd3-4f5d-b9c1-af63e9673c93",
+      "55c4d8e3-a512-4e0c-a8f6-86b14a8bf3ce",
+      "ca8dbbad-f3bb-49a6-ae9c-662d352d2a72"
+     ],
+     "trace": [
+      {
+       "count": 8,
+       "duration_ms": 530,
+       "provider": "bing"
+      },
+      {
+       "count": 0,
+       "duration_ms": 584,
+       "provider": "hackernews"
+      },
+      {
+       "count": 0,
+       "duration_ms": 664,
+       "provider": "github"
+      },
+      {
+       "count": 0,
+       "duration_ms": 685,
+       "provider": "wikipedia"
+      }
+     ]
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:49:14.258507+08:00",
+    "updated_at": "2026-11-04T01:49:18.480683+08:00",
+    "started_at": "2026-11-04T01:49:16.648695+08:00",
+    "completed_at": "2026-11-04T01:49:18.480683+08:00"
+   },
+   {
+    "id": "analyze_02_rag_challenges",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "title": "企业知识库 RAG 技术挑战分析",
+    "type": "analyze",
+    "agent_role": "analyst",
+    "agent_name": "",
+    "depends_on": [
+     "search_02_rag_challenges"
+    ],
+    "position": 3,
+    "status": "completed",
+    "attempts": 2,
+    "max_attempts": 3,
+    "input": {
+     "question": "企业知识库 RAG 技术挑战分析"
+    },
+    "output": {
+     "claims": 2,
+     "llm_used": true,
+     "model": "cline/cline-free/solar-mini4",
+     "question": "企业知识库 RAG 技术挑战分析",
+     "source_n": 2,
+     "tokens": 0
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:49:14.258839+08:00",
+    "updated_at": "2026-11-04T01:53:47.721542+08:00",
+    "started_at": "2026-11-04T01:49:18.648699+08:00",
+    "completed_at": "2026-11-04T01:53:47.721542+08:00"
+   },
+   {
+    "id": "search_03_rag_best_practices",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "title": "企业知识库 RAG 工程最佳实践检索",
+    "type": "search",
+    "agent_role": "researcher",
+    "agent_name": "",
+    "depends_on": [],
+    "position": 4,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "fallback_query": "RAG",
+     "query": "RAG 企业知识库 工程最佳实践 混合检索 重排 缓存 提示工程 监控 评估 安全 合规"
+    },
+    "output": {
+     "failed": 1,
+     "fetched": 4,
+     "providers": [
+      "github",
+      "hackernews",
+      "wikipedia",
+      "bing"
+     ],
+     "query": "RAG 企业知识库 工程最佳实践 混合检索 重排 缓存 提示工程 监控 评估 安全 合规",
+     "result_count": 8,
+     "source_ids": [
+      "83fd7b68-f4fc-478c-ba6d-8cc5168aaea7",
+      "fcee8398-c401-476c-8be3-0bcd34ae147c",
+      "5c9191fd-180d-435b-b666-908e761f3d03",
+      "5212d2de-ca8a-48d5-9f15-aa7448acb5ff",
+      "983f29ae-ed85-4151-945b-ce408fcef002",
+      "86dd55c3-1dd3-4f5d-b9c1-af63e9673c93",
+      "55c4d8e3-a512-4e0c-a8f6-86b14a8bf3ce",
+      "ca8dbbad-f3bb-49a6-ae9c-662d352d2a72"
+     ],
+     "trace": [
+      {
+       "count": 8,
+       "duration_ms": 612,
+       "provider": "bing"
+      },
+      {
+       "count": 0,
+       "duration_ms": 672,
+       "provider": "hackernews"
+      },
+      {
+       "count": 0,
+       "duration_ms": 745,
+       "provider": "github"
+      },
+      {
+       "count": 0,
+       "duration_ms": 777,
+       "provider": "wikipedia"
+      }
+     ]
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:49:14.259153+08:00",
+    "updated_at": "2026-11-04T01:49:19.312159+08:00",
+    "started_at": "2026-11-04T01:49:16.648695+08:00",
+    "completed_at": "2026-11-04T01:49:19.312159+08:00"
+   },
+   {
+    "id": "analyze_03_rag_best_practices",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "title": "企业知识库 RAG 工程最佳实践分析",
+    "type": "analyze",
+    "agent_role": "analyst",
+    "agent_name": "",
+    "depends_on": [
+     "search_03_rag_best_practices"
+    ],
+    "position": 5,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "企业知识库 RAG 工程最佳实践分析"
+    },
+    "output": {
+     "claims": 8,
+     "llm_used": true,
+     "model": "cline/cline-free/solar-mini4",
+     "question": "企业知识库 RAG 工程最佳实践分析",
+     "source_n": 2,
+     "tokens": 17431
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 17431,
+    "created_at": "2026-11-04T01:49:14.259501+08:00",
+    "updated_at": "2026-11-04T01:51:32.276425+08:00",
+    "started_at": "2026-11-04T01:49:19.649058+08:00",
+    "completed_at": "2026-11-04T01:51:32.276425+08:00"
+   },
+   {
+    "id": "verify_rag_enterprise_rag",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "title": "企业知识库 RAG 交叉验证",
+    "type": "verify",
+    "agent_role": "verifier",
+    "agent_name": "",
+    "depends_on": [
+     "analyze_01_rag_landscape",
+     "analyze_02_rag_challenges",
+     "analyze_03_rag_best_practices"
+    ],
+    "position": 6,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践"
+    },
+    "output": {
+     "clusters": 17,
+     "conflicting": 0,
+     "partial": 17,
+     "supported": 0,
+     "unverified": 0,
+     "verified": 17
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:49:14.259808+08:00",
+    "updated_at": "2026-11-04T01:54:39.673311+08:00",
+    "started_at": "2026-11-04T01:54:39.649082+08:00",
+    "completed_at": "2026-11-04T01:54:39.673311+08:00"
+   },
+   {
+    "id": "synthesize_rag_enterprise_rag",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "title": "企业知识库 RAG 综合研究报告",
+    "type": "synthesize",
+    "agent_role": "synthesizer",
+    "agent_name": "",
+    "depends_on": [
+     "verify_rag_enterprise_rag"
+    ],
+    "position": 7,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践"
+    },
+    "output": {
+     "citation_count": 17,
+     "claims": 17,
+     "report_id": "ccbf652e-652b-4d0a-8377-f8a9598135ea",
+     "sources": 2,
+     "version": 1,
+     "word_count": 2264
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:49:14.260226+08:00",
+    "updated_at": "2026-11-04T01:54:40.178229+08:00",
+    "started_at": "2026-11-04T01:54:40.148951+08:00",
+    "completed_at": "2026-11-04T01:54:40.178229+08:00"
+   }
+  ],
+  "latest_sequence": 127
+ },
+ "agents": {
+  "items": [
+   {
+    "id": "038569b1-c79e-4e73-838e-0a97e16d8405",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "run_id": "46e32b73-5b13-4da4-b888-3e6a0f32f8dc",
+    "node_id": "synthesize_rag_enterprise_rag",
+    "role": "synthesizer",
+    "name": "Report Synthesizer",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:54:40.157629+08:00",
+    "duration_ms": 22,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "8d6c57b0-e9cb-4303-b437-6c23fa01fabb",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "run_id": "46e32b73-5b13-4da4-b888-3e6a0f32f8dc",
+    "node_id": "verify_rag_enterprise_rag",
+    "role": "verifier",
+    "name": "Cross-Validator",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:54:39.650809+08:00",
+    "duration_ms": 24,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "192f0458-08e2-4b29-b6d2-f030d8b5f6cc",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "run_id": "46e32b73-5b13-4da4-b888-3e6a0f32f8dc",
+    "node_id": "analyze_01_rag_landscape",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:52:21.152+08:00",
+    "duration_ms": 138227,
+    "token_usage": {
+     "prompt_tokens": 20179,
+     "total_tokens": 20179
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "1aa9c79c-3912-4b8a-bc2d-070a23eff21f",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "run_id": "46e32b73-5b13-4da4-b888-3e6a0f32f8dc",
+    "node_id": "analyze_02_rag_challenges",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:52:21.151868+08:00",
+    "duration_ms": 86571,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "4ce35cbd-f0ae-46e4-920e-8fa2cd833562",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "run_id": "46e32b73-5b13-4da4-b888-3e6a0f32f8dc",
+    "node_id": "analyze_03_rag_best_practices",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:49:19.656323+08:00",
+    "duration_ms": 132621,
+    "token_usage": {
+     "prompt_tokens": 17431,
+     "total_tokens": 17431
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "2835b1d4-d299-4fe6-8799-67ef83ec33c7",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "run_id": "46e32b73-5b13-4da4-b888-3e6a0f32f8dc",
+    "node_id": "analyze_01_rag_landscape",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "failed",
+    "started_at": "2026-11-04T01:49:18.650911+08:00",
+    "duration_ms": 180009,
+    "token_usage": {
+     "total_tokens": 0
+    },
+    "tool_calls": [],
+    "error": "结论写入失败"
+   },
+   {
+    "id": "93e326e0-69b5-47a1-81de-9786dd690d5c",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "run_id": "46e32b73-5b13-4da4-b888-3e6a0f32f8dc",
+    "node_id": "analyze_02_rag_challenges",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "failed",
+    "started_at": "2026-11-04T01:49:18.650781+08:00",
+    "duration_ms": 180009,
+    "token_usage": {
+     "total_tokens": 0
+    },
+    "tool_calls": [],
+    "error": "结论写入失败"
+   },
+   {
+    "id": "fde18785-dfaa-488a-a941-4aa5a72524b1",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "run_id": "46e32b73-5b13-4da4-b888-3e6a0f32f8dc",
+    "node_id": "search_01_rag_landscape",
+    "role": "researcher",
+    "name": "Open Source Researcher",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:49:16.765957+08:00",
+    "duration_ms": 1872,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "17b26a12-3d23-4552-9812-639cd8492b22",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "run_id": "46e32b73-5b13-4da4-b888-3e6a0f32f8dc",
+    "node_id": "search_02_rag_challenges",
+    "role": "researcher",
+    "name": "Open Source Researcher",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:49:16.734665+08:00",
+    "duration_ms": 1751,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "4cb70504-e1b2-441f-a7f4-8305f354703a",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "run_id": "46e32b73-5b13-4da4-b888-3e6a0f32f8dc",
+    "node_id": "search_03_rag_best_practices",
+    "role": "researcher",
+    "name": "Open Source Researcher",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:49:16.65861+08:00",
+    "duration_ms": 2658,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   }
+  ],
+  "total": 10
+ },
+ "sources": {
+  "items": [
+   {
+    "id": "83fd7b68-f4fc-478c-ba6d-8cc5168aaea7",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "search_01_rag_landscape",
+    "url": "https://www.zhihu.com/tardis/zm/art/675509396",
+    "normalized_url": "https://www.zhihu.com/tardis/zm/art/675509396",
+    "title": "一文读懂：大模型 RAG （检索增强生成）含高级方法",
+    "site": "zhihu.com",
+    "provider": "bing",
+    "snippet": "2026年5月2日 · 而RAG就是解决上述问题的有效方案。 一句话总结： RAG（中文为检索增强生成） = 检索技术 + LLM 提示。 例如， …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "robots_blocked",
+    "error": "robots.txt 禁止抓取",
+    "created_at": "2026-11-04T01:49:17.421632+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "fcee8398-c401-476c-8be3-0bcd34ae147c",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "search_01_rag_landscape",
+    "url": "https://zhuanlan.zhihu.com/p/668082024",
+    "normalized_url": "https://zhuanlan.zhihu.com/p/668082024",
+    "title": "一文搞懂大模型 RAG 应用（附实践案例） - 知乎",
+    "site": "zhuanlan.zhihu.com",
+    "provider": "bing",
+    "snippet": "2023年11月25日 · 相对于成本昂贵的“ Post Train ”或“ SFT ”，基于RAG的技术方案往往成为一种更优选择。 本文从RAG架构入手，详 …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "robots_blocked",
+    "error": "robots.txt 禁止抓取",
+    "created_at": "2026-11-04T01:49:17.424873+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "5c9191fd-180d-435b-b666-908e761f3d03",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "search_01_rag_landscape",
+    "url": "https://www.cnblogs.com/yupi/p/19914426",
+    "normalized_url": "https://www.cnblogs.com/yupi/p/19914426",
+    "title": "RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园",
+    "site": "cnblogs.com",
+    "provider": "bing",
+    "snippet": "2026年4月23日 · 而这篇文章，是对 RAG 技术的一个全景科普，从最初的 Naive RAG、到现在最主流的 Agentic RAG，总共 16 种主 …",
+    "excerpt": "RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园 RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 AI 总是一本正经地胡说八道？RAG 让大模型先搜再答，从此告别幻觉。本文一次性讲透 Naive RAG、Hybrid Search、GraphRAG、Agentic RAG 等 16 种主流方案，附代码示例 + 选型对照表，程序员面试和 AI 编程实战必备。 最近这两年，只要你接触过 AI 编程，大概率听过一个词，RAG（Retrieval-Augmented Generation）。 但很多小伙伴对 RAG 都只是一知半解，导致面试的时候只能说出 “检索增强生成” 这六个字，面试官再多问一点，就只能 “阿巴阿巴”。 而这篇文章，是对 RAG 技术的一个全景科普，从最初的 Naive RAG、到现在最主流的 Agentic RAG，总共 16 种主流 RAG 方案，我会一次性给大家讲清楚。以后开发 AI 应用的过程中，无论遇到什么场景，都能选择最合适的 RAG 方案。 干货比较多，建议先点赞收藏，再慢慢往下看~ 会一本正经地胡说八道，也就是我们常说的幻觉 缺乏私有知识，了解不到内部的文档写了什么 比如问 DeepSeek：程序员鱼皮的最新项目是什么？ 结果它给我扯了个两年半以前的项目出来，技术栈也完全不对！ 解决这个问题就可以用 RAG。RAG 的核心思想是 先搜再答 ，让大模型在回答之前先去搜一遍相关资料，再基于搜到的知识来组织答案。 就跟考试的时候偷偷翻书一样，遇到不会的先翻一翻书，再根据书里的知识答题。 还是问 AI 同样的问题，我们主动给 AI 一些参考资料，他的回答就会准确一些： 这个思路听起来简单，但在实际工程上 RAG 已经演化出了很多种不同的实现方法，从最初的「切块 → 搜索 → 生成」，到让 AI Agent 自主决策检索策略的 Agentic RAG，复杂度和能力天差地别。 有朋友可能会问：现在的大模型不是已经支持百万 token 的上下文窗口了，还需要 RAG 吗？ 因为把所有文档塞进上下文窗口，既贵又不靠谱。上下文越长 token 费用越高，而且大模型普遍存在 “Lost in the Middle” 问题，顾名思义，就是对超长上下文中间部分的注意力会明显下降。 这个也不难理解，就像听别人说话一样，我们对开头和结尾的印象会相对深刻一些，中间的总是容易忘记。 不过呢，RAG 和长上下文也不是互斥的关系，现在一般的最佳实践是先用 RAG 给 AI 提供相对精确的资料，再利用长上下文窗口进行有针对性的分析推理，两者互补。 好，背景交代完了。下面我们正式进入主题，挨个讲讲每种 RAG 方案。 我们先从最基础的 RAG 讲起，如果你之前完全没接触过 RAG，看完这一节就能理解它的核心原理。 Naive RAG 这个词听起来就很牛对不对？ 但其实，Naive 是朴素的意思，Naive RAG 是最基本的 RAG 实现方案。 假设你有一份 200 页的公司员工手册，怎么让 AI 基于里面的内容回答员工的提问呢？ 最简单粗暴的做法就是每次提问都把整本手册塞给 AI 大模型。 但是一本手册可能几十万字，全塞进去又贵又慢，而且上下文一长，大模型还容易犯前面提到的 “Lost in the Middle” 的毛病，导致回答质量下降。 所以更合理的思路是：员工问什么，我们就只把相关的几段内容塞给 AI。 那问题又来了，怎么定位到相关的那几段呢？ 如果用关键词匹配，很容易出现问题和文档里的关键词不一致的问题，比如员工问 “老板不批假怎么办”，文档里写的是 “请假审批流程”，关键词对不上，就搜不到。 所谓向量，就是把一段文字用一串数字表示出来，让计算机可以比较语义上的相似度。 语义越接近的句子，它们的向量在数学空间里离得越近。 负责把文字转成向量的模型，叫 Embedding 模型；存储这些向量并支持快速相似度搜索的数据库，叫向量数据库，比如 Milvus、Chroma、Qdrant 等。 理解了向量，Naive RAG 的做法就很好理解了，主要分为两步。 把文档切成小块（chunk），每块几百字 用 Embedding 模型把每个小块转成向量 把用户问题也用 Embedding 模型转成向量 去向量库里搜最相似的几个文档块（比如 Top 5） 把这几个块和用户问题拼成 Prompt，交给大模型生成回答 回到开头那份 200 页的员工手册。我们先把它切成几百个小块并向量化入库，当员工问 “年假有多少天？” 的时候，RAG 的执行流程是这样的： 在向量库里找到最相似的 5 个文档块（比如某块写着 “入职满一年享有 10 天年假，满三年 15 天…”） 大模型回答：“入职满一年享有 10 天年假” 不过 Naive RAG 也有一些比较明显的问题： 切块方式粗暴，可能把一段完整的语义从中间截断 检索质量完全依赖 embedding 模型，搜不到就没辙 这些局限，就是后面所有进阶方法要解决的问题。 下面我用伪代码来帮助大家理解，不熟悉编程的同学可以跳过，不影响后续的学习~ # 1. 把文档切成小块，chunk_size=500 表示每块 500 字， # chunk_overlap=50 表示相邻块之间重叠 50 字，避免关键信息被切断 chunks = split_into_chunks(documents, chunk_size=500, chunk_overlap=50) # 2. 把每个小块转成向量，连同原文一起存入向量数据库 for each chunk in chunks: vector = embedding_model.encode(chunk) # 调用 Embedding 模型编码 vector_store.insert(vector, chunk) # 向量和原文一起入库 # 1. 用同一个 Embedding 模型把用户问题也转成向量 query_vector = embedding_model.encode(user_query) # 2. 在向量库里搜最相似的 Top 5 文档块 top_k_chunks = vector_store.search(query_vector, k=5) # 3. 把检索到的文档块拼进 Prompt，作为参考资料 prompt = \"基于以下参考资料回答问题：\\n\" + join(top_k_chunks) + \"\\n问题：\" + user_query answer = LLM.generate(prompt) 用户提问的方式千奇百怪。比如同样是想知道公司报销流程，有人会问怎么报销，有人会问费用审批流程是什么，还有人会问花了钱怎么找公司要回来。 但文档里可能只写了 “报销申请流程” 这个表述，如果用户的措辞和文档差距太大，向量检索就可能搜不到正确的内容。 Multi-Query 的思路就是：既然一种问法搜不全，那就让大模型把原始问题改成多种不同的表述，分别去搜，最后把结果合并去重。 这种方法的代价就是每次提问要多调用一次 LLM 做改写，再多跑 N 次向量检索，延迟和成本都会增加。 而且如果 LLM 改写出的问题方向跑偏，会把无关文档也带进来，影响答案质量。 所以它比较适合 面向普通用户的客服、电商等场景 ，用户表述口语化、和文档术语差距大，多花这点成本还是有必要的。但是在术语规范的专业领域，Multi-Query 的收益就很有限了。 Multi-Query RAG 的代码实现如下： # 1. 让 LLM 把原问题改写成多个表述 queries = LLM.generate(\"请将以下问题改写成 3 个不同的表述：\" + user_query) // 例如 AI 返回: [\"报销流程是什么\", \"费用审批怎么操作\", \"如何提交报销申请\"] for each query in queries: results = vector_store.search(embed(query), k=5) all_results.append(results) # 3. 合并去重，得到覆盖面更广的候选文档 merged_chunks = deduplicate(all_results) # 4. 把合并后的文档 + 原始问题交给大模型生成回答 answer = LLM.generate(merged_chunks + user_query) AI 回复的效果不好，可能不是因为用户的问法不好，而是用户的问题和文档的语义空间不一致。 用户的提问往往很短，比如 “KV Cache 是什么？”，就这么几个字。 但文档里关于 KV Cache 的描述可能是一大段技术解释。一短一长，在 embedding 空间中可能离得很远，就检索不到了。 HyDE 的做法就是让大模型凭空写一个答案（不必完全准确），然后用这段假答案的向量去检索。因为假答案和真文档的文体更接近，两者在向量空间中离得也更近。 还是上面的例子，用户问：“KV Cache 是什么？” LLM 先编一段假答案：“KV Cache 是一种在 Transformer 推理过程中缓存 Key 和 Value 矩阵的优化技术，可以避免重复计算…” 这段假答案虽然不一定完全准确，但它的向量和真实文档里关于 KV Cache 的那段描述非常接近，所以能精准命中正确的文档。 …",
+    "content_hash": "5467723a42ea5c7f25e4f173daed69bb95b5dbe99385136525b31c01cffd19f0",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:49:17.759062+08:00",
+    "created_at": "2026-11-04T01:49:17.427528+08:00",
+    "evidence_count": 6
+   },
+   {
+    "id": "5212d2de-ca8a-48d5-9f15-aa7448acb5ff",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "search_01_rag_landscape",
+    "url": "https://zhuanlan.zhihu.com/p/2020146942852755666",
+    "normalized_url": "https://zhuanlan.zhihu.com/p/2020146942852755666",
+    "title": "必收藏！一篇吃透 RAG 到底是什么？ - 知乎",
+    "site": "zhuanlan.zhihu.com",
+    "provider": "bing",
+    "snippet": "2026年3月25日 · RAG 的全称是「Retrieval-Augmented Generation」，翻译过来就是「检索增强生成」。 听起来有点高大上，我用 …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "robots_blocked",
+    "error": "robots.txt 禁止抓取",
+    "created_at": "2026-11-04T01:49:17.427958+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "983f29ae-ed85-4151-945b-ce408fcef002",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "search_01_rag_landscape",
+    "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+    "normalized_url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+    "title": "一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客",
+    "site": "blog.csdn.net",
+    "provider": "bing",
+    "snippet": "2024年9月23日 · 本文介绍了 RAG （检索增强生成）技术，它结合信息检索与语言生成模型，可增强大模型处理知识密集型任务的能力 …",
+    "excerpt": "一文彻底搞懂大模型 - RAG（检索、增强、生成） 墨衍会员 ¥399 起/年，写一次发全网 一文 读懂AI 大模型 时代的 RAG 技术 RAG （Retrieval - Augmented Generation， 检索 增强 生成 ） 是一种结合 检索 技术与 生成 模型的技术架构，旨在通过动态引入外部知识库 增强 大 语言模型 （LLM）的 生成 能力。其核心思想是通过 检索 系统从外部数据源（如企业知识库、实时文档等）获取相关信息，并将 检索 结果作为上下文输入 生成 模型，以提高 生成 答案的准确性、时效性和专业性 RAG（Retrieval-Augmented Generation，检索增强生成） 是一种结合了信息检索技术与语言生成模型的人工智能技术。 该技术通过从外部知识库中检索相关信息，并将其作为提示（Prompt）输入给大型语言模型（LLMs） ，以增强模型处理知识密集型任务的能力，如问答、文本摘要、内容生成等。RAG模型由Facebook AI Research（FAIR）团队于2020年首次提出，并迅速成为大模型应用中的热门方案。 什么是RAG ？ RAG（Retrieval-Augmented Generation，检索增强生成），RAG 是一种 AI 框架，它将传统信息检索系统（例如数据库）的优势与生成式大语言模型 (LLM) 的功能结合在一起。 LLM通过将这些额外的知识与自己的语言技能相结合，可以撰写更准确、更具时效性且更贴合具体需求的文字。 如何理解RAG？ 通过上一个问题，我们知道了什么是RAG？了解到RAG是一种结合了信息检索、文本增强和文本生成的自然语言处理（NLP）的技术。 RAG的目的是通过从外部知识库检索相关信息来辅助大语言模型生成更准确、更丰富的文本内容。那我们如何理解RAG的检索、增强和生成呢？ 检索 ：检索是RAG流程的第一步，从预先建立的知识库中检索与问题相关的信息。这一步的目的是为后续的生成过程提供有用的上下文信息和知识支撑。 增强 ：RAG中增强是将检索到的信息用作生成模型（即大语言模型）的上下文输入，以增强模型对特定问题的理解和回答能力。这一步的目的是将外部知识融入生成过程中，使生成的文本内容更加丰富、准确和符合用户需求。 通过增强步骤，LLM模型能够充分利用外部知识库中的信息。 生成：生成是RAG流程的最后一步。这一步的目的是结合LLM生成符合用户需求的回答。生成器会利用检索到的信息作为上下文输入，并结合大语言模型来生成文本内容。 RAG的“检索、增强、生成”，谁增强了谁，谁生成了答案，主语很重要。是从知识库中检索到的问答对，增强了LLM的提示词（prompt），LLM拿着增强后的Prompt生成了问题答案。 如何使用RAG？ 了解了什么是RGA，同步也理解了RAG的检索、增强和生成。那我们如何使用RAG呢？接下来以RAG搭建知识问答系统具体步骤为例，来讲解如何使用RAG？ 收集数据： 首先，需要收集与问答系统相关的各种数据，这些数据可以来自文档、网页、数据库等多种来源。 数据清洗： 对收集到的数据进行清洗，去除噪声、重复项和无关信息，确保数据的质量和准确性。 知识库构建： 将清洗后的数据构建成知识库。这通常包括将文本分割成较小的片段（chunks），使用文本嵌入模型（如GLM）将这些片段转换成向量，并将这些向量存储在向量数据库（如FAISS、Milvus等）中。 问题向量化： 当用户输入查询问题时，使用相同的文本嵌入模型将问题转换成向量。 相似度检索： 在向量数据库中检索与问题向量最相似的知识库片段（chunks）。这通常通过计算向量之间的相似度（如余弦相似度）来实现。 结果排序： 根据相似度得分对检索到的结果进行排序，选择最相关的片段作为后续生成的输入。 上下文融合 ：将检索到的相关片段与原始问题合并，形成更丰富的上下文信息。 大语言模型生成 ：使用大语言模型（如GLM）基于上述上下文信息生成回答。大语言模型会学习如何根据检索到的信息来生成准确、有用的回答。 大家可以结合自己的业务领域知识，开始搭建医疗、法律、产品知识问答。先搭建Demo，然后工作中不断完善知识库问答对。 RAG工作原理是什么？ 大型语言模型（LLM）面临两个问题，第一个问题是LLM会产生幻觉，第二个是LLM的知识中断。 知识截止：当 LLM 返回的信息与模型的训练数据相比过时时。每个基础模型都有知识截止，这意味着其知识仅限于训练时可用的数据。 幻觉：当模型自信地做出错误反应时，就会发生幻觉。 检索增强生成 (RAG) 摆脱了知识限制，整合了外部数据，从外部知识库中检索相关信息，增强模型的生成能力。 RAG工作流程是什么？通过检索增强技术，将用户查询与索引知识融合，利用大语言模型生成准确回答。 知识准备：收集并转换知识文档为文本数据，进行预处理和索引。 嵌入与索引：使用嵌入模型将文本转换为向量，并存储在向量数据库中。 查询检索：用户查询转换为向量，从数据库中检索相关知识。 提示增强：结合检索结果构建增强提示模版。 生成回答：大语言模型根据增强模版生成准确回答。 RAG技术架构是什么？ RAG技术架构主要由两个核心模块组成，检索模块（Retriever）和生成模块（Generator）。 文本嵌入：使用预训练的文本嵌入模型（如GLM）将查询和文档转换成向量表示，以便在向量空间中进行相似度计算。 向量搜索：利用高效的向量搜索技术（如FAISS、Milvus等向量数据库）在向量空间中检索与查询向量最相似的文档或段落。 双塔模型：检索模块常采用双塔模型（Dual-Encoder）进行高效的向量化检索。双塔模型由两个独立的编码器组成，一个用于编码查询，另一个用于编码文档。这两个编码器将查询和文档映射到相同的向量空间中，以便进行相似度计算。 强大的生成模型：生成模块通常使用在大规模数据上预训练的生成模型（如GLM），这些模型在生成自然语言文本方面表现出色。 上下文融合：生成模块将检索到的相关文档与原始查询合并，形成更丰富的上下文信息，作为生成模型的输入。 生成过程：生成模型根据输入的上下文信息，生成连贯、准确且信息丰富的回答或文本。 结合高效的检索模块（ Retriever ）与强大的生成模型（ Generator ），实现基于外部知识增强的自然语言生成能力。 读者福利：如果大家对大模型感兴趣，这套大模型学习资料一定对你有用 如果你是零基础小白，想快速入门大模型是可以考虑的。 一方面是学习时间相对较短，学习内容更全面更集中。 /> 二方面是可以根据这些资料规划好学习计划和方向。 包括：大模型学习线路汇总、学习阶段，大模型实战案例，大模型学习视频，人工智能、机器学习、大模型书籍PDF。带你从零基础系统性的学好大模型！ 😝有需要的小伙伴，可以保存图片到 wx扫描二v码 免费领取【 保证100%免费 】🆓 大模型学习路线图，整体分为7个大的阶段： （全套教程文末领取哈） /> 第一阶段： 从大模型系统设计入手，讲解大模型的主要方法； 第二阶段： 在通过大模型提示词工程从Prompts角度入手更好发挥模型的作用； 第三阶段： 大模型平台应用开发借助阿里云PAI平台构建电商领域虚拟试衣系统； 第四阶段： 大模型知识库应用开发以LangChain框架为例，构建物流行业咨询智能问答系统； 第五阶段： 大模型微调开发借助以大健康、新零售、新媒体领域构建适合当前领域大模型； 第六阶段： 以SD多模态大模型为主，搭建了文生图小程序案例； 第七阶段： 以大模型平台应用与开发为主，通过星火大模型，文心大模型等成熟大模型构建大模型行业应用。 光学理论是没用的，要学会跟着一起做，要动手实操，才能将自己的所学运用到实际当中去，这时候可以搞点实战案例来学习。 观看零基础学习书籍和视频，看书籍和视频学习是最快捷也是最有效果的方式，跟着视频中老师的思路，从基础到深入，还是很容易入门的。 • 基于大模型全栈工程实现 （前端、后端、产品经理、设计、数据分析等），通过这门课可获得不同能力； • 能够利用大模型解决相关实际项目需求： 大数据时代，越来越多的企业和机构需要处理海量数据，利用大模型技术可以更好地处理这些数据，提高数据分析和决策的准确性。因此，掌握大模型应用开发技能，可以让程序员更好地应对实际项目需求； • 基于大模型和企业数据AI应用开发， 实现大模型理论、掌握GPU算力、硬件、LangChain开发框架和项目实战技能， 学会Fine-tuning垂直训练大模型（数据准备、数据蒸馏、大模型部署）一站式掌握； • 能够完成时下热门大模型垂直领域模型训练能力，提高程序员的编码能力： 大模型应用开发需要掌握机器学习算法、深度学习框架等技术，这些技术的掌握可以提高程序员的编码能力和分析能力，让程序员更加熟练地编写高质量的代码。 😝有需要的小伙伴，可以保存图片到 wx扫描二v码 免费领取【 保证100%免费 】🆓 版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。 一文 读懂「 RAG ，Retrieval - Augmented Generation」 检索 增强 生成 检索 增强 生成 （RetrievalAugmentedGeneration），简称 RAG ，已经成为当前最火热的LLM应用方案。它是一个为 大模型 提供外部知识源的概念，这使它们能够 生成 准确且符合上下文的答案，同时能够减少模型幻觉。…",
+    "content_hash": "5a19559d6c3a6190f0af730729ab0c69dee4d66d6c6d8a5963c26fd48587a450",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:49:18.076014+08:00",
+    "created_at": "2026-11-04T01:49:17.428563+08:00",
+    "evidence_count": 11
+   },
+   {
+    "id": "86dd55c3-1dd3-4f5d-b9c1-af63e9673c93",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "search_01_rag_landscape",
+    "url": "https://datawhalechina.github.io/all-in-rag",
+    "normalized_url": "https://datawhalechina.github.io/all-in-rag",
+    "title": "All-in-RAG | 大模型应用开发实战：RAG技术全栈指南",
+    "site": "datawhalechina.github.io",
+    "provider": "bing",
+    "snippet": "2026年9月30日 · 本项目从实践出发，结合最新的RAG技术发展趋势，构建了一套完整的RAG学习体系，帮助开发者： 系统掌握RAG …",
+    "excerpt": "All-in-RAG | 大模型应用开发实战：RAG技术全栈指南",
+    "content_hash": "b2bda24d01c02e9ed4069967708c0661575c02befeab9a55114c0b82992abc46",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:49:17.953507+08:00",
+    "created_at": "2026-11-04T01:49:17.428911+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "55c4d8e3-a512-4e0c-a8f6-86b14a8bf3ce",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "search_01_rag_landscape",
+    "url": "https://blog.csdn.net/m0_48891301/article/details/156265899",
+    "normalized_url": "https://blog.csdn.net/m0_48891301/article/details/156265899",
+    "title": "收藏级！ RAG 工作原理详解：11张图带你吃透 RAG 完整工作 ...",
+    "site": "blog.csdn.net",
+    "provider": "bing",
+    "snippet": "2025年12月25日 · 文章浏览阅读1.2w次，点赞24次，收藏51次。本文详细讲解RAG（检索增强生成）技术的工作原理，通过七步流 …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "fetch_failed",
+    "error": "HTTP 521",
+    "created_at": "2026-11-04T01:49:17.429299+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "ca8dbbad-f3bb-49a6-ae9c-662d352d2a72",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "search_01_rag_landscape",
+    "url": "https://aws.amazon.com/what-is/retrieval-augmented-generation",
+    "normalized_url": "https://aws.amazon.com/what-is/retrieval-augmented-generation",
+    "title": "What is RAG? - Retrieval-Augmented Generation AI Explained - AWS",
+    "site": "aws.amazon.com",
+    "provider": "bing",
+    "snippet": "2022年7月31日 · What is Retrieval-Augmented Generation (RAG), how and why businesses use RAG AI, and how to use RAG with …",
+    "excerpt": "What is RAG (Retrieval-Augmented Generation)? Create an AWS Account What is Retrieval-Augmented Generation? Why is Retrieval-Augmented Generation important? What are the benefits of Retrieval-Augmented Generation? How does Retrieval-Augmented Generation work? What is the difference between Retrieval-Augmented Generation and semantic search? How can AWS support your Retrieval-Augmented Generation requirements? What is Retrieval-Augmented Generation? Retrieval-Augmented Generation (RAG) is the process of optimizing the output of a large language model, so it references an authoritative knowledge base outside of its training data sources before generating a response. Large Language Models (LLMs) are trained on vast volumes of data and use billions of parameters to generate original output for tasks like answering questions, translating languages, and completing sentences. RAG extends the already powerful capabilities of LLMs to specific domains or an organization's internal knowledge base, all without the need to retrain the model. It is a cost-effective approach to improving LLM output so it remains relevant, accurate, and useful in various contexts. Why is Retrieval-Augmented Generation important? LLMs are a key artificial intelligence (AI) technology powering intelligent chatbots and other natural language processing (NLP) applications. The goal is to create bots that can answer user questions in various contexts by cross-referencing authoritative knowledge sources. Unfortunately, the nature of LLM technology introduces unpredictability in LLM responses. Additionally, LLM training data is static and introduces a cut-off date on the knowledge it has. Known challenges of LLMs include: Presenting false information when it does not have the answer. Presenting out-of-date or generic information when the user expects a specific, current response. Creating a response from non-authoritative sources. Creating inaccurate responses due to terminology confusion, wherein different training sources use the same terminology to talk about different things. RAG is one approach to solving some of these challenges. It redirects the LLM to retrieve relevant information from authoritative, pre-determined knowledge sources. Organizations have greater control over the generated text output, and users gain insights into how the LLM generates the response. What are the benefits of Retrieval-Augmented Generation? RAG technology brings several benefits to an organization's generative AI efforts. Cost-effective implementation Chatbot development typically begins using a foundation model . Foundation models (FMs) are API-accessible LLMs trained on a broad spectrum of generalized and unlabeled data. The computational and financial costs of retraining FMs for organization or domain-specific information are high. RAG is a more cost-effective approach to introducing new data to the LLM. It makes generative artificial intelligence (generative AI) technology more broadly accessible and usable. Even if the original training data sources for an LLM are suitable for your needs, it is challenging to maintain relevancy. RAG allows developers to provide the latest research, statistics, or news to the generative models. They can use RAG to connect the LLM directly to live social media feeds, news sites, or other frequently-updated information sources. The LLM can then provide the latest information to the users. RAG allows the LLM to present accurate information with source attribution. The output can include citations or references to sources. Users can also look up source documents themselves if they require further clarification or more detail. This can increase trust and confidence in your generative AI solution. More developer control With RAG, developers can test and improve their chat applications more efficiently. They can control and change the LLM's information sources to adapt to changing requirements or cross-functional usage.…",
+    "content_hash": "27a710711c194258dd1cec3f9161d739d9ae6a6748bfac7e5f8a3a918d66b13a",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:49:19.294868+08:00",
+    "created_at": "2026-11-04T01:49:17.429582+08:00",
+    "evidence_count": 0
+   }
+  ],
+  "total": 8
+ },
+ "evidence": {
+  "items": [
+   {
+    "id": "7dee9d8f-d50b-4a7f-9497-81069aa88209",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_03_rag_best_practices",
+    "statement": "RAG was first proposed by Facebook AI Research (FAIR) in 2020.",
+    "normalized_key": "analyze_03_rag_best_practices:397d79b38ea9",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "numeric_value": 2020,
+    "created_at": "2026-11-04T01:51:32.25071+08:00",
+    "evidence": [
+     {
+      "id": "d7f9704c-7c9e-4197-80e3-8fc8856c0393",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "7dee9d8f-d50b-4a7f-9497-81069aa88209",
+      "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+      "node_id": "analyze_03_rag_best_practices",
+      "quote": "RAG模型由Facebook AI Research（FAIR）团队于2020年首次提出，并迅速成为大模型应用中的热门方案。",
+      "stance": "support",
+      "confidence": 0.949999988079071,
+      "created_at": "2026-11-04T01:51:32.253988+08:00"
+     }
+    ]
+   },
+   {
+    "id": "0e21a17f-97df-46c0-98ce-a654bc6aa32c",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_03_rag_best_practices",
+    "statement": "Enterprise knowledge base RAG construction includes chunking documents, converting chunks to vectors with a text embedding model, and storing vectors in a vector database.",
+    "normalized_key": "analyze_03_rag_best_practices:7252c40d3642",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:51:32.263219+08:00",
+    "evidence": [
+     {
+      "id": "013ab948-00ad-4b1c-895c-462f4eda653e",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "0e21a17f-97df-46c0-98ce-a654bc6aa32c",
+      "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+      "node_id": "analyze_03_rag_best_practices",
+      "quote": "知识库构建： 将清洗后的数据构建成知识库。这通常包括将文本分割成较小的片段（chunks），使用文本嵌入模型（如GLM）将这些片段转换成向量，并将这些向量存储在向量数据库（如FAISS、Milvus等）中。",
+      "stance": "support",
+      "confidence": 0.949999988079071,
+      "created_at": "2026-11-04T01:51:32.263776+08:00"
+     }
+    ]
+   },
+   {
+    "id": "21a8bf12-e73c-44bc-b196-f602225f5e54",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_03_rag_best_practices",
+    "statement": "In RAG, query vectorization uses the same text embedding model as document chunking.",
+    "normalized_key": "analyze_03_rag_best_practices:f6a59149ec3a",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:51:32.265059+08:00",
+    "evidence": [
+     {
+      "id": "7771b062-8d66-4bd9-8fbe-8a130b8cc110",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "21a8bf12-e73c-44bc-b196-f602225f5e54",
+      "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+      "node_id": "analyze_03_rag_best_practices",
+      "quote": "问题向量化： 当用户输入查询问题时，使用相同的文本嵌入模型将问题转换成向量。",
+      "stance": "support",
+      "confidence": 0.949999988079071,
+      "created_at": "2026-11-04T01:51:32.265358+08:00"
+     }
+    ]
+   },
+   {
+    "id": "ce99eaa8-51ba-4c3a-b66d-2b40de6c07a0",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_03_rag_best_practices",
+    "statement": "RAG retrieves similar chunks from a vector database using similarity such as cosine similarity and sorts the results by similarity score to select the most relevant chunks for generation.",
+    "normalized_key": "analyze_03_rag_best_practices:4f46d2194707",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:51:32.266296+08:00",
+    "evidence": [
+     {
+      "id": "379a33c9-4f5f-40c6-9d06-3ea3159d96fc",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "ce99eaa8-51ba-4c3a-b66d-2b40de6c07a0",
+      "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+      "node_id": "analyze_03_rag_best_practices",
+      "quote": "相似度检索： 在向量数据库中检索与问题向量最相似的知识库片段（chunks）。这通常通过计算向量之间的相似度（如余弦相似度）来实现。 结果排序： 根据相似度得分对检索到的结果进行排序，选择最相关的片段作为后续生成的输入。",
+      "stance": "support",
+      "confidence": 0.949999988079071,
+      "created_at": "2026-11-04T01:51:32.266767+08:00"
+     }
+    ]
+   },
+   {
+    "id": "7f1acd54-881a-4def-b3b5-90c6611b5810",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_03_rag_best_practices",
+    "statement": "RAG mitigates LLM knowledge cutoff and hallucination by retrieving relevant external knowledge and enhancing generation.",
+    "normalized_key": "analyze_03_rag_best_practices:fa007e5957cd",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:51:32.267696+08:00",
+    "evidence": [
+     {
+      "id": "47c6c723-a75d-4be7-9ab0-54d8af401fb0",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "7f1acd54-881a-4def-b3b5-90c6611b5810",
+      "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+      "node_id": "analyze_03_rag_best_practices",
+      "quote": "检索增强生成 (RAG) 摆脱了知识限制，整合了外部数据，从外部知识库中检索相关信息，增强模型的生成能力。",
+      "stance": "support",
+      "confidence": 0.949999988079071,
+      "created_at": "2026-11-04T01:51:32.267996+08:00"
+     }
+    ]
+   },
+   {
+    "id": "307485c1-a823-4139-b996-5068e08fdc4b",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_03_rag_best_practices",
+    "statement": "The source states that RAG and long context are not mutually exclusive, and the general best practice is to use RAG to provide precise materials and then use the long context window for targeted analysis/reasoning.",
+    "normalized_key": "analyze_03_rag_best_practices:8a76656101c2",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:51:32.269189+08:00",
+    "evidence": [
+     {
+      "id": "11cee8d4-7974-409b-892d-dec9107b5122",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "307485c1-a823-4139-b996-5068e08fdc4b",
+      "source_id": "5c9191fd-180d-435b-b666-908e761f3d03",
+      "node_id": "analyze_03_rag_best_practices",
+      "quote": "不过呢，RAG 和长上下文也不是互斥的关系，现在一般的最佳实践是先用 RAG 给 AI 提供相对精确的资料，再利用长上下文窗口进行有针对性的分析推理，两者互补。",
+      "stance": "support",
+      "confidence": 0.949999988079071,
+      "created_at": "2026-11-04T01:51:32.269488+08:00"
+     }
+    ]
+   },
+   {
+    "id": "7b0e1298-960d-4ffd-a9ba-e3d359fb18af",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_03_rag_best_practices",
+    "statement": "Naive RAG example uses chunk_size=500.",
+    "normalized_key": "analyze_03_rag_best_practices:6b597d7ed834",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "numeric_value": 500,
+    "created_at": "2026-11-04T01:51:32.270371+08:00",
+    "evidence": [
+     {
+      "id": "e8a32d3c-c98b-4954-b304-aa144cf0e0c0",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "7b0e1298-960d-4ffd-a9ba-e3d359fb18af",
+      "source_id": "5c9191fd-180d-435b-b666-908e761f3d03",
+      "node_id": "analyze_03_rag_best_practices",
+      "quote": "chunk_size=500 表示每块 500 字",
+      "stance": "support",
+      "confidence": 0.949999988079071,
+      "created_at": "2026-11-04T01:51:32.270616+08:00"
+     }
+    ]
+   },
+   {
+    "id": "8b3bb6b6-61fe-4d4f-a6c1-0d48ac74a5d5",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_03_rag_best_practices",
+    "statement": "Naive RAG retrieves the top 5 most similar document chunks from the vector database.",
+    "normalized_key": "analyze_03_rag_best_practices:1e5eca426400",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "numeric_value": 5,
+    "created_at": "2026-11-04T01:51:32.273534+08:00",
+    "evidence": [
+     {
+      "id": "ca3cfc08-413e-4aa0-97f2-46e460c8435d",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "8b3bb6b6-61fe-4d4f-a6c1-0d48ac74a5d5",
+      "source_id": "5c9191fd-180d-435b-b666-908e761f3d03",
+      "node_id": "analyze_03_rag_best_practices",
+      "quote": "去向量库里搜最相似的几个文档块（比如 Top 5）",
+      "stance": "support",
+      "confidence": 0.949999988079071,
+      "created_at": "2026-11-04T01:51:32.27376+08:00"
+     }
+    ]
+   },
+   {
+    "id": "a068d9fc-5d39-4d6b-bae2-6be0933e7b02",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_02_rag_challenges",
+    "statement": "其核心思想是通过 检索 系统从外部数据源（如企业知识库、实时文档等）获取相关信息，并将 检索 结果作为上下文输入 生成 模型，以提高 生成 答案的准确性、时效性和专业性 RAG（Retrieval-Augmented Generation，检索增强生成） 是一种结合了信息检索技术与语言生成模型的人工智能技术。",
+    "normalized_key": "analyze_02_rag_challenges:310fb90ed2c7",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:53:47.715962+08:00",
+    "evidence": [
+     {
+      "id": "83104fbb-3bd2-47f8-b807-2c98cd994e01",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "a068d9fc-5d39-4d6b-bae2-6be0933e7b02",
+      "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+      "node_id": "analyze_02_rag_challenges",
+      "quote": "其核心思想是通过 检索 系统从外部数据源（如企业知识库、实时文档等）获取相关信息，并将 检索 结果作为上下文输入 生成 模型，以提高 生成 答案的准确性、时效性和专业性 RAG（Retrieval-Augmented Generation，检索增强生成） 是一种结合了信息检索技术与语言生成模型的人工智能技术。",
+      "stance": "support",
+      "confidence": 0.44999998807907104,
+      "created_at": "2026-11-04T01:53:47.716502+08:00"
+     }
+    ]
+   },
+   {
+    "id": "bd7af33c-cf17-45f8-8b45-db0e9855074a",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_02_rag_challenges",
+    "statement": "一文彻底搞懂大模型 - RAG（检索、增强、生成） 墨衍会员 ¥399 起/年，写一次发全网 一文 读懂AI 大模型 时代的 RAG 技术 RAG （Retrieval - Augmented Generation， 检索 增强 生成 ） 是一种结合 检索 技术与 生成 模型的技术架构，旨在通过动态引入外部知识库 增强 大 语言模型 （LLM）的 生成 能力。",
+    "normalized_key": "analyze_02_rag_challenges:64a3b7ae93bb",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "numeric_value": 399,
+    "created_at": "2026-11-04T01:53:47.717823+08:00",
+    "evidence": [
+     {
+      "id": "1dddf073-1f41-4054-8b0c-9525fc97a4a5",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "bd7af33c-cf17-45f8-8b45-db0e9855074a",
+      "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+      "node_id": "analyze_02_rag_challenges",
+      "quote": "一文彻底搞懂大模型 - RAG（检索、增强、生成） 墨衍会员 ¥399 起/年，写一次发全网 一文 读懂AI 大模型 时代的 RAG 技术 RAG （Retrieval - Augmented Generation， 检索 增强 生成 ） 是一种结合 检索 技术与 生成 模型的技术架构，旨在通过动态引入外部知识库 增强 大 语言模型 （LLM）的 生成 能力。",
+      "stance": "support",
+      "confidence": 0.44999998807907104,
+      "created_at": "2026-11-04T01:53:47.71811+08:00"
+     }
+    ]
+   },
+   {
+    "id": "376f92a2-1401-4a55-9fb1-6ae9165439ca",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_01_rag_landscape",
+    "statement": "RAG 模型由 Facebook AI Research（FAIR）团队于 2020 年首次提出。",
+    "normalized_key": "analyze_01_rag_landscape:e993859da92a",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "numeric_value": 2020,
+    "created_at": "2026-11-04T01:54:39.358097+08:00",
+    "evidence": [
+     {
+      "id": "d182aa7d-4a58-4800-a00e-2f5089ffd4d6",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "376f92a2-1401-4a55-9fb1-6ae9165439ca",
+      "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+      "node_id": "analyze_01_rag_landscape",
+      "quote": "RAG模型由Facebook AI Research（FAIR）团队于2020年首次提出，并迅速成为大模型应用中的热门方案。",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:54:39.36132+08:00"
+     }
+    ]
+   },
+   {
+    "id": "a12a67fe-2b21-4e14-a556-0ae9ac3f8a4f",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_01_rag_landscape",
+    "statement": "该资料介绍了 16 种主流 RAG 方案。",
+    "normalized_key": "analyze_01_rag_landscape:e0ce6601a0c8",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "numeric_value": 16,
+    "created_at": "2026-11-04T01:54:39.367034+08:00",
+    "evidence": [
+     {
+      "id": "9c912604-61ad-43e3-beb6-2765fc91018f",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "a12a67fe-2b21-4e14-a556-0ae9ac3f8a4f",
+      "source_id": "5c9191fd-180d-435b-b666-908e761f3d03",
+      "node_id": "analyze_01_rag_landscape",
+      "quote": "本文一次性讲透 Naive RAG、Hybrid Search、GraphRAG、Agentic RAG 等 16 种主流方案，附代码示例 + 选型对照表，程序员面试和 AI 编程实战必备。",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:54:39.367416+08:00"
+     }
+    ]
+   },
+   {
+    "id": "efa350c6-6391-4db2-9c0a-2e779271f524",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_01_rag_landscape",
+    "statement": "RAG 技术架构主要由检索模块（Retriever）和生成模块（Generator）两个核心模块组成。",
+    "normalized_key": "analyze_01_rag_landscape:c04df5eebace",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:54:39.368956+08:00",
+    "evidence": [
+     {
+      "id": "1823e85e-3483-4be2-a4fb-293cf214e5de",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "efa350c6-6391-4db2-9c0a-2e779271f524",
+      "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+      "node_id": "analyze_01_rag_landscape",
+      "quote": "RAG技术架构是什么？ RAG技术架构主要由两个核心模块组成，检索模块（Retriever）和生成模块（Generator）。",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:54:39.3694+08:00"
+     }
+    ]
+   },
+   {
+    "id": "cf9fa0a9-2ccd-4403-b5e8-18849441f771",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_01_rag_landscape",
+    "statement": "知识库构建包括将文本分割成较小片段、使用文本嵌入模型转换为向量，并将向量存储在向量数据库中。",
+    "normalized_key": "analyze_01_rag_landscape:5e4341fad006",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:54:39.370675+08:00",
+    "evidence": [
+     {
+      "id": "2ed4fba4-6979-4ee7-99b8-03f7b79993fd",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "cf9fa0a9-2ccd-4403-b5e8-18849441f771",
+      "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+      "node_id": "analyze_01_rag_landscape",
+      "quote": "知识库构建： 将清洗后的数据构建成知识库。这通常包括将文本分割成较小的片段（chunks），使用文本嵌入模型（如GLM）将这些片段转换成向量，并将这些向量存储在向量数据库（如FAISS、Milvus等）中。",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:54:39.370992+08:00"
+     }
+    ]
+   },
+   {
+    "id": "4ca72184-0e4f-48e2-8896-44468d8c096a",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_01_rag_landscape",
+    "statement": "查询处理包括问题向量化、相似度检索、结果排序、上下文融合和大语言模型生成。",
+    "normalized_key": "analyze_01_rag_landscape:6fdd5bd7e3e4",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:54:39.372+08:00",
+    "evidence": [
+     {
+      "id": "a3af48d4-6e6a-45ed-a649-45041f41d566",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "4ca72184-0e4f-48e2-8896-44468d8c096a",
+      "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+      "node_id": "analyze_01_rag_landscape",
+      "quote": "问题向量化： 当用户输入查询问题时，使用相同的文本嵌入模型将问题转换成向量。 相似度检索： 在向量数据库中检索与问题向量最相似的知识库片段（chunks）。这通常通过计算向量之间的相似度（如余弦相似度）来实现。 结果排序： 根据相似度得分对检索到的结果进行排序，选择最相关的片段作为后续生成的输入。 上下文融合 ：将检索到的相关片段与原始问题合并，形成更丰富的上下文信息。 大语言模型生成 ：使用大语言模型（如GLM）基于上述上下文信息生成回答。",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:54:39.372358+08:00"
+     }
+    ]
+   },
+   {
+    "id": "f888fb94-94ce-46c1-801a-21b80430fe78",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_01_rag_landscape",
+    "statement": "RAG 和长上下文不是互斥的关系，现在一般的最佳实践是先用 RAG 给 AI 提供相对精确的资料，再利用长上下文窗口进行有针对性的分析推理，两者互补。",
+    "normalized_key": "analyze_01_rag_landscape:5692c39bffb1",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:54:39.373689+08:00",
+    "evidence": [
+     {
+      "id": "5eee46c6-c5f6-43d2-913c-ef3ec551f547",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "f888fb94-94ce-46c1-801a-21b80430fe78",
+      "source_id": "5c9191fd-180d-435b-b666-908e761f3d03",
+      "node_id": "analyze_01_rag_landscape",
+      "quote": "不过呢，RAG 和长上下文也不是互斥的关系，现在一般的最佳实践是先用 RAG 给 AI 提供相对精确的资料，再利用长上下文窗口进行有针对性的分析推理，两者互补。",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:54:39.374031+08:00"
+     }
+    ]
+   },
+   {
+    "id": "6206123a-6b09-4d3c-a540-8b1a95a969ba",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "node_id": "analyze_01_rag_landscape",
+    "statement": "Naive RAG 的局限包括切块方式粗暴，可能把一段完整的语义从中间截断，以及检索质量完全依赖 embedding 模型，搜不到就没辙。",
+    "normalized_key": "analyze_01_rag_landscape:329249646845",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:54:39.375318+08:00",
+    "evidence": [
+     {
+      "id": "d0bd3187-3c17-46ab-ad45-6bd5edf8a12f",
+      "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+      "claim_id": "6206123a-6b09-4d3c-a540-8b1a95a969ba",
+      "source_id": "5c9191fd-180d-435b-b666-908e761f3d03",
+      "node_id": "analyze_01_rag_landscape",
+      "quote": "不过 Naive RAG 也有一些比较明显的问题： 切块方式粗暴，可能把一段完整的语义从中间截断 检索质量完全依赖 embedding 模型，搜不到就没辙",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:54:39.37606+08:00"
+     }
+    ]
+   }
+  ],
+  "total": 17
+ },
+ "report": {
+  "report": {
+   "id": "ccbf652e-652b-4d0a-8377-f8a9598135ea",
+   "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+   "version": 1,
+   "title": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+   "summary": "本次研究围绕「检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践」执行，共采集资料 2 条，产出结论 17 条（已验证 0 条、部分支持 17 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 17 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。",
+   "markdown": "# 检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践\n\n## 摘要\n\n本次研究围绕「检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践」执行，共采集资料 2 条，产出结论 17 条（已验证 0 条、部分支持 17 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 17 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。\n\n## 目标与范围\n\n**研究目标**：检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践\n\n**研究深度**：deep　**最大并发 Agent**：4　**交叉验证**：true\n\n## 核心发现\n\n1. RAG was first proposed by Facebook AI Research (FAIR) in 2020.（单一来源，置信度 0.50）[1]\n2. Enterprise knowledge base RAG construction includes chunking documents, converting chunks to vectors with a text embedding model, and storing vectors in a vector database.（单一来源，置信度 0.50）[2]\n3. In RAG, query vectorization uses the same text embedding model as document chunking.（单一来源，置信度 0.50）[3]\n4. RAG retrieves similar chunks from a vector database using similarity such as cosine similarity and sorts the results by similarity score to select the most relevant chunks for generation.（单一来源，置信度 0.50）[4]\n5. RAG mitigates LLM knowledge cutoff and hallucination by retrieving relevant external knowledge and enhancing generation.（单一来源，置信度 0.50）[5]\n6. The source states that RAG and long context are not mutually exclusive, and the general best practice is to use RAG to provide precise materials and then use the long context window for targeted analysis/reasoning.（单一来源，置信度 0.50）[6]\n7. Naive RAG example uses chunk_size=500.（单一来源，置信度 0.50）[7]\n8. Naive RAG retrieves the top 5 most similar document chunks from the vector database.（单一来源，置信度 0.50）[8]\n9. 其核心思想是通过 检索 系统从外部数据源（如企业知识库、实时文档等）获取相关信息，并将 检索 结果作为上下文输入 生成 模型，以提高 生成 答案的准确性、时效性和专业性 RAG（Retrieval-Augmented Generation，检索增强生成） 是一种结合了信息检索技术与语言生成模型的人工智能技术。（单一来源，置信度 0.50）[9]\n10. 一文彻底搞懂大模型 - RAG（检索、增强、生成） 墨衍会员 ¥399 起/年，写一次发全网 一文 读懂AI 大模型 时代的 RAG 技术 RAG （Retrieval - Augmented Generation， 检索 增强 生成 ） 是一种结合 检索 技术与 生成 模型的技术架构，旨在通过动态引入外部知识库 增强 大 语言模型 （LLM）的 生成 能力。（单一来源，置信度 0.50）[10]\n\n\n## 分主题分析\n\n### 主题 analyze_01_rag_landscape\n\n- RAG 模型由 Facebook AI Research（FAIR）团队于 2020 年首次提出。[11]\n- 该资料介绍了 16 种主流 RAG 方案。[12]\n- RAG 技术架构主要由检索模块（Retriever）和生成模块（Generator）两个核心模块组成。[13]\n- 知识库构建包括将文本分割成较小片段、使用文本嵌入模型转换为向量，并将向量存储在向量数据库中。[14]\n- 查询处理包括问题向量化、相似度检索、结果排序、上下文融合和大语言模型生成。[15]\n- RAG 和长上下文不是互斥的关系，现在一般的最佳实践是先用 RAG 给 AI 提供相对精确的资料，再利用长上下文窗口进行有针对性的分析推理，两者互补。[16]\n- Naive RAG 的局限包括切块方式粗暴，可能把一段完整的语义从中间截断，以及检索质量完全依赖 embedding 模型，搜不到就没辙。[17]\n\n### 主题 analyze_02_rag_challenges\n\n- 其核心思想是通过 检索 系统从外部数据源（如企业知识库、实时文档等）获取相关信息，并将 检索 结果作为上下文输入 生成 模型，以提高 生成 答案的准确性、时效性和专业性 RAG（Retrieval-Augmented Generation，检索增强生成） 是一种结合了信息检索技术与语言生成模型的人工智能技术。[9]\n- 一文彻底搞懂大模型 - RAG（检索、增强、生成） 墨衍会员 ¥399 起/年，写一次发全网 一文 读懂AI 大模型 时代的 RAG 技术 RAG （Retrieval - Augmented Generation， 检索 增强 生成 ） 是一种结合 检索 技术与 生成 模型的技术架构，旨在通过动态引入外部知识库 增强 大 语言模型 （LLM）的 生成 能力。[10]\n\n### 主题 analyze_03_rag_best_practices\n\n- RAG was first proposed by Facebook AI Research (FAIR) in 2020.[1]\n- Enterprise knowledge base RAG construction includes chunking documents, converting chunks to vectors with a text embedding model, and storing vectors in a vector database.[2]\n- In RAG, query vectorization uses the same text embedding model as document chunking.[3]\n- RAG retrieves similar chunks from a vector database using similarity such as cosine similarity and sorts the results by similarity score to select the most relevant chunks for generation.[4]\n- RAG mitigates LLM knowledge cutoff and hallucination by retrieving relevant external knowledge and enhancing generation.[5]\n- The source states that RAG and long context are not mutually exclusive, and the general best practice is to use RAG to provide precise materials and then use the long context window for targeted analysis/reasoning.[6]\n- Naive RAG example uses chunk_size=500.[7]\n- Naive RAG retrieves the top 5 most similar document chunks from the vector database.[8]\n\n## 关键数据对比\n\n| 结论 | 数值 | 状态 |\n|---|---:|---|\n| RAG was first proposed by Facebook AI Research (FAIR) in 2020. | 2020 | 见来源 983f29ae-ed85-4151-945b-ce408fcef002 |\n| RAG 模型由 Facebook AI Research（FAIR）团队于 2020 年首次提出。 | 2020 | 见来源 983f29ae-ed85-4151-945b-ce408fcef002 |\n| Naive RAG example uses chunk_size=500. | 500 | 见来源 5c9191fd-180d-435b-b666-908e761f3d03 |\n| 一文彻底搞懂大模型 - RAG（检索、增强、生成） 墨衍会员 ¥399 起/年，写一次发全网 一文 读懂AI 大模型 时代的 RAG 技术 RAG （Retri… | 399 | 见来源 983f29ae-ed85-4151-945b-ce408fcef002 |\n| 该资料介绍了 16 种主流 RAG 方案。 | 16 | 见来源 5c9191fd-180d-435b-b666-908e761f3d03 |\n| Naive RAG retrieves the top 5 most similar document chunks from the vector datab… | 5 | 见来源 5c9191fd-180d-435b-b666-908e761f3d03 |\n\n\n## 争议与不确定性\n\n本次执行未检测到同一指标上的来源冲突。\n\n\n\n## 信息来源\n\n1. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n2. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n3. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n4. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n5. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n6. [RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园](https://www.cnblogs.com/yupi/p/19914426) — cnblogs.com\n7. [RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园](https://www.cnblogs.com/yupi/p/19914426) — cnblogs.com\n8. [RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园](https://www.cnblogs.com/yupi/p/19914426) — cnblogs.com\n9. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n10. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n11. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n12. [RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园](https://www.cnblogs.com/yupi/p/19914426) — cnblogs.com\n13. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n14. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n15. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n16. [RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园](https://www.cnblogs.com/yupi/p/19914426) — cnblogs.com\n17. [RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园](https://www.cnblogs.com/yupi/p/19914426) — cnblogs.com\n\n\n## 方法与局限性\n\n- 规划模式：llm；执行模型：LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）。\n- 检索与抓取均走真实外部服务；抓取遵守 robots.txt，正文经过去标签与指纹去重。\n- 结论由来源正文片段抽取，交叉验证按「独立站点数 + 数值一致性」判定，未使用模型主观判断替换证据。\n- 本次统计：资料 2 条、结论 17 条、引用 17 条。\n- 局限：检索覆盖受 Provider 配额与反爬限制；未做全文语义相似度聚类，冲突检测聚焦显式数值指标。\n\n",
+   "sections": [
+    {
+     "heading": "摘要",
+     "body": "本次研究围绕「检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践」执行，共采集资料 2 条，产出结论 17 条（已验证 0 条、部分支持 17 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 17 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。"
+    },
+    {
+     "heading": "目标与范围",
+     "body": "**研究目标**：检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践\n\n**研究深度**：deep　**最大并发 Agent**：4　**交叉验证**：true\n"
+    },
+    {
+     "heading": "核心发现",
+     "body": "1. RAG was first proposed by Facebook AI Research (FAIR) in 2020.（单一来源，置信度 0.50）[1]\n2. Enterprise knowledge base RAG construction includes chunking documents, converting chunks to vectors with a text embedding model, and storing vectors in a vector database.（单一来源，置信度 0.50）[2]\n3. In RAG, query vectorization uses the same text embedding model as document chunking.（单一来源，置信度 0.50）[3]\n4. RAG retrieves similar chunks from a vector database using similarity such as cosine similarity and sorts the results by similarity score to select the most relevant chunks for generation.（单一来源，置信度 0.50）[4]\n5. RAG mitigates LLM knowledge cutoff and hallucination by retrieving relevant external knowledge and enhancing generation.（单一来源，置信度 0.50）[5]\n6. The source states that RAG and long context are not mutually exclusive, and the general best practice is to use RAG to provide precise materials and then use the long context window for targeted analysis/reasoning.（单一来源，置信度 0.50）[6]\n7. Naive RAG example uses chunk_size=500.（单一来源，置信度 0.50）[7]\n8. Naive RAG retrieves the top 5 most similar document chunks from the vector database.（单一来源，置信度 0.50）[8]\n9. 其核心思想是通过 检索 系统从外部数据源（如企业知识库、实时文档等）获取相关信息，并将 检索 结果作为上下文输入 生成 模型，以提高 生成 答案的准确性、时效性和专业性 RAG（Retrieval-Augmented Generation，检索增强生成） 是一种结合了信息检索技术与语言生成模型的人工智能技术。（单一来源，置信度 0.50）[9]\n10. 一文彻底搞懂大模型 - RAG（检索、增强、生成） 墨衍会员 ¥399 起/年，写一次发全网 一文 读懂AI 大模型 时代的 RAG 技术 RAG （Retrieval - Augmented Generation， 检索 增强 生成 ） 是一种结合 检索 技术与 生成 模型的技术架构，旨在通过动态引入外部知识库 增强 大 语言模型 （LLM）的 生成 能力。（单一来源，置信度 0.50）[10]\n"
+    },
+    {
+     "heading": "分主题分析",
+     "body": "### 主题 analyze_01_rag_landscape\n\n- RAG 模型由 Facebook AI Research（FAIR）团队于 2020 年首次提出。[11]\n- 该资料介绍了 16 种主流 RAG 方案。[12]\n- RAG 技术架构主要由检索模块（Retriever）和生成模块（Generator）两个核心模块组成。[13]\n- 知识库构建包括将文本分割成较小片段、使用文本嵌入模型转换为向量，并将向量存储在向量数据库中。[14]\n- 查询处理包括问题向量化、相似度检索、结果排序、上下文融合和大语言模型生成。[15]\n- RAG 和长上下文不是互斥的关系，现在一般的最佳实践是先用 RAG 给 AI 提供相对精确的资料，再利用长上下文窗口进行有针对性的分析推理，两者互补。[16]\n- Naive RAG 的局限包括切块方式粗暴，可能把一段完整的语义从中间截断，以及检索质量完全依赖 embedding 模型，搜不到就没辙。[17]\n\n### 主题 analyze_02_rag_challenges\n\n- 其核心思想是通过 检索 系统从外部数据源（如企业知识库、实时文档等）获取相关信息，并将 检索 结果作为上下文输入 生成 模型，以提高 生成 答案的准确性、时效性和专业性 RAG（Retrieval-Augmented Generation，检索增强生成） 是一种结合了信息检索技术与语言生成模型的人工智能技术。[9]\n- 一文彻底搞懂大模型 - RAG（检索、增强、生成） 墨衍会员 ¥399 起/年，写一次发全网 一文 读懂AI 大模型 时代的 RAG 技术 RAG （Retrieval - Augmented Generation， 检索 增强 生成 ） 是一种结合 检索 技术与 生成 模型的技术架构，旨在通过动态引入外部知识库 增强 大 语言模型 （LLM）的 生成 能力。[10]\n\n### 主题 analyze_03_rag_best_practices\n\n- RAG was first proposed by Facebook AI Research (FAIR) in 2020.[1]\n- Enterprise knowledge base RAG construction includes chunking documents, converting chunks to vectors with a text embedding model, and storing vectors in a vector database.[2]\n- In RAG, query vectorization uses the same text embedding model as document chunking.[3]\n- RAG retrieves similar chunks from a vector database using similarity such as cosine similarity and sorts the results by similarity score to select the most relevant chunks for generation.[4]\n- RAG mitigates LLM knowledge cutoff and hallucination by retrieving relevant external knowledge and enhancing generation.[5]\n- The source states that RAG and long context are not mutually exclusive, and the general best practice is to use RAG to provide precise materials and then use the long context window for targeted analysis/reasoning.[6]\n- Naive RAG example uses chunk_size=500.[7]\n- Naive RAG retrieves the top 5 most similar document chunks from the vector database.[8]"
+    },
+    {
+     "heading": "关键数据对比",
+     "body": "| 结论 | 数值 | 状态 |\n|---|---:|---|\n| RAG was first proposed by Facebook AI Research (FAIR) in 2020. | 2020 | 见来源 983f29ae-ed85-4151-945b-ce408fcef002 |\n| RAG 模型由 Facebook AI Research（FAIR）团队于 2020 年首次提出。 | 2020 | 见来源 983f29ae-ed85-4151-945b-ce408fcef002 |\n| Naive RAG example uses chunk_size=500. | 500 | 见来源 5c9191fd-180d-435b-b666-908e761f3d03 |\n| 一文彻底搞懂大模型 - RAG（检索、增强、生成） 墨衍会员 ¥399 起/年，写一次发全网 一文 读懂AI 大模型 时代的 RAG 技术 RAG （Retri… | 399 | 见来源 983f29ae-ed85-4151-945b-ce408fcef002 |\n| 该资料介绍了 16 种主流 RAG 方案。 | 16 | 见来源 5c9191fd-180d-435b-b666-908e761f3d03 |\n| Naive RAG retrieves the top 5 most similar document chunks from the vector datab… | 5 | 见来源 5c9191fd-180d-435b-b666-908e761f3d03 |\n"
+    },
+    {
+     "heading": "争议与不确定性",
+     "body": "本次执行未检测到同一指标上的来源冲突。\n\n"
+    },
+    {
+     "heading": "信息来源",
+     "body": "1. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n2. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n3. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n4. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n5. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n6. [RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园](https://www.cnblogs.com/yupi/p/19914426) — cnblogs.com\n7. [RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园](https://www.cnblogs.com/yupi/p/19914426) — cnblogs.com\n8. [RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园](https://www.cnblogs.com/yupi/p/19914426) — cnblogs.com\n9. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n10. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n11. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n12. [RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园](https://www.cnblogs.com/yupi/p/19914426) — cnblogs.com\n13. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n14. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n15. [一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客](https://blog.csdn.net/a2875254060/article/details/142468037) — blog.csdn.net\n16. [RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园](https://www.cnblogs.com/yupi/p/19914426) — cnblogs.com\n17. [RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园](https://www.cnblogs.com/yupi/p/19914426) — cnblogs.com\n"
+    },
+    {
+     "heading": "方法与局限性",
+     "body": "- 规划模式：llm；执行模型：LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）。\n- 检索与抓取均走真实外部服务；抓取遵守 robots.txt，正文经过去标签与指纹去重。\n- 结论由来源正文片段抽取，交叉验证按「独立站点数 + 数值一致性」判定，未使用模型主观判断替换证据。\n- 本次统计：资料 2 条、结论 17 条、引用 17 条。\n- 局限：检索覆盖受 Provider 配额与反爬限制；未做全文语义相似度聚类，冲突检测聚焦显式数值指标。\n"
+    }
+   ],
+   "citations": [
+    {
+     "index": 1,
+     "claim_id": "7dee9d8f-d50b-4a7f-9497-81069aa88209",
+     "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+     "title": "一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客",
+     "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+     "site": "blog.csdn.net",
+     "quote": "RAG模型由Facebook AI Research（FAIR）团队于2020年首次提出，并迅速成为大模型应用中的热门方案。"
+    },
+    {
+     "index": 2,
+     "claim_id": "0e21a17f-97df-46c0-98ce-a654bc6aa32c",
+     "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+     "title": "一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客",
+     "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+     "site": "blog.csdn.net",
+     "quote": "知识库构建： 将清洗后的数据构建成知识库。这通常包括将文本分割成较小的片段（chunks），使用文本嵌入模型（如GLM）将这些片段转换成向量，并将这些向量存储在向量数据库（如FAISS、Milvus等）中。"
+    },
+    {
+     "index": 3,
+     "claim_id": "21a8bf12-e73c-44bc-b196-f602225f5e54",
+     "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+     "title": "一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客",
+     "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+     "site": "blog.csdn.net",
+     "quote": "问题向量化： 当用户输入查询问题时，使用相同的文本嵌入模型将问题转换成向量。"
+    },
+    {
+     "index": 4,
+     "claim_id": "ce99eaa8-51ba-4c3a-b66d-2b40de6c07a0",
+     "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+     "title": "一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客",
+     "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+     "site": "blog.csdn.net",
+     "quote": "相似度检索： 在向量数据库中检索与问题向量最相似的知识库片段（chunks）。这通常通过计算向量之间的相似度（如余弦相似度）来实现。 结果排序： 根据相似度得分对检索到的结果进行排序，选择最相关的片段作为后续生成的输入。"
+    },
+    {
+     "index": 5,
+     "claim_id": "7f1acd54-881a-4def-b3b5-90c6611b5810",
+     "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+     "title": "一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客",
+     "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+     "site": "blog.csdn.net",
+     "quote": "检索增强生成 (RAG) 摆脱了知识限制，整合了外部数据，从外部知识库中检索相关信息，增强模型的生成能力。"
+    },
+    {
+     "index": 6,
+     "claim_id": "307485c1-a823-4139-b996-5068e08fdc4b",
+     "source_id": "5c9191fd-180d-435b-b666-908e761f3d03",
+     "title": "RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园",
+     "url": "https://www.cnblogs.com/yupi/p/19914426",
+     "site": "cnblogs.com",
+     "quote": "不过呢，RAG 和长上下文也不是互斥的关系，现在一般的最佳实践是先用 RAG 给 AI 提供相对精确的资料，再利用长上下文窗口进行有针对性的分析推理，两者互补。"
+    },
+    {
+     "index": 7,
+     "claim_id": "7b0e1298-960d-4ffd-a9ba-e3d359fb18af",
+     "source_id": "5c9191fd-180d-435b-b666-908e761f3d03",
+     "title": "RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园",
+     "url": "https://www.cnblogs.com/yupi/p/19914426",
+     "site": "cnblogs.com",
+     "quote": "chunk_size=500 表示每块 500 字"
+    },
+    {
+     "index": 8,
+     "claim_id": "8b3bb6b6-61fe-4d4f-a6c1-0d48ac74a5d5",
+     "source_id": "5c9191fd-180d-435b-b666-908e761f3d03",
+     "title": "RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园",
+     "url": "https://www.cnblogs.com/yupi/p/19914426",
+     "site": "cnblogs.com",
+     "quote": "去向量库里搜最相似的几个文档块（比如 Top 5）"
+    },
+    {
+     "index": 9,
+     "claim_id": "a068d9fc-5d39-4d6b-bae2-6be0933e7b02",
+     "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+     "title": "一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客",
+     "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+     "site": "blog.csdn.net",
+     "quote": "其核心思想是通过 检索 系统从外部数据源（如企业知识库、实时文档等）获取相关信息，并将 检索 结果作为上下文输入 生成 模型，以提高 生成 答案的准确性、时效性和专业性 RAG（Retrieval-Augmented Generation，检索增强生成） 是一种结合了信息检索技术与语言生成模型的人工智能技术。"
+    },
+    {
+     "index": 10,
+     "claim_id": "bd7af33c-cf17-45f8-8b45-db0e9855074a",
+     "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+     "title": "一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客",
+     "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+     "site": "blog.csdn.net",
+     "quote": "一文彻底搞懂大模型 - RAG（检索、增强、生成） 墨衍会员 ¥399 起/年，写一次发全网 一文 读懂AI 大模型 时代的 RAG 技术 RAG （Retrieval - Augmented Generation， 检索 增强 生成 ） 是一种结合 检索 技术与 生成 模型的技术架构，旨在通过动态引入外部知识库 增强 大 语言模型 （LLM）的 生成 能力。"
+    },
+    {
+     "index": 11,
+     "claim_id": "376f92a2-1401-4a55-9fb1-6ae9165439ca",
+     "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+     "title": "一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客",
+     "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+     "site": "blog.csdn.net",
+     "quote": "RAG模型由Facebook AI Research（FAIR）团队于2020年首次提出，并迅速成为大模型应用中的热门方案。"
+    },
+    {
+     "index": 12,
+     "claim_id": "a12a67fe-2b21-4e14-a556-0ae9ac3f8a4f",
+     "source_id": "5c9191fd-180d-435b-b666-908e761f3d03",
+     "title": "RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园",
+     "url": "https://www.cnblogs.com/yupi/p/19914426",
+     "site": "cnblogs.com",
+     "quote": "本文一次性讲透 Naive RAG、Hybrid Search、GraphRAG、Agentic RAG 等 16 种主流方案，附代码示例 + 选型对照表，程序员面试和 AI 编程实战必备。"
+    },
+    {
+     "index": 13,
+     "claim_id": "efa350c6-6391-4db2-9c0a-2e779271f524",
+     "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+     "title": "一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客",
+     "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+     "site": "blog.csdn.net",
+     "quote": "RAG技术架构是什么？ RAG技术架构主要由两个核心模块组成，检索模块（Retriever）和生成模块（Generator）。"
+    },
+    {
+     "index": 14,
+     "claim_id": "cf9fa0a9-2ccd-4403-b5e8-18849441f771",
+     "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+     "title": "一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客",
+     "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+     "site": "blog.csdn.net",
+     "quote": "知识库构建： 将清洗后的数据构建成知识库。这通常包括将文本分割成较小的片段（chunks），使用文本嵌入模型（如GLM）将这些片段转换成向量，并将这些向量存储在向量数据库（如FAISS、Milvus等）中。"
+    },
+    {
+     "index": 15,
+     "claim_id": "4ca72184-0e4f-48e2-8896-44468d8c096a",
+     "source_id": "983f29ae-ed85-4151-945b-ce408fcef002",
+     "title": "一文彻底搞懂大模型 - RAG（检索、增强、生成）-CSDN博客",
+     "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+     "site": "blog.csdn.net",
+     "quote": "问题向量化： 当用户输入查询问题时，使用相同的文本嵌入模型将问题转换成向量。 相似度检索： 在向量数据库中检索与问题向量最相似的知识库片段（chunks）。这通常通过计算向量之间的相似度（如余弦相似度）来实现。 结果排序： 根据相似度得分对检索到的结果进行排序，选择最相关的片段作为后续生成的输入。 上下文融合 ：将检索到的相关片段与原始问题合并，形成更丰富的上下文信息。 大语言模型生成 ：使用大语言模型（如GLM）基于上述上下文信息生成回答。"
+    },
+    {
+     "index": 16,
+     "claim_id": "f888fb94-94ce-46c1-801a-21b80430fe78",
+     "source_id": "5c9191fd-180d-435b-b666-908e761f3d03",
+     "title": "RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园",
+     "url": "https://www.cnblogs.com/yupi/p/19914426",
+     "site": "cnblogs.com",
+     "quote": "不过呢，RAG 和长上下文也不是互斥的关系，现在一般的最佳实践是先用 RAG 给 AI 提供相对精确的资料，再利用长上下文窗口进行有针对性的分析推理，两者互补。"
+    },
+    {
+     "index": 17,
+     "claim_id": "6206123a-6b09-4d3c-a540-8b1a95a969ba",
+     "source_id": "5c9191fd-180d-435b-b666-908e761f3d03",
+     "title": "RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园",
+     "url": "https://www.cnblogs.com/yupi/p/19914426",
+     "site": "cnblogs.com",
+     "quote": "不过 Naive RAG 也有一些比较明显的问题： 切块方式粗暴，可能把一段完整的语义从中间截断 检索质量完全依赖 embedding 模型，搜不到就没辙"
+    }
+   ],
+   "citation_count": 17,
+   "word_count": 2264,
+   "model": "LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）",
+   "created_at": "2026-11-04T01:54:40.165328+08:00"
+  },
+  "versions": [
+   {
+    "id": "ccbf652e-652b-4d0a-8377-f8a9598135ea",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "version": 1,
+    "title": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+    "summary": "本次研究围绕「检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践」执行，共采集资料 2 条，产出结论 17 条（已验证 0 条、部分支持 17 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 17 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。",
+    "citation_count": 17,
+    "word_count": 2264,
+    "model": "LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）",
+    "created_at": "2026-11-04T01:54:40.165328+08:00"
+   }
+  ]
+ },
+ "summary": {
+  "agents": 10,
+  "sources": 8,
+  "evidence_items": 17,
+  "dag_nodes": 8,
+  "research_questions": 3,
+  "subtasks": 8,
+  "agent_models": [
+   "cline/cline-free/solar-mini4"
+  ],
+  "agent_token_usage_total": 37610,
+  "report_md_chars": 0,
+  "report_versions": [
+   {
+    "id": "ccbf652e-652b-4d0a-8377-f8a9598135ea",
+    "task_id": "87de3043-6ab4-432b-b149-7bbd81561997",
+    "version": 1,
+    "title": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+    "summary": "本次研究围绕「检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践」执行，共采集资料 2 条，产出结论 17 条（已验证 0 条、部分支持 17 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 17 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。",
+    "citation_count": 17,
+    "word_count": 2264,
+    "model": "LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）",
+    "created_at": "2026-11-04T01:54:40.165328+08:00"
+   }
+  ]
+ }
+}

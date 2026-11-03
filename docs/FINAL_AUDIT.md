@@ -100,3 +100,31 @@
    `curl -X POST -H "Authorization: Bearer $TOKEN" -d '{"query":"..."}' http://127.0.0.1:8080/api/v1/settings/llm/test` 通过后，在界面建任务选 LLM 模式。
 2. **Docker 环境**——实机跑 `docker compose -f docker-compose.yaml up -d --build` 完成部署验收（静态校验已过，缺实跑）。
 3. **（可选）付费搜索凭据**——tavily/serpapi/brave，提升中文检索覆盖；当前免密钥 Provider 已可用。
+
+---
+
+# RC1 增补审计（2026-11-04）
+
+> RC1 验证轮在原审计基础上完成真实模型接入、质量验收与安全复查。
+> 详细分报告：RC1_BASELINE / RC1_MODEL_CAPABILITY_REPORT /
+> RC1_RESEARCH_QUALITY_REPORT / RC1_DEPLOYMENT_REPORT / RC1_SECURITY_REPORT。
+
+| 项 | RC1 结果 |
+|---|---|
+| 真实模型接入 | ✅ Solar Mini 4（`cline/cline-free/solar-mini4`）经设置中心真实 UI 接入；UI 链路 14/14；加密落库 + 重启持久化验证 |
+| 模型能力 | ✅ chat/多轮/长输入/json_object/streaming/usage/工具调用可用；json_schema 不支持（有兼容替代）；中继偶发 502（重试有效） |
+| 真实研究任务 | ✅ A/B/C 三任务 LLM Planner+LLM 抽取真实完成；修复前/后双轮证据链 |
+| 研究质量 | PARTIAL — C 任务 40/50 可接受、A 36.5/50、B 30.5/50（对比覆盖不足如实标注）；独立事实核查 8/8 正确；0 编造 |
+| 检索质量缺陷 | ✅ 已修复 P0（UA 反爬降级）+ 超时根因（model.timeout 4m） |
+| 安全复查 | ✅ 13/13；CORS 反射缺陷已修复 + 回归测试 |
+| PDF 压测 | ✅ 5 用例（24 页大报告/边界表格/并发一致/缺字/非法字体） |
+| 最终回归 | ✅ verify.sh 14/14（含负向自检）；Playwright 浏览器审计 27/27 |
+| Docker 实机 | ⛔ BLOCKED（本机无 Docker；解除步骤成文） |
+| RC1 标签 | **建议打标**：核心链路真实可用、已知限制如实入账（见 CHANGELOG） |
+
+### RC1 提交
+
+| 仓库 | 分支 | 范围 |
+|---|---|---|
+| upstream/hector | feature/hector-researchos | UA 修复、CORS 修复+回归测试、PDF 压力测试、设置配置脚本 |
+| 开发包 | main | RC1 五份报告、CHANGELOG、探测/运行/安全/审计脚本、证据 JSON、账本同步 |

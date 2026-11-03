@@ -85,6 +85,15 @@ def main() -> int:
             continue
         if t.startswith("- "):
             t = t[2:]  # 列表标记在 PDF 里渲染为 • / 编号，比对正文部分
+        if t.startswith("|"):
+            # 表格行：PDF 按「列宽等比 + 单元格内换行」重排，整句无法 flat 匹配。
+            # 改为比对第一列（结论列）的前 24 个有效字符；分隔行与空列跳过。
+            cols = [c.strip() for c in t.strip("|").split("|")]
+            if not cols or set(t.replace("|", "").replace("-", "").replace(" ", "").replace(":", "")) == set():
+                continue  # 分隔行 |---|---|
+            t = cols[0] if len(cols[0]) >= 12 else (cols[-1] if len(cols) > 1 and len(cols[-1]) >= 12 else "")
+            if not t:
+                continue
         key = flat_expected(t)
         if len(key) < 12:
             continue

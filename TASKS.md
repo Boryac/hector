@@ -200,3 +200,30 @@
 BLOCKED（外部条件，非代码问题）：
 - 真实 LLM 研究质量：无可用 Key（`.env.researchos` 未配 `RESEARCHOS_LLM_*`）；链路已验证到「试连诚实返回上游 401、启发式全链路可交付」
 - Docker 实机部署：本机无 Docker；静态校验（构建上下文/依赖关系/健康检查）已过，Dockerfile 多阶段构建逻辑与 compose 依赖已人工核对
+
+## 第十一阶段：RC1 验证与发布准备（2026-11-04）
+
+- [x] R1.1 现状复核：两仓 HEAD/工作树实测、服务/PG/中继状态、LLM 配置基线 → `docs/RC1_BASELINE.md`
+- [x] R1.2 模型探测：18 项自动探测 + 重试定性（tool_single 502 瞬态、json_schema 不支持有替代）→ `docs/RC1_MODEL_CAPABILITY_REPORT.md` + `scripts/rc1_probe_model.py`
+- [x] R1.3 模型接入：设置中心真实 UI（Playwright）14/14；加密落库、掩码、热生效、重启持久化
+- [x] R1.4 真实研究任务：A/B/C 三任务 LLM Planner+LLM 抽取真实执行，修复前/后两轮证据 → `scripts/rc1_evidence/`
+- [x] R1.5 质量评估：10 指标评分 + 独立事实核查（8 项全对、0 编造）→ `docs/RC1_RESEARCH_QUALITY_REPORT.md`
+- [x] R1.6 PDF 压测：5 用例（大报告/边界表格/并发一致性/缺字/非法字体拒绝）全绿
+- [x] R1.7 Docker：实机 BLOCKED（无 Docker），静态校验保留，容器网络注意事项成文 → `docs/RC1_DEPLOYMENT_REPORT.md`
+- [x] R1.8 安全复查：13 项探测全过；CORS 缺陷修复 + 回归测试 → `docs/RC1_SECURITY_REPORT.md`
+- [x] R1.9 最终回归：verify.sh 14/14、浏览器审计（Playwright）27/27
+- [x] R1.10 发布准备：CHANGELOG 新增、七份文档同步、双仓提交
+
+### R1 证据表
+
+| 任务 | 证据 |
+|---|---|
+| R1.2 | `rc1_probe_results.json`：16/18 直接通过；tool_single 重试 4/4；json_schema 有 json_object 替代 |
+| R1.3 | `settings_configure_model.py` 14 通过 / 0 失败；`/system llm.enabled=true`；重启后 source=web 保留、key_set=true |
+| R1.4 | 任务 A `dd7543fe`（126s, 4 结论全切题, 20.3k tokens）、B `45d31384`（156s）、C `87de3043`（367s, 17 结论全切题, 37.6k tokens）；修复前对照 `*.PREFIX-UA.json` / `*.timeout90s.json` |
+| R1.8 | `security_probe.json` 13/13；`api/cors_test.go` 6 断言 |
+| R1.9 | verify.sh `14 通过 / 0 失败`；`browser_audit.json` 27/27 |
+
+RC1 后仍 BLOCKED：
+- Docker 实机部署（本机无 Docker；解除步骤见 RC1_DEPLOYMENT_REPORT §4）
+- 真实模型质量上限（本地免费中继延迟高、偶发 502、无 SLA；付费 Provider 可改善）

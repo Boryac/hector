@@ -291,3 +291,15 @@
 ### 2026-11-03 — [T10.4/T10.5] verify.sh 重写与部署资产修复
 - 做了什么：旧 verify.sh 是 4 步骨架（大量 skip、无退出码语义、有「verify.sh passing on skeleton does NOT mean V1.0 done」的自供状注释）。重写为统一校验：gofmt / vet / test / tsc / next build / openapi / compose / 迁移幂等（跑两次）/ 起真实服务打 /health 与 report.pdf / PDF 内容比对，并内置负向自检——故意注入悬空 $ref 和坏格式文件，校验器抓不到就算校验器 FAIL。部署侧：`deployments/compose.yaml` 原是 phase-0 残骸（引用不存在的 Dockerfile、./api、./worker、../web/Dockerfile），重写为与实际镜像一致的生产编排；本机无 Docker，`check-compose.py` 提供静态校验并把实机部署如实标 BLOCKED。
 - 测试结果：`bash scripts/verify.sh` 全量 14 通过 / 0 失败 / 0 跳过；负向自检 2 项通过（坏文件确实被抓到，exit 1）。
+
+### 2026-11-04 — [R1.2/R1.3] 本地模型探测与设置中心接入
+- 做了什么：18 项模型能力探测（`rc1_probe_model.py`），定位 Model ID `cline/cline-free/solar-mini4`；两个失败项重试定性——tool_single 首次 502 为中继瞬态（重试 4/4 成功）、json_schema 被模型忽略（`json_object` 可靠可用，ResearchOS 兼容）。接入走设置中心真实 UI（Playwright 驱动 Chromium，因为本机 Chrome 156 headless 出现启动即退出的回归）：provider/base_url/model/api_key 四字段经 React 受控控件填写 → savebar → PUT 落库 → 测试连接（服务端真实最小 LLM 请求 2587ms 回复 OK）→ 刷新持久化，14/14。
+- 关键判定：usage 含 reasoning_tokens（90/156），`reasoning_content` 不会进入报告（客户端只解析 content）；reasoning tokens 占用补全预算，超时需按此标定——这个判断直接预告了后面 R1.5 的超时根因。
+
+### 2026-11-04 — [R1.4/R1.5] 真实研究任务与两轮根因修复
+- 做了什么：A（事实核查）/B（三对象对比）/C（开放专题）三任务全部以 LLM Planner + LLM 抽取真实执行，证据全链路落盘。第一轮结果难看：A 的 7 条结论全是无关噪声、C 完全跑题。定位过程值得记录：① 用服务默认 UA 直接 curl bing 复现——反爬对非浏览器 UA 返回随机结果页（Go 检索式召回到酒店广告），浏览器 UA 则首条即官方站点 → 修 `defaultSearchUA`（三处），任务 A 切题率 0/7→4/4；② 任务 C 的 6 条跑题结论全部来自企业微信官网——SSE 事件流回放发现 4/5 analyst `context deadline exceeded`（90s 超时，reasoning 模型大 prompt 不够）静默降级规则抽取 → 经设置中心调 `model.timeout=4m`，重跑后 17 条结论全部切题且事实独立核查全对（RAG/FAIR 2020、chunking 流程链、top-5 检索均与领域事实一致）。
+- 测试结果：质量报告 `docs/RC1_RESEARCH_QUALITY_REPORT.md`（10 指标 × 3 任务评分，C 40/50、A 36.5/50、B 30.5/50）；8 项独立事实核查全对；0 编造 URL、0 编造引用。
+
+### 2026-11-04 — [R1.6-R1.10] PDF 压测、安全复查与最终回归
+- 做了什么：PDF 5 条压力用例（24 页大报告、空表格/单列、8 路并发字节级一致、缺字替换、非法外部字体拒绝）。安全探测 13 项抓到 1 个真缺陷——CORS 任意 Origin 反射（可利用性低但违反最小暴露），修为仅同源回显并补 `cors_test.go` 6 断言。最终回归：verify.sh 14/14（其间 verify_pdf_content.py 抓到表格行误报——PDF 表格按列宽重排导致整句无法 flat 匹配，修脚本比对第一列单元格）；浏览器审计因 Chrome 回归改用 Playwright，27/27。
+- 结论：RC1 候选达成。剩余 BLOCKED：Docker 实机（无 Docker）、真实模型质量上限（免费中继无 SLA）。

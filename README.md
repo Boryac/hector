@@ -21,11 +21,13 @@
 | 设置中心 | ✅ 通过 | 27 项配置入库持久化、热/需重启/部署三层、密钥 AES-256-GCM 加密、GET 只回掩码 |
 | 前端（7 页） | ✅ 通过 | `ui-audit.mjs` 双视口 14 项 + `ui-functional.mjs` 37 项断言（真实 API 调用、UI 创建任务落库）；截图见 `docs/screenshots/` |
 | LLM 链路（客户端 → 规划 → 抽取 → 报告） | ✅ 已验证（用本地测试替身） | `planner_mode=llm`、编造引文与伪造 `source_id` 被丢弃 |
-| 真实大模型质量 | ⚠️ **未验证** | 无 API Key（BLOCKED）。链路通 ≠ 效果好；配置方法见 `docs/FINAL_AUDIT.md` §G |
-| Docker Compose | ⚠️ **未在本机验证** | 本机无 Docker（BLOCKED）；compose 静态校验通过，部署清单已与实际镜像对齐 |
+| 真实大模型接入（Solar Mini 4） | ✅ 已接入并验证 | 设置中心真实 UI 接入 14/14；加密落库 + 重启持久化；能力探测 16/18（`docs/RC1_MODEL_CAPABILITY_REPORT.md`） |
+| 真实大模型研究质量 | ✅ 部分达标（如实标注） | A/B/C 三任务真实执行；C 40/50、A 36.5/50、B 30.5/50；独立事实核查 8/8、0 编造（`docs/RC1_RESEARCH_QUALITY_REPORT.md`） |
+| 安全复查 | ✅ 13/13 | CORS 反射缺陷已修复 + 回归测试；`docs/RC1_SECURITY_REPORT.md` |
+| Docker Compose | ⚠️ **未在本机验证** | 本机无 Docker（BLOCKED）；compose 静态校验通过，容器网络注意事项见 `docs/RC1_DEPLOYMENT_REPORT.md` |
 | 多用户隔离 | 🚫 **禁用** | V1 保持单用户；身份只认服务端 Bearer Token，多用户能力在 A2A 身份隔离修复并回归前不开放 |
 
-> 表格中带 ⚠️ 的项**尚未真实验证**，不得当作已完成。逐项细节见 [`docs/FINAL_AUDIT.md`](docs/FINAL_AUDIT.md) 与 [`docs/INTEGRATION_MATRIX.md`](docs/INTEGRATION_MATRIX.md)。
+> 表格中带 ⚠️ 的项**尚未真实验证**，不得当作已完成。逐项细节见 [`docs/FINAL_AUDIT.md`](docs/FINAL_AUDIT.md)（含 RC1 增补审计）与 [`CHANGELOG.md`](CHANGELOG.md)。
 
 ---
 

@@ -1,0 +1,1789 @@
+{
+ "key": "C-open",
+ "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+ "goal": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+ "depth": "deep",
+ "created_at": "2026-11-04 01:42:19",
+ "model_id_expected": "cline/cline-free/solar-mini4",
+ "wall_seconds": 204.3,
+ "status": "completed",
+ "planner_mode": "llm",
+ "task_detail": {
+  "id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+  "title": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+  "goal": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+  "depth": "deep",
+  "scope": {},
+  "max_agents": 4,
+  "max_duration_seconds": 1800,
+  "enable_verification": true,
+  "status": "completed",
+  "created_by": "local-user",
+  "planner_mode": "llm",
+  "plan": {
+   "goal": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+   "research_questions": [
+    {
+     "id": "q1",
+     "question": "企业知识库 RAG 落地路径与架构模式",
+     "priority": "high"
+    },
+    {
+     "id": "q2",
+     "question": "企业知识库 RAG 检索质量与核心技术挑战",
+     "priority": "high"
+    },
+    {
+     "id": "q3",
+     "question": "企业知识库 RAG 数据治理、安全与合规",
+     "priority": "high"
+    },
+    {
+     "id": "q4",
+     "question": "企业知识库 RAG 评估、监控与迭代运营",
+     "priority": "medium"
+    },
+    {
+     "id": "q5",
+     "question": "企业知识库 RAG 工程最佳实践与成本优化",
+     "priority": "medium"
+    }
+   ],
+   "subtasks": [
+    {
+     "id": "search_1",
+     "title": "企业知识库 RAG 落地路径与架构模式检索",
+     "agent_role": "researcher",
+     "inputs": [],
+     "outputs": [
+      "企业知识库 RAG 落地路径与架构模式综述",
+      "关键技术组件与部署阶段"
+     ],
+     "depends_on": [],
+     "node_type": "search",
+     "query": "企业知识库 RAG 落地 架构 检索增强生成 流程 阶段"
+    },
+    {
+     "id": "analyze_1",
+     "title": "落地路径与架构模式分析",
+     "agent_role": "analyst",
+     "inputs": [
+      "search_1"
+     ],
+     "outputs": [
+      "落地路径分阶段总结",
+      "架构模式与组件映射"
+     ],
+     "depends_on": [
+      "search_1"
+     ],
+     "node_type": "analyze"
+    },
+    {
+     "id": "search_2",
+     "title": "RAG 检索质量与技术挑战检索",
+     "agent_role": "researcher",
+     "inputs": [],
+     "outputs": [
+      "检索质量、幻觉、召回/重排等挑战清单"
+     ],
+     "depends_on": [],
+     "node_type": "search",
+     "query": "RAG 检索质量 幻觉 召回 相关性 重排 企业知识库 挑战"
+    },
+    {
+     "id": "analyze_2",
+     "title": "技术挑战分析",
+     "agent_role": "analyst",
+     "inputs": [
+      "search_2"
+     ],
+     "outputs": [
+      "技术挑战分类与影响分析"
+     ],
+     "depends_on": [
+      "search_2"
+     ],
+     "node_type": "analyze"
+    },
+    {
+     "id": "search_3",
+     "title": "企业知识库 RAG 数据治理、安全与合规检索",
+     "agent_role": "researcher",
+     "inputs": [],
+     "outputs": [
+      "数据治理、隐私安全、合规要求"
+     ],
+     "depends_on": [],
+     "node_type": "search",
+     "query": "企业知识库 RAG 数据治理 隐私安全 合规 权限 审计"
+    },
+    {
+     "id": "analyze_3",
+     "title": "数据治理、安全与合规分析",
+     "agent_role": "analyst",
+     "inputs": [
+      "search_3"
+     ],
+     "outputs": [
+      "安全合规风险与控制措施"
+     ],
+     "depends_on": [
+      "search_3"
+     ],
+     "node_type": "analyze"
+    },
+    {
+     "id": "search_4",
+     "title": "RAG 企业知识库 评估、监控与迭代运营检索",
+     "agent_role": "researcher",
+     "inputs": [],
+     "outputs": [
+      "评估指标、监控、反馈、迭代机制"
+     ],
+     "depends_on": [],
+     "node_type": "search",
+     "query": "RAG 企业知识库 评估指标 监控 反馈 迭代 运营"
+    },
+    {
+     "id": "analyze_4",
+     "title": "评估、监控与迭代运营分析",
+     "agent_role": "analyst",
+     "inputs": [
+      "search_4"
+     ],
+     "outputs": [
+      "评估与运营最佳实践"
+     ],
+     "depends_on": [
+      "search_4"
+     ],
+     "node_type": "analyze"
+    },
+    {
+     "id": "search_5",
+     "title": "RAG 企业知识库 工程最佳实践与成本优化检索",
+     "agent_role": "researcher",
+     "inputs": [],
+     "outputs": [
+      "索引、向量化、缓存、成本优化工程实践"
+     ],
+     "depends_on": [],
+     "node_type": "search",
+     "query": "RAG 企业知识库 工程实践 索引 向量化 缓存 成本优化"
+    },
+    {
+     "id": "analyze_5",
+     "title": "工程最佳实践与成本优化分析",
+     "agent_role": "analyst",
+     "inputs": [
+      "search_5"
+     ],
+     "outputs": [
+      "工程最佳实践与成本优化策略"
+     ],
+     "depends_on": [
+      "search_5"
+     ],
+     "node_type": "analyze"
+    },
+    {
+     "id": "verify_1",
+     "title": "交叉验证各研究问题结论",
+     "agent_role": "verifier",
+     "inputs": [
+      "analyze_1",
+      "analyze_2",
+      "analyze_3",
+      "analyze_4",
+      "analyze_5"
+     ],
+     "outputs": [
+      "各研究问题结论的交叉验证结果",
+      "矛盾点与证据不足项"
+     ],
+     "depends_on": [
+      "analyze_1",
+      "analyze_2",
+      "analyze_3",
+      "analyze_4",
+      "analyze_5"
+     ],
+     "node_type": "verify"
+    },
+    {
+     "id": "synthesize_1",
+     "title": "企业知识库 RAG 落地综合报告",
+     "agent_role": "synthesizer",
+     "inputs": [
+      "verify_1"
+     ],
+     "outputs": [
+      "企业知识库 RAG 落地路径、挑战与最佳实践综合报告"
+     ],
+     "depends_on": [
+      "verify_1"
+     ],
+     "node_type": "synthesize"
+    }
+   ],
+   "workflow": {
+    "nodes": null,
+    "edges": null
+   },
+   "risks_and_gaps": [
+    "企业知识库场景差异大，公开资料可能偏通用，难以覆盖行业特有数据格式与业务流程",
+    "公开评测基准不足，企业私有数据评估指标和标准化程度不一致",
+    "安全合规要求随地区和行业变化，公开资料可能缺乏最新法规细节",
+    "成本、延迟、召回质量之间的权衡缺乏统一量化标准",
+    "验证依赖公开资料，最终结论仍需结合企业内部数据、业务指标和真实部署反馈验证"
+   ]
+  },
+  "workflow": {
+   "nodes": [
+    {
+     "id": "search_1",
+     "type": "search",
+     "title": "企业知识库 RAG 落地路径与架构模式检索",
+     "agent_role": "researcher",
+     "depends_on": []
+    },
+    {
+     "id": "analyze_1",
+     "type": "analyze",
+     "title": "落地路径与架构模式分析",
+     "agent_role": "analyst",
+     "depends_on": [
+      "search_1"
+     ]
+    },
+    {
+     "id": "search_2",
+     "type": "search",
+     "title": "RAG 检索质量与技术挑战检索",
+     "agent_role": "researcher",
+     "depends_on": []
+    },
+    {
+     "id": "analyze_2",
+     "type": "analyze",
+     "title": "技术挑战分析",
+     "agent_role": "analyst",
+     "depends_on": [
+      "search_2"
+     ]
+    },
+    {
+     "id": "search_3",
+     "type": "search",
+     "title": "企业知识库 RAG 数据治理、安全与合规检索",
+     "agent_role": "researcher",
+     "depends_on": []
+    },
+    {
+     "id": "analyze_3",
+     "type": "analyze",
+     "title": "数据治理、安全与合规分析",
+     "agent_role": "analyst",
+     "depends_on": [
+      "search_3"
+     ]
+    },
+    {
+     "id": "search_4",
+     "type": "search",
+     "title": "RAG 企业知识库 评估、监控与迭代运营检索",
+     "agent_role": "researcher",
+     "depends_on": []
+    },
+    {
+     "id": "analyze_4",
+     "type": "analyze",
+     "title": "评估、监控与迭代运营分析",
+     "agent_role": "analyst",
+     "depends_on": [
+      "search_4"
+     ]
+    },
+    {
+     "id": "search_5",
+     "type": "search",
+     "title": "RAG 企业知识库 工程最佳实践与成本优化检索",
+     "agent_role": "researcher",
+     "depends_on": []
+    },
+    {
+     "id": "analyze_5",
+     "type": "analyze",
+     "title": "工程最佳实践与成本优化分析",
+     "agent_role": "analyst",
+     "depends_on": [
+      "search_5"
+     ]
+    },
+    {
+     "id": "verify_1",
+     "type": "verify",
+     "title": "交叉验证各研究问题结论",
+     "agent_role": "verifier",
+     "depends_on": [
+      "analyze_1",
+      "analyze_2",
+      "analyze_3",
+      "analyze_4",
+      "analyze_5"
+     ]
+    },
+    {
+     "id": "synthesize_1",
+     "type": "synthesize",
+     "title": "企业知识库 RAG 落地综合报告",
+     "agent_role": "synthesizer",
+     "depends_on": [
+      "verify_1"
+     ]
+    }
+   ],
+   "edges": [
+    {
+     "source": "search_1",
+     "target": "analyze_1"
+    },
+    {
+     "source": "search_2",
+     "target": "analyze_2"
+    },
+    {
+     "source": "search_3",
+     "target": "analyze_3"
+    },
+    {
+     "source": "search_4",
+     "target": "analyze_4"
+    },
+    {
+     "source": "search_5",
+     "target": "analyze_5"
+    },
+    {
+     "source": "analyze_1",
+     "target": "verify_1"
+    },
+    {
+     "source": "analyze_2",
+     "target": "verify_1"
+    },
+    {
+     "source": "analyze_3",
+     "target": "verify_1"
+    },
+    {
+     "source": "analyze_4",
+     "target": "verify_1"
+    },
+    {
+     "source": "analyze_5",
+     "target": "verify_1"
+    },
+    {
+     "source": "verify_1",
+     "target": "synthesize_1"
+    }
+   ]
+  },
+  "stats": {
+   "claims": 6,
+   "finished_at": "2026-11-03T17:45:39Z",
+   "nodes_done": 12,
+   "nodes_total": 12,
+   "sources": 16
+  },
+  "created_at": "2026-11-04T01:42:19.334651+08:00",
+  "updated_at": "2026-11-04T01:45:39.942862+08:00",
+  "started_at": "2026-11-04T01:43:19.409793+08:00",
+  "finished_at": "2026-11-04T01:45:39.942862+08:00",
+  "nodes": [
+   {
+    "id": "search_1",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "title": "企业知识库 RAG 落地路径与架构模式检索",
+    "type": "search",
+    "agent_role": "researcher",
+    "agent_name": "",
+    "depends_on": [],
+    "position": 0,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "fallback_query": "RAG",
+     "query": "企业知识库 RAG 落地 架构 检索增强生成 流程 阶段"
+    },
+    "output": {
+     "failed": 4,
+     "fetched": 3,
+     "providers": [
+      "github",
+      "hackernews",
+      "wikipedia",
+      "bing"
+     ],
+     "query": "企业知识库 RAG 落地 架构 检索增强生成 流程 阶段",
+     "result_count": 8,
+     "source_ids": [
+      "f9b62491-e085-40ee-b3a7-28203135fbae",
+      "47008c44-3ee3-4ec8-8807-26119599bd68",
+      "0c9baf61-ad49-4931-b0ce-440c75bf04cd",
+      "cfbd16cd-424b-40fe-86cf-4e8760ac19f1",
+      "79611db2-f43c-4315-9ffa-b2688c9975a7",
+      "d7437b12-b442-4ef4-962e-e868420c2f50",
+      "1ec8aec4-0b8e-4ee6-999b-fb4403a0870b",
+      "0bf03b5e-1cd3-4399-a45c-7ebc9df5abcb"
+     ],
+     "trace": [
+      {
+       "count": 8,
+       "duration_ms": 555,
+       "provider": "bing"
+      },
+      {
+       "count": 0,
+       "duration_ms": 560,
+       "provider": "hackernews"
+      },
+      {
+       "count": 0,
+       "duration_ms": 648,
+       "provider": "wikipedia"
+      },
+      {
+       "count": 0,
+       "duration_ms": 661,
+       "provider": "github"
+      }
+     ]
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:43:16.705406+08:00",
+    "updated_at": "2026-11-04T01:43:20.832036+08:00",
+    "started_at": "2026-11-04T01:43:19.4229+08:00",
+    "completed_at": "2026-11-04T01:43:20.832036+08:00"
+   },
+   {
+    "id": "analyze_1",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "title": "落地路径与架构模式分析",
+    "type": "analyze",
+    "agent_role": "analyst",
+    "agent_name": "",
+    "depends_on": [
+     "search_1"
+    ],
+    "position": 1,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "落地路径与架构模式分析"
+    },
+    "output": {
+     "claims": 0,
+     "reason": "资料中未抽取出可引用结论",
+     "skipped": true,
+     "source_n": 3
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:43:16.705896+08:00",
+    "updated_at": "2026-11-04T01:44:50.948822+08:00",
+    "started_at": "2026-11-04T01:43:20.922686+08:00",
+    "completed_at": "2026-11-04T01:44:50.948822+08:00"
+   },
+   {
+    "id": "search_2",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "title": "RAG 检索质量与技术挑战检索",
+    "type": "search",
+    "agent_role": "researcher",
+    "agent_name": "",
+    "depends_on": [],
+    "position": 2,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "fallback_query": "RAG",
+     "query": "RAG 检索质量 幻觉 召回 相关性 重排 企业知识库 挑战"
+    },
+    "output": {
+     "failed": 1,
+     "fetched": 4,
+     "providers": [
+      "github",
+      "hackernews",
+      "wikipedia",
+      "bing"
+     ],
+     "query": "RAG 检索质量 幻觉 召回 相关性 重排 企业知识库 挑战",
+     "result_count": 8,
+     "source_ids": [
+      "3a056476-3a15-41e5-aa8d-30824a40c53c",
+      "d7c5e7ff-d219-404e-adb8-42ccca53be11",
+      "d326544d-9e96-469a-8bdc-bf4ff23e682f",
+      "9c4f7578-f1c0-4698-89f8-87e2d351c0a8",
+      "2e1f35bb-be53-409d-8477-e6209d00495e",
+      "e8981d2c-21e0-4a1c-97e8-110bae4accbf",
+      "feaa6346-de81-460e-b163-ddb2ddb911f2",
+      "9d92e936-b7c9-4dde-bc58-183a3fcf30d8"
+     ],
+     "trace": [
+      {
+       "count": 8,
+       "duration_ms": 639,
+       "provider": "bing"
+      },
+      {
+       "count": 0,
+       "duration_ms": 651,
+       "provider": "hackernews"
+      },
+      {
+       "count": 0,
+       "duration_ms": 734,
+       "provider": "wikipedia"
+      },
+      {
+       "count": 0,
+       "duration_ms": 735,
+       "provider": "github"
+      }
+     ]
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:43:16.706268+08:00",
+    "updated_at": "2026-11-04T01:43:21.780563+08:00",
+    "started_at": "2026-11-04T01:43:19.4229+08:00",
+    "completed_at": "2026-11-04T01:43:21.780563+08:00"
+   },
+   {
+    "id": "analyze_2",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "title": "技术挑战分析",
+    "type": "analyze",
+    "agent_role": "analyst",
+    "agent_name": "",
+    "depends_on": [
+     "search_2"
+    ],
+    "position": 3,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "技术挑战分析"
+    },
+    "output": {
+     "claims": 0,
+     "reason": "资料中未抽取出可引用结论",
+     "skipped": true,
+     "source_n": 1
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:43:16.706586+08:00",
+    "updated_at": "2026-11-04T01:44:51.944553+08:00",
+    "started_at": "2026-11-04T01:43:21.923366+08:00",
+    "completed_at": "2026-11-04T01:44:51.944553+08:00"
+   },
+   {
+    "id": "search_3",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "title": "企业知识库 RAG 数据治理、安全与合规检索",
+    "type": "search",
+    "agent_role": "researcher",
+    "agent_name": "",
+    "depends_on": [],
+    "position": 4,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "fallback_query": "RAG",
+     "query": "企业知识库 RAG 数据治理 隐私安全 合规 权限 审计"
+    },
+    "output": {
+     "failed": 4,
+     "fetched": 3,
+     "providers": [
+      "github",
+      "hackernews",
+      "wikipedia",
+      "bing"
+     ],
+     "query": "企业知识库 RAG 数据治理 隐私安全 合规 权限 审计",
+     "result_count": 8,
+     "source_ids": [
+      "f9b62491-e085-40ee-b3a7-28203135fbae",
+      "47008c44-3ee3-4ec8-8807-26119599bd68",
+      "0c9baf61-ad49-4931-b0ce-440c75bf04cd",
+      "cfbd16cd-424b-40fe-86cf-4e8760ac19f1",
+      "79611db2-f43c-4315-9ffa-b2688c9975a7",
+      "d7437b12-b442-4ef4-962e-e868420c2f50",
+      "1ec8aec4-0b8e-4ee6-999b-fb4403a0870b",
+      "0bf03b5e-1cd3-4399-a45c-7ebc9df5abcb"
+     ],
+     "trace": [
+      {
+       "count": 8,
+       "duration_ms": 647,
+       "provider": "bing"
+      },
+      {
+       "count": 0,
+       "duration_ms": 654,
+       "provider": "hackernews"
+      },
+      {
+       "count": 0,
+       "duration_ms": 728,
+       "provider": "github"
+      },
+      {
+       "count": 0,
+       "duration_ms": 737,
+       "provider": "wikipedia"
+      }
+     ]
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:43:16.706871+08:00",
+    "updated_at": "2026-11-04T01:43:20.816617+08:00",
+    "started_at": "2026-11-04T01:43:19.4229+08:00",
+    "completed_at": "2026-11-04T01:43:20.816617+08:00"
+   },
+   {
+    "id": "analyze_3",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "title": "数据治理、安全与合规分析",
+    "type": "analyze",
+    "agent_role": "analyst",
+    "agent_name": "",
+    "depends_on": [
+     "search_3"
+    ],
+    "position": 5,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "数据治理、安全与合规分析"
+    },
+    "output": {
+     "claims": 6,
+     "llm_used": true,
+     "model": "cline/cline-free/solar-mini4",
+     "question": "数据治理、安全与合规分析",
+     "source_n": 1,
+     "tokens": 6080
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 6080,
+    "created_at": "2026-11-04T01:43:16.707165+08:00",
+    "updated_at": "2026-11-04T01:44:07.250024+08:00",
+    "started_at": "2026-11-04T01:43:20.922686+08:00",
+    "completed_at": "2026-11-04T01:44:07.250024+08:00"
+   },
+   {
+    "id": "search_4",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "title": "RAG 企业知识库 评估、监控与迭代运营检索",
+    "type": "search",
+    "agent_role": "researcher",
+    "agent_name": "",
+    "depends_on": [],
+    "position": 6,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "fallback_query": "RAG",
+     "query": "RAG 企业知识库 评估指标 监控 反馈 迭代 运营"
+    },
+    "output": {
+     "failed": 2,
+     "fetched": 3,
+     "providers": [
+      "github",
+      "hackernews",
+      "wikipedia",
+      "bing"
+     ],
+     "query": "RAG 企业知识库 评估指标 监控 反馈 迭代 运营",
+     "result_count": 8,
+     "source_ids": [
+      "3a056476-3a15-41e5-aa8d-30824a40c53c",
+      "d7c5e7ff-d219-404e-adb8-42ccca53be11",
+      "d326544d-9e96-469a-8bdc-bf4ff23e682f",
+      "9c4f7578-f1c0-4698-89f8-87e2d351c0a8",
+      "2e1f35bb-be53-409d-8477-e6209d00495e",
+      "e8981d2c-21e0-4a1c-97e8-110bae4accbf",
+      "feaa6346-de81-460e-b163-ddb2ddb911f2",
+      "9d92e936-b7c9-4dde-bc58-183a3fcf30d8"
+     ],
+     "trace": [
+      {
+       "count": 8,
+       "duration_ms": 650,
+       "provider": "bing"
+      },
+      {
+       "count": 0,
+       "duration_ms": 663,
+       "provider": "hackernews"
+      },
+      {
+       "count": 0,
+       "duration_ms": 729,
+       "provider": "github"
+      },
+      {
+       "count": 0,
+       "duration_ms": 758,
+       "provider": "wikipedia"
+      }
+     ]
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:43:16.707474+08:00",
+    "updated_at": "2026-11-04T01:43:21.815851+08:00",
+    "started_at": "2026-11-04T01:43:19.4229+08:00",
+    "completed_at": "2026-11-04T01:43:21.815851+08:00"
+   },
+   {
+    "id": "analyze_4",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "title": "评估、监控与迭代运营分析",
+    "type": "analyze",
+    "agent_role": "analyst",
+    "agent_name": "",
+    "depends_on": [
+     "search_4"
+    ],
+    "position": 7,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "评估、监控与迭代运营分析"
+    },
+    "output": {
+     "claims": 0,
+     "reason": "资料中未抽取出可引用结论",
+     "skipped": true,
+     "source_n": 4
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:43:16.707754+08:00",
+    "updated_at": "2026-11-04T01:44:51.94511+08:00",
+    "started_at": "2026-11-04T01:43:21.923366+08:00",
+    "completed_at": "2026-11-04T01:44:51.94511+08:00"
+   },
+   {
+    "id": "search_5",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "title": "RAG 企业知识库 工程最佳实践与成本优化检索",
+    "type": "search",
+    "agent_role": "researcher",
+    "agent_name": "",
+    "depends_on": [],
+    "position": 8,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "fallback_query": "RAG",
+     "query": "RAG 企业知识库 工程实践 索引 向量化 缓存 成本优化"
+    },
+    "output": {
+     "failed": 1,
+     "fetched": 4,
+     "providers": [
+      "github",
+      "hackernews",
+      "wikipedia",
+      "bing"
+     ],
+     "query": "RAG 企业知识库 工程实践 索引 向量化 缓存 成本优化",
+     "result_count": 8,
+     "source_ids": [
+      "3a056476-3a15-41e5-aa8d-30824a40c53c",
+      "d7c5e7ff-d219-404e-adb8-42ccca53be11",
+      "d326544d-9e96-469a-8bdc-bf4ff23e682f",
+      "9c4f7578-f1c0-4698-89f8-87e2d351c0a8",
+      "2e1f35bb-be53-409d-8477-e6209d00495e",
+      "e8981d2c-21e0-4a1c-97e8-110bae4accbf",
+      "feaa6346-de81-460e-b163-ddb2ddb911f2",
+      "9d92e936-b7c9-4dde-bc58-183a3fcf30d8"
+     ],
+     "trace": [
+      {
+       "count": 8,
+       "duration_ms": 242,
+       "provider": "bing"
+      },
+      {
+       "count": 0,
+       "duration_ms": 395,
+       "provider": "wikipedia"
+      },
+      {
+       "count": 0,
+       "duration_ms": 403,
+       "provider": "hackernews"
+      },
+      {
+       "count": 0,
+       "duration_ms": 726,
+       "provider": "github"
+      }
+     ]
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:43:16.70807+08:00",
+    "updated_at": "2026-11-04T01:44:08.910137+08:00",
+    "started_at": "2026-11-04T01:44:07.422717+08:00",
+    "completed_at": "2026-11-04T01:44:08.910137+08:00"
+   },
+   {
+    "id": "analyze_5",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "title": "工程最佳实践与成本优化分析",
+    "type": "analyze",
+    "agent_role": "analyst",
+    "agent_name": "",
+    "depends_on": [
+     "search_5"
+    ],
+    "position": 9,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "工程最佳实践与成本优化分析"
+    },
+    "output": {
+     "claims": 0,
+     "reason": "资料中未抽取出可引用结论",
+     "skipped": true,
+     "source_n": 2
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:43:16.708374+08:00",
+    "updated_at": "2026-11-04T01:45:38.939651+08:00",
+    "started_at": "2026-11-04T01:44:08.92287+08:00",
+    "completed_at": "2026-11-04T01:45:38.939651+08:00"
+   },
+   {
+    "id": "verify_1",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "title": "交叉验证各研究问题结论",
+    "type": "verify",
+    "agent_role": "verifier",
+    "agent_name": "",
+    "depends_on": [
+     "analyze_1",
+     "analyze_2",
+     "analyze_3",
+     "analyze_4",
+     "analyze_5"
+    ],
+    "position": 10,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践"
+    },
+    "output": {
+     "clusters": 6,
+     "conflicting": 0,
+     "partial": 6,
+     "supported": 0,
+     "unverified": 0,
+     "verified": 6
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:43:16.708715+08:00",
+    "updated_at": "2026-11-04T01:45:39.444271+08:00",
+    "started_at": "2026-11-04T01:45:39.422839+08:00",
+    "completed_at": "2026-11-04T01:45:39.444271+08:00"
+   },
+   {
+    "id": "synthesize_1",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "title": "企业知识库 RAG 落地综合报告",
+    "type": "synthesize",
+    "agent_role": "synthesizer",
+    "agent_name": "",
+    "depends_on": [
+     "verify_1"
+    ],
+    "position": 11,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践"
+    },
+    "output": {
+     "citation_count": 6,
+     "claims": 6,
+     "report_id": "3087c922-1bca-42df-81e1-38acd65d2b4a",
+     "sources": 1,
+     "version": 1,
+     "word_count": 1007
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:43:16.709124+08:00",
+    "updated_at": "2026-11-04T01:45:39.937848+08:00",
+    "started_at": "2026-11-04T01:45:39.922915+08:00",
+    "completed_at": "2026-11-04T01:45:39.937848+08:00"
+   }
+  ],
+  "latest_sequence": 136
+ },
+ "agents": {
+  "items": [
+   {
+    "id": "89263700-34e1-4cb0-9fd1-ded7c3eabfcb",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "run_id": "bdb8a71e-77ba-4698-9a02-0ade490cc070",
+    "node_id": "synthesize_1",
+    "role": "synthesizer",
+    "name": "Report Synthesizer",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:45:39.926982+08:00",
+    "duration_ms": 12,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "257eeeff-562a-45fb-a501-72bc70138b5f",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "run_id": "bdb8a71e-77ba-4698-9a02-0ade490cc070",
+    "node_id": "verify_1",
+    "role": "verifier",
+    "name": "Cross-Validator",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:45:39.424895+08:00",
+    "duration_ms": 20,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "f18d6021-7264-43c7-b5e0-dce56881c502",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "run_id": "bdb8a71e-77ba-4698-9a02-0ade490cc070",
+    "node_id": "analyze_5",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:44:08.924579+08:00",
+    "duration_ms": 90019,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "bb617f5c-599f-4556-b2fb-eae6003203f2",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "run_id": "bdb8a71e-77ba-4698-9a02-0ade490cc070",
+    "node_id": "search_5",
+    "role": "researcher",
+    "name": "Open Source Researcher",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:44:07.428441+08:00",
+    "duration_ms": 1483,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "648a3e6a-ff82-42fe-9b3b-72650b1f1407",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "run_id": "bdb8a71e-77ba-4698-9a02-0ade490cc070",
+    "node_id": "analyze_4",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:43:21.928464+08:00",
+    "duration_ms": 90021,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "6b48100e-7e2a-4d8a-9b74-6701a0b5f186",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "run_id": "bdb8a71e-77ba-4698-9a02-0ade490cc070",
+    "node_id": "analyze_2",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:43:21.928369+08:00",
+    "duration_ms": 90017,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "fcedc3bd-271f-4f3b-ba7e-29a22563edc8",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "run_id": "bdb8a71e-77ba-4698-9a02-0ade490cc070",
+    "node_id": "analyze_1",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:43:20.925824+08:00",
+    "duration_ms": 90024,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "74e145f8-51bf-4c0f-954d-19609f9a2647",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "run_id": "bdb8a71e-77ba-4698-9a02-0ade490cc070",
+    "node_id": "analyze_3",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:43:20.925682+08:00",
+    "duration_ms": 46326,
+    "token_usage": {
+     "prompt_tokens": 6080,
+     "total_tokens": 6080
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "57654d10-a177-488e-9885-4a3c0583f0c2",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "run_id": "bdb8a71e-77ba-4698-9a02-0ade490cc070",
+    "node_id": "search_1",
+    "role": "researcher",
+    "name": "Open Source Researcher",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:43:19.518119+08:00",
+    "duration_ms": 1316,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "50c14db5-a394-4c75-924e-9dce412250be",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "run_id": "bdb8a71e-77ba-4698-9a02-0ade490cc070",
+    "node_id": "search_2",
+    "role": "researcher",
+    "name": "Open Source Researcher",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:43:19.430491+08:00",
+    "duration_ms": 2357,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "e7cf927e-6b73-4d97-b838-2f23bd44a040",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "run_id": "",
+    "node_id": "search_3",
+    "role": "researcher",
+    "name": "Open Source Researcher",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:43:19.425876+08:00",
+    "duration_ms": 1397,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "ad0f74db-1327-4f59-9775-2411b04667c1",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "run_id": "bdb8a71e-77ba-4698-9a02-0ade490cc070",
+    "node_id": "search_4",
+    "role": "researcher",
+    "name": "Open Source Researcher",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:43:19.425431+08:00",
+    "duration_ms": 2392,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   }
+  ],
+  "total": 12
+ },
+ "sources": {
+  "items": [
+   {
+    "id": "3a056476-3a15-41e5-aa8d-30824a40c53c",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_2",
+    "url": "https://www.zhihu.com/tardis/zm/art/675509396",
+    "normalized_url": "https://www.zhihu.com/tardis/zm/art/675509396",
+    "title": "一文读懂：大模型 RAG （检索增强生成）含高级方法",
+    "site": "zhihu.com",
+    "provider": "bing",
+    "snippet": "2026年5月2日 · 而RAG就是解决上述问题的有效方案。 一句话总结： RAG（中文为检索增强生成） = 检索技术 + LLM 提示。 例如， …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "robots_blocked",
+    "error": "robots.txt 禁止抓取",
+    "created_at": "2026-11-04T01:43:20.184064+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_3",
+    "url": "https://work.weixin.qq.com",
+    "normalized_url": "https://work.weixin.qq.com",
+    "title": "企业微信",
+    "site": "work.weixin.qq.com",
+    "provider": "bing",
+    "snippet": "2026年10月23日 · 国内首家通过SOC2Type2审计的企业办公产品，国际权威认证，银行级加密水平，为企业数据安全提供可靠保障， …",
+    "excerpt": "Same Communication Experience as WeChat\nHit the ground running in a familiar environment without any learning costs.\nAdd WeChat users as contacts, run Mini Programs and use WeChat Pay features in the app. Add WeChat users as contacts, run Mini Programs and use WeChat Pay features in the app.\nA Wide Array of OA Tools\nLeverage various built-in OA tools (Attendance, Approvals, and more), third-party tools, as well as user-developed tools integrated via APIs.\nComprehensive Security Protection\nInternationally recognized and bank-level encryption that ensures data security\nMessage Exchange with WeChat\nSend chat messages and articles between WeChat and WeCom.\nBatch import contacts into a directory where they are managed in one place for convenient and accurate lookup.\nHave stable HD video conferences that are accessible from phones and allow sharing documents and screens among up to 300 participants.\nWeCom provides a Group Live Stream function that teachers could initiate on-line class with students.\nSend employees red packets, as well as pay and receive money to/from employees.\nEnjoy up to 1000 minutes of company-paid phone talk time with multiple people at once. Workplace communication has never been this easy.\nReceive and check emails in real time and respond promptly using an email program geared for corporate customers.\nManage company files in one place for easier access. Enjoy 100-GB storage for free or get expanded storage for a fee.\nManageable Group Chat\nConfigure exclusive admin permission for group owners, mute members, post group notices and create group chats of up to 2000 members.\nExtensive Customization\nCustomize employee profiles, configure Corporate Directory access permissions, and hide departments/members as needed. Build a unique corporate image by adding a company logo or brand identity design on the launch page.\nPunch in/out of work at any place and time on the phone.\nKeep track of employees’ work progress by checking their work reports on the phone.\nCustomize approval templates, configure approvers and CC recipients, and check application records.",
+    "content_hash": "8afab9ec585f0e083f8495d136eefeaacc9b3c2228c656562b8c90975e13e654",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:43:20.679445+08:00",
+    "created_at": "2026-11-04T01:43:20.184102+08:00",
+    "evidence_count": 6
+   },
+   {
+    "id": "d7c5e7ff-d219-404e-adb8-42ccca53be11",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_2",
+    "url": "https://zhuanlan.zhihu.com/p/668082024",
+    "normalized_url": "https://zhuanlan.zhihu.com/p/668082024",
+    "title": "一文搞懂大模型 RAG 应用（附实践案例） - 知乎",
+    "site": "zhuanlan.zhihu.com",
+    "provider": "bing",
+    "snippet": "2023年11月25日 · 相对于成本昂贵的“ Post Train ”或“ SFT ”，基于RAG的技术方案往往成为一种更优选择。 本文从RAG架构入手，详 …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "robots_blocked",
+    "error": "robots.txt 禁止抓取",
+    "created_at": "2026-11-04T01:43:20.184544+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "d326544d-9e96-469a-8bdc-bf4ff23e682f",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_2",
+    "url": "https://www.cnblogs.com/yupi/p/19914426",
+    "normalized_url": "https://www.cnblogs.com/yupi/p/19914426",
+    "title": "RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园",
+    "site": "cnblogs.com",
+    "provider": "bing",
+    "snippet": "2026年4月23日 · 而这篇文章，是对 RAG 技术的一个全景科普，从最初的 Naive RAG、到现在最主流的 Agentic RAG，总共 16 种主 …",
+    "excerpt": "RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 - 程序员鱼皮 - 博客园 RAG 是什么？16 种 RAG 方案一次讲清！AI 应用开发必学 | 万字干货 AI 总是一本正经地胡说八道？RAG 让大模型先搜再答，从此告别幻觉。本文一次性讲透 Naive RAG、Hybrid Search、GraphRAG、Agentic RAG 等 16 种主流方案，附代码示例 + 选型对照表，程序员面试和 AI 编程实战必备。 最近这两年，只要你接触过 AI 编程，大概率听过一个词，RAG（Retrieval-Augmented Generation）。 但很多小伙伴对 RAG 都只是一知半解，导致面试的时候只能说出 “检索增强生成” 这六个字，面试官再多问一点，就只能 “阿巴阿巴”。 而这篇文章，是对 RAG 技术的一个全景科普，从最初的 Naive RAG、到现在最主流的 Agentic RAG，总共 16 种主流 RAG 方案，我会一次性给大家讲清楚。以后开发 AI 应用的过程中，无论遇到什么场景，都能选择最合适的 RAG 方案。 干货比较多，建议先点赞收藏，再慢慢往下看~ 会一本正经地胡说八道，也就是我们常说的幻觉 缺乏私有知识，了解不到内部的文档写了什么 比如问 DeepSeek：程序员鱼皮的最新项目是什么？ 结果它给我扯了个两年半以前的项目出来，技术栈也完全不对！ 解决这个问题就可以用 RAG。RAG 的核心思想是 先搜再答 ，让大模型在回答之前先去搜一遍相关资料，再基于搜到的知识来组织答案。 就跟考试的时候偷偷翻书一样，遇到不会的先翻一翻书，再根据书里的知识答题。 还是问 AI 同样的问题，我们主动给 AI 一些参考资料，他的回答就会准确一些： 这个思路听起来简单，但在实际工程上 RAG 已经演化出了很多种不同的实现方法，从最初的「切块 → 搜索 → 生成」，到让 AI Agent 自主决策检索策略的 Agentic RAG，复杂度和能力天差地别。 有朋友可能会问：现在的大模型不是已经支持百万 token 的上下文窗口了，还需要 RAG 吗？ 因为把所有文档塞进上下文窗口，既贵又不靠谱。上下文越长 token 费用越高，而且大模型普遍存在 “Lost in the Middle” 问题，顾名思义，就是对超长上下文中间部分的注意力会明显下降。 这个也不难理解，就像听别人说话一样，我们对开头和结尾的印象会相对深刻一些，中间的总是容易忘记。 不过呢，RAG 和长上下文也不是互斥的关系，现在一般的最佳实践是先用 RAG 给 AI 提供相对精确的资料，再利用长上下文窗口进行有针对性的分析推理，两者互补。 好，背景交代完了。下面我们正式进入主题，挨个讲讲每种 RAG 方案。 我们先从最基础的 RAG 讲起，如果你之前完全没接触过 RAG，看完这一节就能理解它的核心原理。 Naive RAG 这个词听起来就很牛对不对？ 但其实，Naive 是朴素的意思，Naive RAG 是最基本的 RAG 实现方案。 假设你有一份 200 页的公司员工手册，怎么让 AI 基于里面的内容回答员工的提问呢？ 最简单粗暴的做法就是每次提问都把整本手册塞给 AI 大模型。 但是一本手册可能几十万字，全塞进去又贵又慢，而且上下文一长，大模型还容易犯前面提到的 “Lost in the Middle” 的毛病，导致回答质量下降。 所以更合理的思路是：员工问什么，我们就只把相关的几段内容塞给 AI。 那问题又来了，怎么定位到相关的那几段呢？ 如果用关键词匹配，很容易出现问题和文档里的关键词不一致的问题，比如员工问 “老板不批假怎么办”，文档里写的是 “请假审批流程”，关键词对不上，就搜不到。 所谓向量，就是把一段文字用一串数字表示出来，让计算机可以比较语义上的相似度。 语义越接近的句子，它们的向量在数学空间里离得越近。 负责把文字转成向量的模型，叫 Embedding 模型；存储这些向量并支持快速相似度搜索的数据库，叫向量数据库，比如 Milvus、Chroma、Qdrant 等。 理解了向量，Naive RAG 的做法就很好理解了，主要分为两步。 把文档切成小块（chunk），每块几百字 用 Embedding 模型把每个小块转成向量 把用户问题也用 Embedding 模型转成向量 去向量库里搜最相似的几个文档块（比如 Top 5） 把这几个块和用户问题拼成 Prompt，交给大模型生成回答 回到开头那份 200 页的员工手册。我们先把它切成几百个小块并向量化入库，当员工问 “年假有多少天？” 的时候，RAG 的执行流程是这样的： 在向量库里找到最相似的 5 个文档块（比如某块写着 “入职满一年享有 10 天年假，满三年 15 天…”） 大模型回答：“入职满一年享有 10 天年假” 不过 Naive RAG 也有一些比较明显的问题： 切块方式粗暴，可能把一段完整的语义从中间截断 检索质量完全依赖 embedding 模型，搜不到就没辙 这些局限，就是后面所有进阶方法要解决的问题。 下面我用伪代码来帮助大家理解，不熟悉编程的同学可以跳过，不影响后续的学习~ # 1. 把文档切成小块，chunk_size=500 表示每块 500 字， # chunk_overlap=50 表示相邻块之间重叠 50 字，避免关键信息被切断 chunks = split_into_chunks(documents, chunk_size=500, chunk_overlap=50) # 2. 把每个小块转成向量，连同原文一起存入向量数据库 for each chunk in chunks: vector = embedding_model.encode(chunk) # 调用 Embedding 模型编码 vector_store.insert(vector, chunk) # 向量和原文一起入库 # 1. 用同一个 Embedding 模型把用户问题也转成向量 query_vector = embedding_model.encode(user_query) # 2. 在向量库里搜最相似的 Top 5 文档块 top_k_chunks = vector_store.search(query_vector, k=5) # 3. 把检索到的文档块拼进 Prompt，作为参考资料 prompt = \"基于以下参考资料回答问题：\\n\" + join(top_k_chunks) + \"\\n问题：\" + user_query answer = LLM.generate(prompt) 用户提问的方式千奇百怪。比如同样是想知道公司报销流程，有人会问怎么报销，有人会问费用审批流程是什么，还有人会问花了钱怎么找公司要回来。 但文档里可能只写了 “报销申请流程” 这个表述，如果用户的措辞和文档差距太大，向量检索就可能搜不到正确的内容。 Multi-Query 的思路就是：既然一种问法搜不全，那就让大模型把原始问题改成多种不同的表述，分别去搜，最后把结果合并去重。 这种方法的代价就是每次提问要多调用一次 LLM 做改写，再多跑 N 次向量检索，延迟和成本都会增加。 而且如果 LLM 改写出的问题方向跑偏，会把无关文档也带进来，影响答案质量。 所以它比较适合 面向普通用户的客服、电商等场景 ，用户表述口语化、和文档术语差距大，多花这点成本还是有必要的。但是在术语规范的专业领域，Multi-Query 的收益就很有限了。 Multi-Query RAG 的代码实现如下： # 1. 让 LLM 把原问题改写成多个表述 queries = LLM.generate(\"请将以下问题改写成 3 个不同的表述：\" + user_query) // 例如 AI 返回: [\"报销流程是什么\", \"费用审批怎么操作\", \"如何提交报销申请\"] for each query in queries: results = vector_store.search(embed(query), k=5) all_results.append(results) # 3. 合并去重，得到覆盖面更广的候选文档 merged_chunks = deduplicate(all_results) # 4. 把合并后的文档 + 原始问题交给大模型生成回答 answer = LLM.generate(merged_chunks + user_query) AI 回复的效果不好，可能不是因为用户的问法不好，而是用户的问题和文档的语义空间不一致。 用户的提问往往很短，比如 “KV Cache 是什么？”，就这么几个字。 但文档里关于 KV Cache 的描述可能是一大段技术解释。一短一长，在 embedding 空间中可能离得很远，就检索不到了。 HyDE 的做法就是让大模型凭空写一个答案（不必完全准确），然后用这段假答案的向量去检索。因为假答案和真文档的文体更接近，两者在向量空间中离得也更近。 还是上面的例子，用户问：“KV Cache 是什么？” LLM 先编一段假答案：“KV Cache 是一种在 Transformer 推理过程中缓存 Key 和 Value 矩阵的优化技术，可以避免重复计算…” 这段假答案虽然不一定完全准确，但它的向量和真实文档里关于 KV Cache 的那段描述非常接近，所以能精准命中正确的文档。 …",
+    "content_hash": "5467723a42ea5c7f25e4f173daed69bb95b5dbe99385136525b31c01cffd19f0",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:44:08.273638+08:00",
+    "created_at": "2026-11-04T01:43:20.184921+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "9c4f7578-f1c0-4698-89f8-87e2d351c0a8",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_2",
+    "url": "https://zhuanlan.zhihu.com/p/2020146942852755666",
+    "normalized_url": "https://zhuanlan.zhihu.com/p/2020146942852755666",
+    "title": "必收藏！一篇吃透 RAG 到底是什么？ - 知乎",
+    "site": "zhuanlan.zhihu.com",
+    "provider": "bing",
+    "snippet": "2026年3月25日 · RAG 的全称是「Retrieval-Augmented Generation」，翻译过来就是「检索增强生成」。 听起来有点高大上，我用 …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "robots_blocked",
+    "error": "robots.txt 禁止抓取",
+    "created_at": "2026-11-04T01:43:20.185246+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "2e1f35bb-be53-409d-8477-e6209d00495e",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_2",
+    "url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+    "normalized_url": "https://blog.csdn.net/a2875254060/article/details/142468037",
+    "title": "一文彻底搞懂大模型 - RAG （检索、增强、生成）-CSDN博客",
+    "site": "blog.csdn.net",
+    "provider": "bing",
+    "snippet": "2024年9月23日 · 本文介绍了RAG（检索增强生成）技术，它结合信息检索与语言生成模型，可增强大模型处理知识密集型任务的能力 …",
+    "excerpt": "一文彻底搞懂大模型 - RAG（检索、增强、生成） 墨衍会员 ¥399 起/年，写一次发全网 一文 读懂AI 大模型 时代的 RAG 技术 RAG （Retrieval - Augmented Generation， 检索 增强 生成 ） 是一种结合 检索 技术与 生成 模型的技术架构，旨在通过动态引入外部知识库 增强 大 语言模型 （LLM）的 生成 能力。其核心思想是通过 检索 系统从外部数据源（如企业知识库、实时文档等）获取相关信息，并将 检索 结果作为上下文输入 生成 模型，以提高 生成 答案的准确性、时效性和专业性 RAG（Retrieval-Augmented Generation，检索增强生成） 是一种结合了信息检索技术与语言生成模型的人工智能技术。 该技术通过从外部知识库中检索相关信息，并将其作为提示（Prompt）输入给大型语言模型（LLMs） ，以增强模型处理知识密集型任务的能力，如问答、文本摘要、内容生成等。RAG模型由Facebook AI Research（FAIR）团队于2020年首次提出，并迅速成为大模型应用中的热门方案。 什么是RAG ？ RAG（Retrieval-Augmented Generation，检索增强生成），RAG 是一种 AI 框架，它将传统信息检索系统（例如数据库）的优势与生成式大语言模型 (LLM) 的功能结合在一起。 LLM通过将这些额外的知识与自己的语言技能相结合，可以撰写更准确、更具时效性且更贴合具体需求的文字。 如何理解RAG？ 通过上一个问题，我们知道了什么是RAG？了解到RAG是一种结合了信息检索、文本增强和文本生成的自然语言处理（NLP）的技术。 RAG的目的是通过从外部知识库检索相关信息来辅助大语言模型生成更准确、更丰富的文本内容。那我们如何理解RAG的检索、增强和生成呢？ 检索 ：检索是RAG流程的第一步，从预先建立的知识库中检索与问题相关的信息。这一步的目的是为后续的生成过程提供有用的上下文信息和知识支撑。 增强 ：RAG中增强是将检索到的信息用作生成模型（即大语言模型）的上下文输入，以增强模型对特定问题的理解和回答能力。这一步的目的是将外部知识融入生成过程中，使生成的文本内容更加丰富、准确和符合用户需求。 通过增强步骤，LLM模型能够充分利用外部知识库中的信息。 生成：生成是RAG流程的最后一步。这一步的目的是结合LLM生成符合用户需求的回答。生成器会利用检索到的信息作为上下文输入，并结合大语言模型来生成文本内容。 RAG的“检索、增强、生成”，谁增强了谁，谁生成了答案，主语很重要。是从知识库中检索到的问答对，增强了LLM的提示词（prompt），LLM拿着增强后的Prompt生成了问题答案。 如何使用RAG？ 了解了什么是RGA，同步也理解了RAG的检索、增强和生成。那我们如何使用RAG呢？接下来以RAG搭建知识问答系统具体步骤为例，来讲解如何使用RAG？ 收集数据： 首先，需要收集与问答系统相关的各种数据，这些数据可以来自文档、网页、数据库等多种来源。 数据清洗： 对收集到的数据进行清洗，去除噪声、重复项和无关信息，确保数据的质量和准确性。 知识库构建： 将清洗后的数据构建成知识库。这通常包括将文本分割成较小的片段（chunks），使用文本嵌入模型（如GLM）将这些片段转换成向量，并将这些向量存储在向量数据库（如FAISS、Milvus等）中。 问题向量化： 当用户输入查询问题时，使用相同的文本嵌入模型将问题转换成向量。 相似度检索： 在向量数据库中检索与问题向量最相似的知识库片段（chunks）。这通常通过计算向量之间的相似度（如余弦相似度）来实现。 结果排序： 根据相似度得分对检索到的结果进行排序，选择最相关的片段作为后续生成的输入。 上下文融合 ：将检索到的相关片段与原始问题合并，形成更丰富的上下文信息。 大语言模型生成 ：使用大语言模型（如GLM）基于上述上下文信息生成回答。大语言模型会学习如何根据检索到的信息来生成准确、有用的回答。 大家可以结合自己的业务领域知识，开始搭建医疗、法律、产品知识问答。先搭建Demo，然后工作中不断完善知识库问答对。 RAG工作原理是什么？ 大型语言模型（LLM）面临两个问题，第一个问题是LLM会产生幻觉，第二个是LLM的知识中断。 知识截止：当 LLM 返回的信息与模型的训练数据相比过时时。每个基础模型都有知识截止，这意味着其知识仅限于训练时可用的数据。 幻觉：当模型自信地做出错误反应时，就会发生幻觉。 检索增强生成 (RAG) 摆脱了知识限制，整合了外部数据，从外部知识库中检索相关信息，增强模型的生成能力。 RAG工作流程是什么？通过检索增强技术，将用户查询与索引知识融合，利用大语言模型生成准确回答。 知识准备：收集并转换知识文档为文本数据，进行预处理和索引。 嵌入与索引：使用嵌入模型将文本转换为向量，并存储在向量数据库中。 查询检索：用户查询转换为向量，从数据库中检索相关知识。 提示增强：结合检索结果构建增强提示模版。 生成回答：大语言模型根据增强模版生成准确回答。 RAG技术架构是什么？ RAG技术架构主要由两个核心模块组成，检索模块（Retriever）和生成模块（Generator）。 文本嵌入：使用预训练的文本嵌入模型（如GLM）将查询和文档转换成向量表示，以便在向量空间中进行相似度计算。 向量搜索：利用高效的向量搜索技术（如FAISS、Milvus等向量数据库）在向量空间中检索与查询向量最相似的文档或段落。 双塔模型：检索模块常采用双塔模型（Dual-Encoder）进行高效的向量化检索。双塔模型由两个独立的编码器组成，一个用于编码查询，另一个用于编码文档。这两个编码器将查询和文档映射到相同的向量空间中，以便进行相似度计算。 强大的生成模型：生成模块通常使用在大规模数据上预训练的生成模型（如GLM），这些模型在生成自然语言文本方面表现出色。 上下文融合：生成模块将检索到的相关文档与原始查询合并，形成更丰富的上下文信息，作为生成模型的输入。 生成过程：生成模型根据输入的上下文信息，生成连贯、准确且信息丰富的回答或文本。 结合高效的检索模块（ Retriever ）与强大的生成模型（ Generator ），实现基于外部知识增强的自然语言生成能力。 读者福利：如果大家对大模型感兴趣，这套大模型学习资料一定对你有用 如果你是零基础小白，想快速入门大模型是可以考虑的。 一方面是学习时间相对较短，学习内容更全面更集中。 /> 二方面是可以根据这些资料规划好学习计划和方向。 包括：大模型学习线路汇总、学习阶段，大模型实战案例，大模型学习视频，人工智能、机器学习、大模型书籍PDF。带你从零基础系统性的学好大模型！ 😝有需要的小伙伴，可以保存图片到 wx扫描二v码 免费领取【 保证100%免费 】🆓 大模型学习路线图，整体分为7个大的阶段： （全套教程文末领取哈） /> 第一阶段： 从大模型系统设计入手，讲解大模型的主要方法； 第二阶段： 在通过大模型提示词工程从Prompts角度入手更好发挥模型的作用； 第三阶段： 大模型平台应用开发借助阿里云PAI平台构建电商领域虚拟试衣系统； 第四阶段： 大模型知识库应用开发以LangChain框架为例，构建物流行业咨询智能问答系统； 第五阶段： 大模型微调开发借助以大健康、新零售、新媒体领域构建适合当前领域大模型； 第六阶段： 以SD多模态大模型为主，搭建了文生图小程序案例； 第七阶段： 以大模型平台应用与开发为主，通过星火大模型，文心大模型等成熟大模型构建大模型行业应用。 光学理论是没用的，要学会跟着一起做，要动手实操，才能将自己的所学运用到实际当中去，这时候可以搞点实战案例来学习。 观看零基础学习书籍和视频，看书籍和视频学习是最快捷也是最有效果的方式，跟着视频中老师的思路，从基础到深入，还是很容易入门的。 • 基于大模型全栈工程实现 （前端、后端、产品经理、设计、数据分析等），通过这门课可获得不同能力； • 能够利用大模型解决相关实际项目需求： 大数据时代，越来越多的企业和机构需要处理海量数据，利用大模型技术可以更好地处理这些数据，提高数据分析和决策的准确性。因此，掌握大模型应用开发技能，可以让程序员更好地应对实际项目需求； • 基于大模型和企业数据AI应用开发， 实现大模型理论、掌握GPU算力、硬件、LangChain开发框架和项目实战技能， 学会Fine-tuning垂直训练大模型（数据准备、数据蒸馏、大模型部署）一站式掌握； • 能够完成时下热门大模型垂直领域模型训练能力，提高程序员的编码能力： 大模型应用开发需要掌握机器学习算法、深度学习框架等技术，这些技术的掌握可以提高程序员的编码能力和分析能力，让程序员更加熟练地编写高质量的代码。 😝有需要的小伙伴，可以保存图片到 wx扫描二v码 免费领取【 保证100%免费 】🆓 版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。 一文 读懂「 RAG ，Retrieval - Augmented Generation」 检索 增强 生成 检索 增强 生成 （RetrievalAugmentedGeneration），简称 RAG ，已经成为当前最火热的LLM应用方案。它是一个为 大模型 提供外部知识源的概念，这使它们能够 生成 准确且符合上下文的答案，同时能够减少模型幻觉。…",
+    "content_hash": "f6682ad9484dad222409c6bdfc2d5f3f2406b94c32c8bb472dc4633e467d8b59",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "fetch_failed",
+    "error": "HTTP 521",
+    "fetched_at": "2026-11-04T01:43:20.737555+08:00",
+    "created_at": "2026-11-04T01:43:20.185611+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "e8981d2c-21e0-4a1c-97e8-110bae4accbf",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_2",
+    "url": "https://datawhalechina.github.io/all-in-rag",
+    "normalized_url": "https://datawhalechina.github.io/all-in-rag",
+    "title": "All-in-RAG | 大模型应用开发实战：RAG技术全栈指南",
+    "site": "datawhalechina.github.io",
+    "provider": "bing",
+    "snippet": "2026年9月30日 · 本项目从实践出发，结合最新的RAG技术发展趋势，构建了一套完整的RAG学习体系，帮助开发者： 系统掌握RAG …",
+    "excerpt": "All-in-RAG | 大模型应用开发实战：RAG技术全栈指南",
+    "content_hash": "b2bda24d01c02e9ed4069967708c0661575c02befeab9a55114c0b82992abc46",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:44:08.310547+08:00",
+    "created_at": "2026-11-04T01:43:20.185979+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "feaa6346-de81-460e-b163-ddb2ddb911f2",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_2",
+    "url": "https://blog.csdn.net/m0_48891301/article/details/156265899",
+    "normalized_url": "https://blog.csdn.net/m0_48891301/article/details/156265899",
+    "title": "收藏级！RAG工作原理详解：11张图带你吃透RAG完整工作流程-CSDN博客",
+    "site": "blog.csdn.net",
+    "provider": "bing",
+    "snippet": "2025年12月25日 · 文章浏览阅读1.2w次，点赞24次，收藏51次。本文详细讲解RAG（检索增强生成）技术的工作原理，通过七步流 …",
+    "excerpt": "收藏级！RAG工作原理详解：11张图带你吃透RAG完整工作流程 墨衍会员 ¥399 起/年，写一次发全网 RAG 全流程核心技术深度解析：1- 工作原理 +切片+召回+排序 本文深入解析了检索增强生成（ RAG ）技术的核心原理与应用。 RAG 通过将信息检索与大语言模型生成能力结合，有效解决 大模型 的\"幻觉\"问题、知识时效性不足和领域专业壁垒等关键问题。文章详细介绍了 RAG 的 工作流程 ，包括准备阶段的分片（Chunking）和索引（Indexing）技术，以及回答阶段的召回、重排和生成过程。特别针对分片技术，对比分析了固定长度切分、递归字符切分、语义切分、结构切分和LLM智能切分五种方法的优缺点及适用场景。最后，文章还探讨了向量化（Embedding）的核心算法和主流 对于刚入门大模型的小白，或是想落地大模型应用的程序员来说，RAG（检索增强生成）绝对是绕不开的核心技术——它能轻松解决大模型“知识过时”“易幻觉”“不懂私有数据”三大痛点。本文将用11张直观示意图，把RAG的核心概念、七步工作流拆解得明明白白，新手也能快速上手，建议收藏反复学习！ RAG的全称是Retrieval-Augmented Generation（检索增强生成），名字直接点明了它的核心逻辑：用“检索外部知识”的方式，增强大模型的“生成能力”。下面这张图清晰展示了其核心框架： 它的核心价值在于打破传统大模型的“知识牢笼”，通过三个关键环节的协同，让大模型成为“实时更新、精准可信”的知识处理器： 检索（Retrieval）：主动“找知识”而非“记知识” 传统大模型的知识局限于训练数据，想了解2024年的新信息、公司内部文档等，根本无从下手。而RAG会主动从外部知识库（比如向量数据库）中，通过近似最近邻搜索（ANN）算法，精准定位与用户问题相关的知识片段。相当于给大模型配了一个“实时搜索引擎”，随时能调取最新、最专属的知识。 增强（Augmented）：动态扩展上下文，零成本更新知识 检索到的知识不会直接给用户，而是先“喂”给大模型，作为上下文的一部分补充进去。这一步完美解决了两个问题：一是不用花几百万、几千万重新训练大模型，就能让它掌握新知识；二是规避了大模型上下文窗口有限的问题，只把最相关的知识片段传进去，提升效率。 生成（Generation）：基于权威依据，生成可信答案 大模型结合用户的原始问题和检索到的权威知识，生成最终回复。关键是，它能自动关联知识来源（比如“根据2024Q1行业报告第3节内容”），不仅减少了“胡编乱造”的幻觉问题，还让答案可追溯、可验证，专业度和可信度直接拉满。 简单总结：RAG通过“主动检索找知识→动态增强补上下文→可信生成出答案”的闭环，把大模型从“封闭的知识容器”变成了“开放的知识处理器”，是平衡大模型实时性、准确性和成本的最优解。 二、拆解RAG七步工作流：从知识准备到智能生成的全流程 了解了核心概念，再来看RAG的具体工作流程。下面这张图完整展示了从“原始知识”到“最终答案”的七个关键步骤，每一步都环环相扣，缺一不可： 步骤1：知识分块（Chunking）——把海量知识拆成“可检索的小单元” 我们要用到的外部知识（比如PDF报告、Word文档、企业数据库里的内容），大多是大段的文本，直接处理会导致语义混乱、检索精准度低。所以第一步要做“知识分块”，把大文本切割成语义完整的小片段。 这里有个关键原则：既要保证每个片段能独立表达完整意思，又要适配后续嵌入模型的输入长度限制。比如表格要完整保留，不能切成两半；段落要按主题边界拆分，避免把“问题”和“解决方案”拆到不同片段里。只有分块合理，后续检索才能精准。 给新手补充：常见的分块策略有5种，不同场景适配不同策略，具体可以参考下面这张图： 步骤2：生成嵌入（Embedding）——把文字变成“机器能看懂的数字” 机器没法直接理解文字的语义，所以需要把分好的每个知识块，通过“预训练嵌入模型”（比如基于Transformer的双编码器）转化成高维向量（一串数字）。这个过程的核心是“捕捉语义特征”，比如让“抗过拟合技术”和“正则化方法”的向量非常接近，这样机器就能判断两者语义相关。 这里要注意：RAG用的是“上下文嵌入模型”，不是早期的单词嵌入模型（比如Word2Vec、Glove）。上下文嵌入的优势是“动态适配”——同一个词在不同语境下，会生成不同的向量。比如“苹果”，在“吃苹果”和“苹果手机”两个句子里，向量完全不同，能精准区分语义。 下面这张图清晰对比了“上下文嵌入”和“单词嵌入”的区别，新手可以直观理解： 步骤3：向量存储（Vector Storage）——搭建“知识记忆库” 生成的高维向量，会和原始知识块、元数据（比如文档来源、页码、创建时间）一起，存入“向量数据库”。向量数据库不只是个“存储器”，更关键的是它支持“近似最近邻索引”（比如HNSW索引），能实现毫秒级的相似性搜索——相当于给海量知识搭建了一个“快速检索的记忆库”。 这里给程序员提个小提示：向量数据库是RAG的核心组件，选择时要关注吞吐量、检索速度和兼容性（比如是否支持多模态向量）。常见的向量数据库有Pinecone、Milvus、Chroma等，新手可以从Chroma入手，轻量化易部署。 步骤4：用户查询嵌入（Query Embedding）——把“问题”变成“检索指令” 当用户提出问题（比如“RAGFlow怎么支持多模态内容？”）时，系统会用“和处理知识块完全相同的嵌入模型”，把问题也转化成高维向量——也就是“查询向量”。这样一来，问题和知识块就处于同一个“语义空间”，机器就能通过计算向量相似度，找到最相关的知识。 这里的核心逻辑是“统一语义标准”：如果知识块用A模型嵌入，查询用B模型嵌入，两者的向量就无法比对，检索就会失效。所以新手在搭建RAG时，一定要保证“知识嵌入”和“查询嵌入”用同一个模型。 步骤5：语义检索（Semantic Retrieval）——从记忆库中“精准找答案” 系统会用查询向量，在向量数据库中通过近似最近邻算法（ANN）快速扫描，召回Top-K个最相关的知识块（比如包含“RAGFlow OCR提取”“表格转Markdown”的片段）。为了提升精准度，实际应用中还会结合“关键词匹配”（比如BM25算法）——既保证能找到语义相关的内容，又不会漏掉包含精确术语的片段。 比如用户问“多模态支持”，如果知识块里有“OCR提取图片文字”“PDF表格识别”等内容，即使没直接用“多模态”这个词，语义检索也能精准定位到，这就是它比传统关键词搜索的优势。 步骤6：重排序（Reranking）——给检索结果“排个优先级” 初步检索到的Top-K个知识块，可能存在“语义相似但主题偏离”的问题。比如用户问“RAGFlow的多模态支持”，检索结果里可能混进了“其他工具的OCR功能”，这时候就需要“重排序”环节来校准。 重排序会用到“交叉编码器（Cross-Encoder）”，它会深度分析查询和每个知识块的交互关系，给每个片段打一个精准的相关性分数，然后把最契合的片段排在最前面。这一步能有效过滤噪声，让后续生成答案的依据更精准。 步骤7：增强生成（Augmented Generation）——融合知识，生成最终答案 最后一步，大模型会接收两个输入：用户的原始问题，以及重排序后的优质知识块。通过注意力机制，大模型会把两者的信息融合起来，生成连贯、结构化的回复。比如结合“OCR提取图像文本”“表格转Markdown”等知识，输出：“RAGFlow的多模态支持核心在于两点：一是通过OCR技术提取图片中的文字信息，二是将PDF/图片中的表格转为Markdown格式保留结构，最终实现文本、图像、表格等多模态内容的统一语义处理。” RAG的七步工作流，本质是构建了一条“知识固化→意图解析→动态增强→可控输出”的完整链条。它没有改变大模型的核心架构，却通过“外部检索+上下文增强”的巧妙设计，让大模型实现了“知识实时更新”“精准解答专业问题”“适配私有数据”的能力。 对于小白来说，理解RAG是入门大模型应用的关键；对于程序员来说，RAG是落地大模型项目的“性价比之王”——不用重训大模型，就能快速搭建出适配业务场景的智能问答、文档解析等应用。建议收藏本文，结合图中的流程反复梳理，后续上手实操会更轻松！ 由于新岗位的生产效率，要优于被取代岗位的生产效率，所以实际上整个社会的生产效率是提升的。 “最先掌握AI的人，将会比较晚掌握AI的人有竞争优势”。 这句话，放在计算机、互联网、移动互联网的开局时期，都是一样的道理。 我在一线互联网企业工作十余年里，指导过不少同行后辈。帮助很多人得到了学习和成长。 我意识到有很多经验和知识值得分享给大家，也可以通过我们的能力和经验解答大家在人工智能学习中的很多困惑，所以在工作繁忙的情况下还是坚持各种整理和分享。但苦于知识传播途径有限，很多互联网行业朋友无法获得正确的资料得到学习提升，故此将并将重要的AI大模型资料包括AI大模型入门学习思维导图、精品AI大模型学习书籍手册、视频教程、实战学习等录播视频免费分享出来。 这份完整版的大模型 AI 学习资料已经上传CSDN，朋友们如果需要可以微信扫描下方CSDN官方认证二维码免费领取【 保证100%免费 】 我国在A大模型领域面临人才短缺,数量与质量均落后于发达国家。2023年，人才缺口已超百万，凸显培养不足。随着AI技术飞速发展，预计到2025年,这一缺口将急剧扩大至400万,严重制约我国AI产业的创新步伐。…",
+    "content_hash": "a3c2ce580eb1fc773a6b8efb9db15f7c35dc3055f68986f72fd2f9850cdd2116",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:44:08.88414+08:00",
+    "created_at": "2026-11-04T01:43:20.187688+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "47008c44-3ee3-4ec8-8807-26119599bd68",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_3",
+    "url": "http://www.gsxt.gov.cn",
+    "normalized_url": "http://www.gsxt.gov.cn",
+    "title": "国家 企业 信用信息公示系统",
+    "site": "gsxt.gov.cn",
+    "provider": "bing",
+    "snippet": "信用修复 苹果APP 安卓APP 微信小程序 支付宝小程序 主办单位：国家市场监督管理总局 地址：北京市西城区三里河东路八号 邮政编 …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "fetch_failed",
+    "error": "HTTP 521",
+    "created_at": "2026-11-04T01:43:20.187766+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "9d92e936-b7c9-4dde-bc58-183a3fcf30d8",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_2",
+    "url": "https://aws.amazon.com/what-is/retrieval-augmented-generation",
+    "normalized_url": "https://aws.amazon.com/what-is/retrieval-augmented-generation",
+    "title": "What is RAG? - Retrieval-Augmented Generation AI Explained - AWS",
+    "site": "aws.amazon.com",
+    "provider": "bing",
+    "snippet": "2022年7月31日 · What is Retrieval-Augmented Generation (RAG), how and why businesses use RAG AI, and how to use RAG with …",
+    "excerpt": "What is RAG (Retrieval-Augmented Generation)? Create an AWS Account What is Retrieval-Augmented Generation? Why is Retrieval-Augmented Generation important? What are the benefits of Retrieval-Augmented Generation? How does Retrieval-Augmented Generation work? What is the difference between Retrieval-Augmented Generation and semantic search? How can AWS support your Retrieval-Augmented Generation requirements? What is Retrieval-Augmented Generation? Retrieval-Augmented Generation (RAG) is the process of optimizing the output of a large language model, so it references an authoritative knowledge base outside of its training data sources before generating a response. Large Language Models (LLMs) are trained on vast volumes of data and use billions of parameters to generate original output for tasks like answering questions, translating languages, and completing sentences. RAG extends the already powerful capabilities of LLMs to specific domains or an organization's internal knowledge base, all without the need to retrain the model. It is a cost-effective approach to improving LLM output so it remains relevant, accurate, and useful in various contexts. Why is Retrieval-Augmented Generation important? LLMs are a key artificial intelligence (AI) technology powering intelligent chatbots and other natural language processing (NLP) applications. The goal is to create bots that can answer user questions in various contexts by cross-referencing authoritative knowledge sources. Unfortunately, the nature of LLM technology introduces unpredictability in LLM responses. Additionally, LLM training data is static and introduces a cut-off date on the knowledge it has. Known challenges of LLMs include: Presenting false information when it does not have the answer. Presenting out-of-date or generic information when the user expects a specific, current response. Creating a response from non-authoritative sources. Creating inaccurate responses due to terminology confusion, wherein different training sources use the same terminology to talk about different things. RAG is one approach to solving some of these challenges. It redirects the LLM to retrieve relevant information from authoritative, pre-determined knowledge sources. Organizations have greater control over the generated text output, and users gain insights into how the LLM generates the response. What are the benefits of Retrieval-Augmented Generation? RAG technology brings several benefits to an organization's generative AI efforts. Cost-effective implementation Chatbot development typically begins using a foundation model . Foundation models (FMs) are API-accessible LLMs trained on a broad spectrum of generalized and unlabeled data. The computational and financial costs of retraining FMs for organization or domain-specific information are high. RAG is a more cost-effective approach to introducing new data to the LLM. It makes generative artificial intelligence (generative AI) technology more broadly accessible and usable. Even if the original training data sources for an LLM are suitable for your needs, it is challenging to maintain relevancy. RAG allows developers to provide the latest research, statistics, or news to the generative models. They can use RAG to connect the LLM directly to live social media feeds, news sites, or other frequently-updated information sources. The LLM can then provide the latest information to the users. RAG allows the LLM to present accurate information with source attribution. The output can include citations or references to sources. Users can also look up source documents themselves if they require further clarification or more detail. This can increase trust and confidence in your generative AI solution. More developer control With RAG, developers can test and improve their chat applications more efficiently. They can control and change the LLM's information sources to adapt to changing requirements or cross-functional usage.…",
+    "content_hash": "27a710711c194258dd1cec3f9161d739d9ae6a6748bfac7e5f8a3a918d66b13a",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:44:08.671446+08:00",
+    "created_at": "2026-11-04T01:43:20.188096+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "0c9baf61-ad49-4931-b0ce-440c75bf04cd",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_3",
+    "url": "https://aiqicha.baidu.com",
+    "normalized_url": "https://aiqicha.baidu.com",
+    "title": "爱企查-工商查询_专业企业信息查询平台_公司查询_老板查询_工商信息查询系统",
+    "site": "aiqicha.baidu.com",
+    "provider": "bing",
+    "snippet": "爱企查是百度推出的企业信用查询工具,提供一站式的企业信息查询服务,能够快速查询浏览工商信息、企业法人股东、主要成员、变更 …",
+    "excerpt": "爱企查-工商查询_专业企业信息查询平台_公司查询_老板查询_工商信息查询系统",
+    "content_hash": "a716cb000cf75bd08973999234948eac9c3591eff391dbd993f33d5a5b641ab8",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:43:20.826408+08:00",
+    "created_at": "2026-11-04T01:43:20.188238+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "cfbd16cd-424b-40fe-86cf-4e8760ac19f1",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_3",
+    "url": "https://baike.baidu.com/item/%E4%BC%81%E4%B8%9A/707680",
+    "normalized_url": "https://baike.baidu.com/item/%E4%BC%81%E4%B8%9A/707680",
+    "title": "企业 （从事经济活动并依法设立并具有法人资格的经济组织 ...",
+    "site": "baike.baidu.com",
+    "provider": "bing",
+    "snippet": "2022年6月6日 · 【汉译】企业商业单元：可以是一家公司或者商业店铺，常常指规模最小的商家。 在 中国 可以指个体经营户。",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "robots_blocked",
+    "error": "robots.txt 禁止抓取",
+    "created_at": "2026-11-04T01:43:20.188643+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "79611db2-f43c-4315-9ffa-b2688c9975a7",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_3",
+    "url": "https://www.gsxt.gov.cn/index",
+    "normalized_url": "https://www.gsxt.gov.cn/index",
+    "title": "国家 企业 信用信息公示系统",
+    "site": "gsxt.gov.cn",
+    "provider": "bing",
+    "snippet": "国家企业信用信息公示系统提供企业信用信息的查询、填报与公示服务。",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "fetch_failed",
+    "error": "HTTP 521",
+    "created_at": "2026-11-04T01:43:20.18907+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "d7437b12-b442-4ef4-962e-e868420c2f50",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_3",
+    "url": "https://m.qcc.com",
+    "normalized_url": "https://m.qcc.com",
+    "title": "企查查 - 查 企业 _查老板_查风险_ 企业 信息查询系统",
+    "site": "m.qcc.com",
+    "provider": "bing",
+    "snippet": "企查查是官方备案的企业征信机构，为您提供全国企业信息查询，包括企业工商信息查询，信用信息查询，经营状况查询等相关信息。 …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "fetch_failed",
+    "error": "HTTP 567",
+    "created_at": "2026-11-04T01:43:20.189477+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "1ec8aec4-0b8e-4ee6-999b-fb4403a0870b",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_3",
+    "url": "https://js.gsxt.gov.cn/index.html",
+    "normalized_url": "https://js.gsxt.gov.cn/index.html",
+    "title": "国家 企业 信用信息公示系统",
+    "site": "js.gsxt.gov.cn",
+    "provider": "bing",
+    "snippet": "国家企业信用信息公示系统 华北 | 东北 | 华东 | 华南 | 华中 | 西南 | 西北 | 地方频道 登录 注册 企业信用信息 经营异常名录 严重违法失 …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "fetch_failed",
+    "error": "HTTP 521",
+    "created_at": "2026-11-04T01:43:20.189842+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "0bf03b5e-1cd3-4399-a45c-7ebc9df5abcb",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "search_3",
+    "url": "https://www.aiqicha.com",
+    "normalized_url": "https://www.aiqicha.com",
+    "title": "爱企查-工商查询_专业企业信息查询平台_公司查询_老板查询_工商信息查询系统",
+    "site": "aiqicha.com",
+    "provider": "bing",
+    "snippet": "爱企查是百度推出的企业信用查询工具,提供一站式的企业信息查询服务,能够快速查询浏览工商信息、企业法人股东、主要成员、变更 …",
+    "excerpt": "爱企查-工商查询_专业企业信息查询平台_公司查询_老板查询_工商信息查询系统",
+    "content_hash": "a716cb000cf75bd08973999234948eac9c3591eff391dbd993f33d5a5b641ab8",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:43:20.563777+08:00",
+    "created_at": "2026-11-04T01:43:20.190146+08:00",
+    "evidence_count": 0
+   }
+  ],
+  "total": 16
+ },
+ "evidence": {
+  "items": [
+   {
+    "id": "dff4a149-ca47-406a-9f1a-171d2c987194",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "analyze_3",
+    "statement": "企业微信提供银行级加密以确保数据安全。",
+    "normalized_key": "analyze_3:39acfd9be6a0",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:44:07.23787+08:00",
+    "evidence": [
+     {
+      "id": "c49f17c3-710c-4705-8a26-a7f8fba6c445",
+      "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+      "claim_id": "dff4a149-ca47-406a-9f1a-171d2c987194",
+      "source_id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+      "node_id": "analyze_3",
+      "quote": "Internationally recognized and bank-level encryption that ensures data security",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:44:07.238274+08:00"
+     }
+    ]
+   },
+   {
+    "id": "ef8aaf0a-ab7f-4ef5-b8fa-7baf2c8d8d52",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "analyze_3",
+    "statement": "企业微信支持企业文件集中管理，并提供免费 100-GB 存储或付费扩展存储。",
+    "normalized_key": "analyze_3:02891a255479",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "numeric_value": 100,
+    "created_at": "2026-11-04T01:44:07.239577+08:00",
+    "evidence": [
+     {
+      "id": "dc95ffd5-3ee3-4775-8436-428358cb397f",
+      "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+      "claim_id": "ef8aaf0a-ab7f-4ef5-b8fa-7baf2c8d8d52",
+      "source_id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+      "node_id": "analyze_3",
+      "quote": "Manage company files in one place for easier access. Enjoy 100-GB storage for free or get expanded storage for a fee.",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:44:07.239893+08:00"
+     }
+    ]
+   },
+   {
+    "id": "15c308d3-c289-483f-9e84-31a7c15f7d51",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "analyze_3",
+    "statement": "企业微信允许配置企业目录访问权限，并可按需隐藏部门或成员。",
+    "normalized_key": "analyze_3:a2694161ade2",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:44:07.24126+08:00",
+    "evidence": [
+     {
+      "id": "58e73027-4a8e-4326-b4d7-2f8edb46f56d",
+      "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+      "claim_id": "15c308d3-c289-483f-9e84-31a7c15f7d51",
+      "source_id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+      "node_id": "analyze_3",
+      "quote": "Customize employee profiles, configure Corporate Directory access permissions, and hide departments/members as needed.",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:44:07.241708+08:00"
+     }
+    ]
+   },
+   {
+    "id": "0d7c8cfa-f92c-4869-9fad-ea16d00783c4",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "analyze_3",
+    "statement": "企业微信支持批量导入联系人并在一个目录中集中管理，以便便捷准确查找。",
+    "normalized_key": "analyze_3:686b887ea999",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:44:07.242923+08:00",
+    "evidence": [
+     {
+      "id": "455e271e-9928-4262-a65a-1866ba296ecd",
+      "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+      "claim_id": "0d7c8cfa-f92c-4869-9fad-ea16d00783c4",
+      "source_id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+      "node_id": "analyze_3",
+      "quote": "Batch import contacts into a directory where they are managed in one place for convenient and accurate lookup.",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:44:07.243368+08:00"
+     }
+    ]
+   },
+   {
+    "id": "32b15cd1-b170-4594-8ef3-d9509ef8cf71",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "analyze_3",
+    "statement": "企业微信支持创建最多 2000 成员的群聊，并配置群主专属管理员权限、成员静音和群公告。",
+    "normalized_key": "analyze_3:bb779f31dfb7",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "numeric_value": 2000,
+    "created_at": "2026-11-04T01:44:07.244354+08:00",
+    "evidence": [
+     {
+      "id": "a246f39b-2c8f-4b45-ba89-2a2214feb74e",
+      "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+      "claim_id": "32b15cd1-b170-4594-8ef3-d9509ef8cf71",
+      "source_id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+      "node_id": "analyze_3",
+      "quote": "Configure exclusive admin permission for group owners, mute members, post group notices and create group chats of up to 2000 members.",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:44:07.244679+08:00"
+     }
+    ]
+   },
+   {
+    "id": "124eaaf1-2e98-4c08-85e1-5441affa390e",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "node_id": "analyze_3",
+    "statement": "企业微信支持自定义审批模板、配置审批人和 CC 收件人，并查看申请记录。",
+    "normalized_key": "analyze_3:dbcfcee25d9a",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:44:07.247979+08:00",
+    "evidence": [
+     {
+      "id": "eebeb5b6-51be-4356-9123-b01e494a7146",
+      "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+      "claim_id": "124eaaf1-2e98-4c08-85e1-5441affa390e",
+      "source_id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+      "node_id": "analyze_3",
+      "quote": "Customize approval templates, configure approvers and CC recipients, and check application records.",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:44:07.248334+08:00"
+     }
+    ]
+   }
+  ],
+  "total": 6
+ },
+ "report": {
+  "report": {
+   "id": "3087c922-1bca-42df-81e1-38acd65d2b4a",
+   "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+   "version": 1,
+   "title": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+   "summary": "本次研究围绕「检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践」执行，共采集资料 1 条，产出结论 6 条（已验证 0 条、部分支持 6 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 6 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。",
+   "markdown": "# 检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践\n\n## 摘要\n\n本次研究围绕「检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践」执行，共采集资料 1 条，产出结论 6 条（已验证 0 条、部分支持 6 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 6 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。\n\n## 目标与范围\n\n**研究目标**：检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践\n\n**研究深度**：deep　**最大并发 Agent**：4　**交叉验证**：true\n\n## 核心发现\n\n1. 企业微信提供银行级加密以确保数据安全。（单一来源，置信度 0.50）[1]\n2. 企业微信支持企业文件集中管理，并提供免费 100-GB 存储或付费扩展存储。（单一来源，置信度 0.50）[2]\n3. 企业微信允许配置企业目录访问权限，并可按需隐藏部门或成员。（单一来源，置信度 0.50）[3]\n4. 企业微信支持批量导入联系人并在一个目录中集中管理，以便便捷准确查找。（单一来源，置信度 0.50）[4]\n5. 企业微信支持创建最多 2000 成员的群聊，并配置群主专属管理员权限、成员静音和群公告。（单一来源，置信度 0.50）[5]\n6. 企业微信支持自定义审批模板、配置审批人和 CC 收件人，并查看申请记录。（单一来源，置信度 0.50）[6]\n\n\n## 分主题分析\n\n### 主题 analyze_3\n\n- 企业微信提供银行级加密以确保数据安全。[1]\n- 企业微信支持企业文件集中管理，并提供免费 100-GB 存储或付费扩展存储。[2]\n- 企业微信允许配置企业目录访问权限，并可按需隐藏部门或成员。[3]\n- 企业微信支持批量导入联系人并在一个目录中集中管理，以便便捷准确查找。[4]\n- 企业微信支持创建最多 2000 成员的群聊，并配置群主专属管理员权限、成员静音和群公告。[5]\n- 企业微信支持自定义审批模板、配置审批人和 CC 收件人，并查看申请记录。[6]\n\n## 关键数据对比\n\n| 结论 | 数值 | 状态 |\n|---|---:|---|\n| 企业微信支持创建最多 2000 成员的群聊，并配置群主专属管理员权限、成员静音和群公告。 | 2000 | 见来源 f9b62491-e085-40ee-b3a7-28203135fbae |\n| 企业微信支持企业文件集中管理，并提供免费 100-GB 存储或付费扩展存储。 | 100 | 见来源 f9b62491-e085-40ee-b3a7-28203135fbae |\n\n\n## 争议与不确定性\n\n本次执行未检测到同一指标上的来源冲突。\n\n\n\n## 信息来源\n\n1. [企业微信](https://work.weixin.qq.com) — work.weixin.qq.com\n2. [企业微信](https://work.weixin.qq.com) — work.weixin.qq.com\n3. [企业微信](https://work.weixin.qq.com) — work.weixin.qq.com\n4. [企业微信](https://work.weixin.qq.com) — work.weixin.qq.com\n5. [企业微信](https://work.weixin.qq.com) — work.weixin.qq.com\n6. [企业微信](https://work.weixin.qq.com) — work.weixin.qq.com\n\n\n## 方法与局限性\n\n- 规划模式：llm；执行模型：LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）。\n- 检索与抓取均走真实外部服务；抓取遵守 robots.txt，正文经过去标签与指纹去重。\n- 结论由来源正文片段抽取，交叉验证按「独立站点数 + 数值一致性」判定，未使用模型主观判断替换证据。\n- 本次统计：资料 1 条、结论 6 条、引用 6 条。\n- 局限：检索覆盖受 Provider 配额与反爬限制；未做全文语义相似度聚类，冲突检测聚焦显式数值指标。\n\n",
+   "sections": [
+    {
+     "heading": "摘要",
+     "body": "本次研究围绕「检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践」执行，共采集资料 1 条，产出结论 6 条（已验证 0 条、部分支持 6 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 6 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。"
+    },
+    {
+     "heading": "目标与范围",
+     "body": "**研究目标**：检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践\n\n**研究深度**：deep　**最大并发 Agent**：4　**交叉验证**：true\n"
+    },
+    {
+     "heading": "核心发现",
+     "body": "1. 企业微信提供银行级加密以确保数据安全。（单一来源，置信度 0.50）[1]\n2. 企业微信支持企业文件集中管理，并提供免费 100-GB 存储或付费扩展存储。（单一来源，置信度 0.50）[2]\n3. 企业微信允许配置企业目录访问权限，并可按需隐藏部门或成员。（单一来源，置信度 0.50）[3]\n4. 企业微信支持批量导入联系人并在一个目录中集中管理，以便便捷准确查找。（单一来源，置信度 0.50）[4]\n5. 企业微信支持创建最多 2000 成员的群聊，并配置群主专属管理员权限、成员静音和群公告。（单一来源，置信度 0.50）[5]\n6. 企业微信支持自定义审批模板、配置审批人和 CC 收件人，并查看申请记录。（单一来源，置信度 0.50）[6]\n"
+    },
+    {
+     "heading": "分主题分析",
+     "body": "### 主题 analyze_3\n\n- 企业微信提供银行级加密以确保数据安全。[1]\n- 企业微信支持企业文件集中管理，并提供免费 100-GB 存储或付费扩展存储。[2]\n- 企业微信允许配置企业目录访问权限，并可按需隐藏部门或成员。[3]\n- 企业微信支持批量导入联系人并在一个目录中集中管理，以便便捷准确查找。[4]\n- 企业微信支持创建最多 2000 成员的群聊，并配置群主专属管理员权限、成员静音和群公告。[5]\n- 企业微信支持自定义审批模板、配置审批人和 CC 收件人，并查看申请记录。[6]"
+    },
+    {
+     "heading": "关键数据对比",
+     "body": "| 结论 | 数值 | 状态 |\n|---|---:|---|\n| 企业微信支持创建最多 2000 成员的群聊，并配置群主专属管理员权限、成员静音和群公告。 | 2000 | 见来源 f9b62491-e085-40ee-b3a7-28203135fbae |\n| 企业微信支持企业文件集中管理，并提供免费 100-GB 存储或付费扩展存储。 | 100 | 见来源 f9b62491-e085-40ee-b3a7-28203135fbae |\n"
+    },
+    {
+     "heading": "争议与不确定性",
+     "body": "本次执行未检测到同一指标上的来源冲突。\n\n"
+    },
+    {
+     "heading": "信息来源",
+     "body": "1. [企业微信](https://work.weixin.qq.com) — work.weixin.qq.com\n2. [企业微信](https://work.weixin.qq.com) — work.weixin.qq.com\n3. [企业微信](https://work.weixin.qq.com) — work.weixin.qq.com\n4. [企业微信](https://work.weixin.qq.com) — work.weixin.qq.com\n5. [企业微信](https://work.weixin.qq.com) — work.weixin.qq.com\n6. [企业微信](https://work.weixin.qq.com) — work.weixin.qq.com\n"
+    },
+    {
+     "heading": "方法与局限性",
+     "body": "- 规划模式：llm；执行模型：LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）。\n- 检索与抓取均走真实外部服务；抓取遵守 robots.txt，正文经过去标签与指纹去重。\n- 结论由来源正文片段抽取，交叉验证按「独立站点数 + 数值一致性」判定，未使用模型主观判断替换证据。\n- 本次统计：资料 1 条、结论 6 条、引用 6 条。\n- 局限：检索覆盖受 Provider 配额与反爬限制；未做全文语义相似度聚类，冲突检测聚焦显式数值指标。\n"
+    }
+   ],
+   "citations": [
+    {
+     "index": 1,
+     "claim_id": "dff4a149-ca47-406a-9f1a-171d2c987194",
+     "source_id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+     "title": "企业微信",
+     "url": "https://work.weixin.qq.com",
+     "site": "work.weixin.qq.com",
+     "quote": "Internationally recognized and bank-level encryption that ensures data security"
+    },
+    {
+     "index": 2,
+     "claim_id": "ef8aaf0a-ab7f-4ef5-b8fa-7baf2c8d8d52",
+     "source_id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+     "title": "企业微信",
+     "url": "https://work.weixin.qq.com",
+     "site": "work.weixin.qq.com",
+     "quote": "Manage company files in one place for easier access. Enjoy 100-GB storage for free or get expanded storage for a fee."
+    },
+    {
+     "index": 3,
+     "claim_id": "15c308d3-c289-483f-9e84-31a7c15f7d51",
+     "source_id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+     "title": "企业微信",
+     "url": "https://work.weixin.qq.com",
+     "site": "work.weixin.qq.com",
+     "quote": "Customize employee profiles, configure Corporate Directory access permissions, and hide departments/members as needed."
+    },
+    {
+     "index": 4,
+     "claim_id": "0d7c8cfa-f92c-4869-9fad-ea16d00783c4",
+     "source_id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+     "title": "企业微信",
+     "url": "https://work.weixin.qq.com",
+     "site": "work.weixin.qq.com",
+     "quote": "Batch import contacts into a directory where they are managed in one place for convenient and accurate lookup."
+    },
+    {
+     "index": 5,
+     "claim_id": "32b15cd1-b170-4594-8ef3-d9509ef8cf71",
+     "source_id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+     "title": "企业微信",
+     "url": "https://work.weixin.qq.com",
+     "site": "work.weixin.qq.com",
+     "quote": "Configure exclusive admin permission for group owners, mute members, post group notices and create group chats of up to 2000 members."
+    },
+    {
+     "index": 6,
+     "claim_id": "124eaaf1-2e98-4c08-85e1-5441affa390e",
+     "source_id": "f9b62491-e085-40ee-b3a7-28203135fbae",
+     "title": "企业微信",
+     "url": "https://work.weixin.qq.com",
+     "site": "work.weixin.qq.com",
+     "quote": "Customize approval templates, configure approvers and CC recipients, and check application records."
+    }
+   ],
+   "citation_count": 6,
+   "word_count": 1007,
+   "model": "LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）",
+   "created_at": "2026-11-04T01:45:39.931896+08:00"
+  },
+  "versions": [
+   {
+    "id": "3087c922-1bca-42df-81e1-38acd65d2b4a",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "version": 1,
+    "title": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+    "summary": "本次研究围绕「检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践」执行，共采集资料 1 条，产出结论 6 条（已验证 0 条、部分支持 6 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 6 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。",
+    "citation_count": 6,
+    "word_count": 1007,
+    "model": "LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）",
+    "created_at": "2026-11-04T01:45:39.931896+08:00"
+   }
+  ]
+ },
+ "summary": {
+  "agents": 12,
+  "sources": 16,
+  "evidence_items": 6,
+  "dag_nodes": 12,
+  "research_questions": 5,
+  "subtasks": 12,
+  "agent_models": [
+   "cline/cline-free/solar-mini4"
+  ],
+  "agent_token_usage_total": 6080,
+  "report_md_chars": 0,
+  "report_versions": [
+   {
+    "id": "3087c922-1bca-42df-81e1-38acd65d2b4a",
+    "task_id": "70575e4d-7125-40b4-87c1-0b9a1b2081dd",
+    "version": 1,
+    "title": "检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践",
+    "summary": "本次研究围绕「检索增强生成（RAG）技术在企业知识库场景的落地路径、主要技术挑战与工程最佳实践」执行，共采集资料 1 条，产出结论 6 条（已验证 0 条、部分支持 6 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 6 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。",
+    "citation_count": 6,
+    "word_count": 1007,
+    "model": "LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）",
+    "created_at": "2026-11-04T01:45:39.931896+08:00"
+   }
+  ]
+ }
+}
