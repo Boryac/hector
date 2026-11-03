@@ -13,6 +13,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -245,11 +246,19 @@ func bearerToken(r *http.Request) string {
 	return ""
 }
 
+// withCORS 仅对「同源请求」回显 CORS 头。
+//
+// RC1 安全复查（2026-11-04）发现旧实现把任意 Origin 原样反射进
+// Access-Control-Allow-Origin，等于对全互联网开放跨域读取。
+// 实际可利用性低（鉴权走 Authorization 头且未开启 Allow-Credentials，
+// 攻击者页面拿不到 Token），但 V1 本地单用户工具的合法用法只有
+// 「前端与 API 同源部署」一种，直接把放行条件收紧为 Origin 的 host
+// 与请求 Host 一致；其余 Origin 不回显，浏览器会自行拦截跨域读取。
 func withCORS(addr string, next http.Handler) http.Handler {
 	_ = addr
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
-		if origin != "" {
+		if origin != "" && sameHost(origin, r.Host) {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Vary", "Origin")
 			w.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type,X-API-Token,Last-Event-ID")
@@ -262,6 +271,16 @@ func withCORS(addr string, next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+// sameHost 判断 Origin 头的 host:port 是否与请求自身的 Host 一致。
+// 解析失败一律视为不同源（宁可错杀，不做宽松回退）。
+func sameHost(origin, host string) bool {
+	u, err := url.Parse(origin)
+	if err != nil || u.Host == "" {
+		return false
+	}
+	return strings.EqualFold(u.Host, host)
 }
 
 func withRecover(next http.Handler) http.Handler {

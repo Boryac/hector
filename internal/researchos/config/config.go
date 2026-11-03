@@ -110,7 +110,7 @@ func Load() (*Config, error) {
 		FetchTimeout:    envDuration("RESEARCHOS_FETCH_TIMEOUT", 25*time.Second),
 		FetchMaxBytes:   int64(envInt("RESEARCHOS_FETCH_MAX_BYTES", 3_000_000)),
 		RespectRobots:   envBool("RESEARCHOS_RESPECT_ROBOTS", true),
-		UserAgent:       env("RESEARCHOS_USER_AGENT", "HectorResearchOS/1.0 (+local research agent)"),
+		UserAgent:       env("RESEARCHOS_USER_AGENT", defaultSearchUA),
 		DefaultDepth:    env("RESEARCHOS_DEFAULT_DEPTH", "standard"),
 		RequireApproval: envBool("RESEARCHOS_REQUIRE_APPROVAL", true),
 		Workers:         envInt("RESEARCHOS_WORKERS", 4),
@@ -155,6 +155,14 @@ func Load() (*Config, error) {
 func (c Config) LLMEnabled() bool {
 	return c.LLMProvider != "" && c.LLMProvider != LLMNone && c.LLMAPIKey != ""
 }
+
+// defaultSearchUA 是检索与抓取的默认 User-Agent。
+//
+// RC1 实测（2026-11-04）：自标识 UA（HectorResearchOS/1.0）会被 Bing 反爬降级，
+// 对任意检索式返回与查询无关的随机结果页（实测 Go 检索式召回到酒店广告），
+// 这是检索质量问题的主要来源。改用真实浏览器 UA 后同一检索式首条即官方站点。
+// robots.txt 合规行为不受影响：仍解析并以「*」组规则判定是否允许抓取。
+const defaultSearchUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"
 
 // PlannerMode 返回规划器工作模式的机器可读标识，用于在报告与 UI 中如实标注。
 func (c Config) PlannerMode() string {

@@ -66,7 +66,7 @@ func New(opt Options) *Fetcher {
 		opt.MaxBytes = 3 << 20
 	}
 	if opt.UserAgent == "" {
-		opt.UserAgent = "HectorResearchOS/1.0 (+local research agent)"
+		opt.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"
 	}
 	if opt.Client == nil {
 		opt.Client = &http.Client{Timeout: opt.Timeout, Transport: guardTransport()}
