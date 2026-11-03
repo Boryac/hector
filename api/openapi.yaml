@@ -1,79 +1,804 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Hector ResearchOS API
   version: 1.0.0
-  description: REST + SSE contract for Hector ResearchOS V1.0. See API_CONTRACT.md and EVENT_PROTOCOL.md.
+  description: |
+    自主研究 Agent 平台的 REST + SSE 契约。
+
+    ## 身份与鉴权
+    - 所有 `/api/` 路径（`/api/v1/health` 除外）必须携带 `Authorization: Bearer <RESEARCHOS_API_TOKEN>`。
+    - 身份完全由服务端决定（`RESEARCHOS_LOCAL_USER`）。请求体、查询串、请求头里的任何
+      `user_id` / `X-User-Id` **一律被忽略**，不参与鉴权与归属判断。
+    - SSE 端点额外接受 `?token=`（EventSource 无法自定义请求头），该通道仅对
+      `GET /research/{id}/events` 开放。
+    - 静态前端资源（非 `/api/` 前缀）免鉴权，且不含任何任务数据。
+
+    ## 状态机
+    任务状态跃迁受白名单约束，非法跃迁返回 `409 invalid_transition`，
+    并写入 `research.transition_rejected` 审计事件（不改状态）。
+    白名单见 `docs/DATA_MODEL.md` 第 3 节。
+
+    ## 错误格式
+    ```json
+    { "error": { "code": "invalid_transition", "message": "任务 t1 不允许从 \"completed\" 跃迁到 \"running\"" } }
+    ```
+
 servers:
-  - url: http://localhost:8080/api/v1
+  - url: http://127.0.0.1:8080
+    description: 本地单用户部署
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: health
+  - name: research
+  - name: events
+  - name: evidence
+  - name: report
+  - name: tools
+  - name: settings
+
 paths:
-  /health:
+  /api/v1/health:
     get:
-      summary: Health check
+      tags: [health]
+      summary: 健康检查（免鉴权）
+      security: []
       responses:
         '200':
-          description: OK with component status
+          description: 服务可用
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+        '503':
+          description: 数据库不可用
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+
+  /api/v1/research:
+    post:
+      tags: [research]
+      summary: 创建研究任务
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateResearchRequest' }
+      responses:
+        '201':
+          description: 已创建（规划异步进行）
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [task]
+                properties:
+                  task: { $ref: '#/components/schemas/Task' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+    get:
+      tags: [research]
+      summary: 任务列表
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [created, planning, awaiting_approval, running, paused, synthesizing, completed, failed, cancelled] } }
+        - { name: limit, in: query, schema: { type: integer, default: 20, maximum: 100 } }
+        - { name: offset, in: query, schema: { type: integer, default: 0 } }
+      responses:
+        '200':
+          description: 列表
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  status: {type: string}
-                  database: {type: string}
-                  worker: {type: string}
-  /research:
+                  items: { type: array, items: { $ref: '#/components/schemas/Task' } }
+                  total: { type: integer }
+                  limit: { type: integer }
+                  offset: { type: integer }
+
+  /api/v1/research/{id}:
+    get:
+      tags: [research]
+      summary: 任务详情（含节点与工作流快照）
+      parameters: [ { $ref: '#/components/parameters/TaskID' } ]
+      responses:
+        '200':
+          description: 详情
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task: { $ref: '#/components/schemas/Task' }
+                  nodes: { type: array, items: { $ref: '#/components/schemas/Node' } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [research]
+      summary: 删除任务及其派生数据
+      parameters: [ { $ref: '#/components/parameters/TaskID' } ]
+      responses:
+        '200':
+          description: 已删除
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted: { type: string }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/research/{id}/plan:
     post:
-      summary: Create research task
+      tags: [research]
+      summary: 重新规划（运行中任务被拒绝）
+      parameters: [ { $ref: '#/components/parameters/TaskID' } ]
+      responses:
+        '202':
+          description: 已提交异步规划
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, const: planning }
+                  task_id: { type: string }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/v1/research/{id}/approve:
+    post:
+      tags: [research]
+      summary: 批准执行（awaiting_approval / paused → running）
+      parameters: [ { $ref: '#/components/parameters/TaskID' } ]
+      responses:
+        '200':
+          description: 已批准
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task: { $ref: '#/components/schemas/Task' }
+                  already_running: { type: boolean }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/v1/research/{id}/pause:
+    post:
+      tags: [research]
+      summary: 暂停（running / synthesizing → paused）
+      parameters: [ { $ref: '#/components/parameters/TaskID' } ]
+      responses:
+        '200':
+          description: 已暂停
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusOnly' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/v1/research/{id}/resume:
+    post:
+      tags: [research]
+      summary: 恢复（paused → running）
+      parameters: [ { $ref: '#/components/parameters/TaskID' } ]
+      responses:
+        '200':
+          description: 已恢复
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusOnly' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/v1/research/{id}/cancel:
+    post:
+      tags: [research]
+      summary: 取消（终态任务被拒绝）
+      parameters: [ { $ref: '#/components/parameters/TaskID' } ]
+      responses:
+        '200':
+          description: 已取消
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, const: cancelled }
+                  cancelled_nodes: { type: integer }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/v1/research/{id}/nodes/{node_id}/retry:
+    post:
+      tags: [research]
+      summary: 重试失败节点（已完成任务被拒绝）
+      parameters:
+        - { $ref: '#/components/parameters/TaskID' }
+        - { name: node_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '202':
+          description: 已重置为待执行
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  node_id: { type: string }
+                  status: { type: string, const: pending }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/v1/research/{id}/events:
+    get:
+      tags: [events]
+      summary: 事件流（SSE，支持断线续接）
+      description: |
+        `Content-Type: text/event-stream`。每条事件带 `event_id`（幂等键）与任务内
+        单调递增的 `sequence`。续接两种方式：
+        - 标准：`Last-Event-ID: <event_id>`
+        - 显式：`?after_sequence=<n>`
+
+        `?format=json` 时改为一次性返回 JSON 数组（便于脚本与测试）。
+      parameters:
+        - { $ref: '#/components/parameters/TaskID' }
+        - { name: after_sequence, in: query, schema: { type: integer, default: 0 } }
+        - { name: format, in: query, schema: { type: string, enum: [sse, json], default: sse } }
+        - { name: token, in: query, description: 仅 SSE 通道可用, schema: { type: string } }
+      responses:
+        '200':
+          description: 事件流或事件数组
+          content:
+            text/event-stream:
+              schema: { type: string }
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: '#/components/schemas/Event' } }
+                  last_sequence: { type: integer }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/research/{id}/sources:
+    get:
+      tags: [evidence]
+      summary: 资料列表
+      parameters:
+        - { $ref: '#/components/parameters/TaskID' }
+        - { name: host, in: query, schema: { type: string } }
+        - { name: credibility, in: query, schema: { type: string, enum: [high, medium, low, downgraded] } }
+        - { name: status, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, default: 100 } }
+      responses:
+        '200':
+          description: 资料列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: '#/components/schemas/Source' } }
+                  total: { type: integer }
+
+  /api/v1/research/{id}/sources/{source_id}:
+    get:
+      tags: [evidence]
+      summary: 资料详情（含正文摘录与证据数）
+      parameters:
+        - { $ref: '#/components/parameters/TaskID' }
+        - { name: source_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: 资料详情
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Source' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/research/{id}/evidence:
+    get:
+      tags: [evidence]
+      summary: 结论与证据列表
+      parameters:
+        - { $ref: '#/components/parameters/TaskID' }
+        - { name: status, in: query, schema: { type: string, enum: [unverified, supported, partially_supported, conflicting, refuted] } }
+      responses:
+        '200':
+          description: 结论列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: '#/components/schemas/Claim' } }
+                  total: { type: integer }
+
+  /api/v1/research/{id}/evidence/{claim_id}:
+    get:
+      tags: [evidence]
+      summary: 单条结论及其证据边
+      parameters:
+        - { $ref: '#/components/parameters/TaskID' }
+        - { name: claim_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: 结论详情
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Claim' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/research/{id}/report:
+    get:
+      tags: [report]
+      summary: 最新报告（含历史版本号）
+      parameters: [ { $ref: '#/components/parameters/TaskID' } ]
+      responses:
+        '200':
+          description: 报告
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  report: { $ref: '#/components/schemas/Report' }
+                  versions: { type: array, items: { type: integer } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/research/{id}/report.md:
+    get:
+      tags: [report]
+      summary: 导出 Markdown
+      parameters: [ { $ref: '#/components/parameters/TaskID' } ]
+      responses:
+        '200':
+          description: Markdown 文本
+          content:
+            text/markdown:
+              schema: { type: string }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/research/{id}/report.html:
+    get:
+      tags: [report]
+      summary: 导出 HTML（转义 + 仅 http(s) 链接）
+      parameters: [ { $ref: '#/components/parameters/TaskID' } ]
+      responses:
+        '200':
+          description: HTML 文档
+          content:
+            text/html:
+              schema: { type: string }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/research/{id}/agents:
+    get:
+      tags: [research]
+      summary: Agent 执行记录
+      parameters: [ { $ref: '#/components/parameters/TaskID' } ]
+      responses:
+        '200':
+          description: 记录列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: '#/components/schemas/AgentExecution' } }
+                  total: { type: integer }
+
+  /api/v1/research/{id}/agents/{agent_id}:
+    get:
+      tags: [research]
+      summary: 单个 Agent 执行详情
+      parameters:
+        - { $ref: '#/components/parameters/TaskID' }
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: 执行详情
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AgentExecution' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/tools:
+    get:
+      tags: [tools]
+      summary: 已注册工具与 MCP Server
+      responses:
+        '200':
+          description: 工具清单
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tools: { type: array, items: { type: object } }
+                  servers: { type: array, items: { $ref: '#/components/schemas/MCPServer' } }
+
+  /api/v1/tools/calls:
+    get:
+      tags: [tools]
+      summary: 工具调用日志
+      parameters:
+        - { name: task_id, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, default: 100 } }
+      responses:
+        '200':
+          description: 调用记录
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: '#/components/schemas/ToolInvocation' } }
+                  total: { type: integer }
+
+  /api/v1/tools/servers:
+    post:
+      tags: [tools]
+      summary: 注册 MCP Server（高风险工具默认需审批）
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [goal]
+              required: [name, command]
               properties:
-                goal: {type: string}
-                depth: {type: string, enum: [quick, standard, deep], default: standard}
-                scope: {type: object}
-                max_agents: {type: integer, default: 4}
-                max_duration: {type: string}
-                enable_verification: {type: boolean, default: true}
+                name: { type: string }
+                command: { type: string }
+                args: { type: array, items: { type: string } }
+                require_approval: { type: boolean, default: true }
       responses:
-        '201': {description: Created}
-        '422': {description: Validation failed}
-    get:
-      summary: List research tasks
+        '201':
+          description: 已注册
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  status: { type: string }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+
+  /api/v1/tools/servers/{id}/{action}:
+    post:
+      tags: [tools]
+      summary: MCP Server 启停与健康检查
       parameters:
-        - {name: status, in: query, schema: {type: string}}
-        - {name: page, in: query, schema: {type: integer, default: 1}}
-        - {name: page_size, in: query, schema: {type: integer, default: 20}}
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: action, in: path, required: true, schema: { type: string, enum: [enable, disable, health, restart] } }
       responses:
-        '200': {description: List}
-  /research/{id}:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  status: { type: string }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/settings:
     get:
-      summary: Get research task detail with workflow snapshot
-      parameters:
-        - {name: id, in: path, required: true, schema: {type: string}}
+      tags: [settings]
+      summary: 运行配置（密钥一律掩码）
       responses:
-        '200': {description: Detail}
-        '404': {description: Not found}
-  /research/{id}/pause:
-    post: {summary: Pause task, responses: {'200': {description: Paused}}}
-  /research/{id}/resume:
-    post: {summary: Resume task, responses: {'200': {description: Resumed}}}
-  /research/{id}/cancel:
-    post: {summary: Cancel task, responses: {'200': {description: Cancelled}}}
-  /research/{id}/approve:
-    post: {summary: Approve plan, responses: {'200': {description: Approved}}}
-  /research/{id}/events:
-    get:
-      summary: SSE event stream, supports Last-Event-ID and after_sequence
+        '200':
+          description: 配置
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Settings' }
+    put:
+      tags: [settings]
+      summary: 更新运行配置
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Settings' }
       responses:
-        '200': {description: text/event-stream}
-  /research/{id}/sources:
-    get: {summary: List sources, responses: {'200': {description: Sources}}}
-  /research/{id}/evidence:
-    get: {summary: List evidence claims, responses: {'200': {description: Evidence}}}
-  /research/{id}/report:
-    get: {summary: Latest report, responses: {'200': {description: Report}}}
-  /tools:
-    get: {summary: List MCP tools, responses: {'200': {description: Tools}}}
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Settings' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: RESEARCHOS_API_TOKEN
+
+  parameters:
+    TaskID:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+
+  responses:
+    BadRequest:
+      description: 请求体不合法
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unprocessable:
+      description: 参数校验失败
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: 资源不存在（或不属于当前身份）
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: 状态机拒绝或并发冲突
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string, examples: [invalid_transition] }
+            message: { type: string }
+
+    StatusOnly:
+      type: object
+      properties:
+        status: { type: string }
+
+    Health:
+      type: object
+      properties:
+        status: { type: string, enum: [ok, degraded] }
+        version: { type: string }
+        uptime_s: { type: integer }
+        time: { type: string, format: date-time }
+        checks:
+          type: object
+          properties:
+            database:
+              type: object
+              properties:
+                ok: { type: boolean }
+                latency_ms: { type: integer }
+                migrations: { type: array, items: { type: string } }
+            llm:
+              type: object
+              properties:
+                enabled: { type: boolean }
+                provider: { type: string }
+                model: { type: string }
+                note: { type: string }
+            search:
+              type: object
+              properties:
+                providers: { type: array, items: { type: string } }
+            auth:
+              type: object
+              properties:
+                mode: { type: string, const: single-user-local }
+
+    CreateResearchRequest:
+      type: object
+      required: [goal]
+      properties:
+        goal: { type: string, minLength: 4, description: 研究目标，越具体越好 }
+        title: { type: string }
+        depth: { type: string, enum: [quick, standard, deep], default: standard }
+        scope: { type: object, additionalProperties: true }
+        max_agents: { type: integer, minimum: 1, maximum: 16 }
+        max_duration_seconds: { type: integer, minimum: 60 }
+        enable_verification: { type: boolean, default: true }
+        plan_now: { type: boolean, default: true }
+
+    Task:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        goal: { type: string }
+        depth: { type: string }
+        scope: { type: object, additionalProperties: true }
+        max_agents: { type: integer }
+        max_duration_seconds: { type: integer }
+        enable_verification: { type: boolean }
+        status:
+          type: string
+          enum: [created, planning, awaiting_approval, running, paused, synthesizing, completed, failed, cancelled]
+        planner_mode: { type: string, enum: [llm, heuristic], description: 如实标注是否使用大模型 }
+        plan_error: { type: string }
+        error: { type: string }
+        created_by: { type: string, description: 服务端身份，不接受客户端传入 }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        started_at: { type: string, format: date-time, nullable: true }
+        finished_at: { type: string, format: date-time, nullable: true }
+        stats: { type: object, additionalProperties: true }
+        nodes: { type: array, items: { $ref: '#/components/schemas/Node' } }
+
+    Node:
+      type: object
+      properties:
+        id: { type: string }
+        task_id: { type: string }
+        title: { type: string }
+        type: { type: string, enum: [search, fetch, analyze, verify, synthesize] }
+        agent_role: { type: string, enum: [planner, researcher, analyst, verifier, synthesizer, reporter] }
+        depends_on: { type: array, items: { type: string } }
+        position: { type: integer }
+        status: { type: string, enum: [pending, queued, running, completed, failed, skipped, cancelled] }
+        attempts: { type: integer }
+        max_attempts: { type: integer }
+        progress: { type: integer, minimum: 0, maximum: 100 }
+        progress_text: { type: string }
+        error: { type: string }
+        tokens_total: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    Event:
+      type: object
+      properties:
+        event_id: { type: string, description: 幂等键（重复投递不重复入库） }
+        task_id: { type: string }
+        run_id: { type: string }
+        node_id: { type: string }
+        event_type:
+          type: string
+          examples: [research.created, node.started, node.completed, report.completed]
+        sequence: { type: integer, description: 任务内单调递增，用于断线续接 }
+        timestamp: { type: string, format: date-time }
+        payload: { type: object, additionalProperties: true }
+
+    Source:
+      type: object
+      properties:
+        id: { type: string }
+        task_id: { type: string }
+        node_id: { type: string }
+        url: { type: string }
+        normalized_url: { type: string }
+        title: { type: string }
+        site: { type: string }
+        provider: { type: string }
+        snippet: { type: string }
+        excerpt: { type: string }
+        content_hash: { type: string, description: SHA256 内容指纹 }
+        http_status: { type: integer }
+        credibility: { type: string, enum: [high, medium, low, downgraded] }
+        status: { type: string, enum: [discovered, fetched, fetch_failed, robots_blocked] }
+        error: { type: string }
+        evidence_count: { type: integer }
+        created_at: { type: string, format: date-time }
+
+    Claim:
+      type: object
+      properties:
+        id: { type: string }
+        task_id: { type: string }
+        node_id: { type: string }
+        statement: { type: string }
+        status: { type: string, enum: [unverified, supported, partially_supported, conflicting, refuted] }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        conflict_group: { type: string }
+        verifier_notes: { type: string }
+        source_count: { type: integer }
+        numeric_value: { type: number, nullable: true }
+        evidence:
+          type: array
+          items: { $ref: '#/components/schemas/Evidence' }
+
+    Evidence:
+      type: object
+      properties:
+        id: { type: string }
+        claim_id: { type: string }
+        source_id: { type: string }
+        quote: { type: string, description: 原文逐字引文（抽取时已校验可回溯） }
+        stance: { type: string, enum: [support, refute, unknown] }
+        confidence: { type: number }
+        source: { $ref: '#/components/schemas/Source' }
+
+    Report:
+      type: object
+      properties:
+        id: { type: string }
+        task_id: { type: string }
+        version: { type: integer }
+        title: { type: string }
+        summary: { type: string }
+        markdown: { type: string }
+        sections:
+          type: array
+          items:
+            type: object
+            properties:
+              heading: { type: string }
+              body: { type: string }
+              citation_ids: { type: array, items: { type: string } }
+        citations:
+          type: array
+          items:
+            type: object
+            properties:
+              index: { type: integer, description: "报告中的 [n] 编号" }
+              claim_id: { type: string }
+              source_id: { type: string }
+              title: { type: string }
+              url: { type: string }
+              site: { type: string }
+              quote: { type: string }
+        citation_count: { type: integer }
+        word_count: { type: integer }
+        model: { type: string }
+        created_at: { type: string, format: date-time }
+
+    AgentExecution:
+      type: object
+      properties:
+        id: { type: string }
+        task_id: { type: string }
+        node_id: { type: string }
+        role: { type: string }
+        name: { type: string }
+        model: { type: string }
+        status: { type: string, enum: [running, completed, failed] }
+        error: { type: string }
+        usage: { type: object, additionalProperties: true }
+        started_at: { type: string, format: date-time }
+        finished_at: { type: string, format: date-time, nullable: true }
+
+    ToolInvocation:
+      type: object
+      properties:
+        id: { type: string }
+        task_id: { type: string }
+        node_id: { type: string }
+        tool: { type: string }
+        status: { type: string }
+        request: { type: object, additionalProperties: true }
+        response: { type: object, additionalProperties: true }
+        error: { type: string }
+        duration_ms: { type: integer }
+        created_at: { type: string, format: date-time }
+
+    MCPServer:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        command: { type: string }
+        args: { type: array, items: { type: string } }
+        enabled: { type: boolean }
+        require_approval: { type: boolean }
+        health: { type: string, enum: [unknown, healthy, unhealthy] }
+        last_checked_at: { type: string, format: date-time, nullable: true }
+
+    Settings:
+      type: object
+      properties:
+        addr: { type: string }
+        database: { type: string, description: 密码已脱敏 }
+        llm_provider: { type: string }
+        llm_model: { type: string }
+        llm_api_key: { type: string, description: 掩码值 }
+        search_providers: { type: array, items: { type: string } }
+        tavily_api_key: { type: string, description: 掩码值 }
+        serpapi_key: { type: string, description: 掩码值 }
+        github_token: { type: string, description: 掩码值 }
+        workers: { type: integer }
+        max_agents: { type: integer }
+        node_timeout: { type: string }
+        respect_robots: { type: boolean }

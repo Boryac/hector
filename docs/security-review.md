@@ -98,6 +98,35 @@ CONFIRMED: unauthenticated request adopts arbitrary user_id "victim"
 
 **通过标准：** 上述 7 项落地 + 回归测试全绿 + 人工确认后，才允许开启多用户能力。Phase 1 按单用户本地模式推进不受阻。
 
+### 1.7 修复实施状态（2026-11-04，T5.5）
+
+| # | 项目 | 状态 | 证据 |
+|---|---|---|---|
+| 1 | 身份只认服务端签发 | ✅ 已修复 | `pkg/server/events.go`：删除 metadata 覆盖分支；未认证归入常量 `anonymousUserID = "anonymous"`；metadata 出现 `user_id` 时记审计日志 |
+| 2 | 会话绑定校验 | ⏳ 未做 | 需要给 `pkg/session` 增加 owner 字段与 403 分支，涉及上游会话层改造，排在多用户能力之前 |
+| 3 | 存储层强制过滤 | ✅ ResearchOS 侧已做 / ⏳ 上游未做 | `internal/researchos/api` 所有读写都以 `s.owner(r)`（服务端身份）过滤；上游 `pkg/task` 仍未补 user 条件 |
+| 4 | 元数据白名单 | ✅ 等价实现 | metadata 中的身份类键不再参与身份判定；非身份键仍透传给 Agent 使用 |
+| 5 | 共享密钥收敛 | ✅ 已定性 | `DECISIONS.md` 第 13 条：单用户本地模式；多用户能力需 JWT/OIDC 后才开 |
+| 6 | 管理面加固 | ✅ 已修复 | `pkg/server/admin_handler.go`：`subtle.ConstantTimeCompare` + 空密钥直接拒绝 |
+| 7 | 回归测试翻转 | ✅ 完成 | `pkg/server/identity_isolation_test.go` 6 条用例，断言 claims 胜出、metadata 无效、匿名常量生效 |
+
+验证命令与结果：
+
+```
+$ go test ./pkg/server/ -run TestToInvocationMeta -v
+--- PASS: TestToInvocationMeta_MetadataMustNotOverrideClaims
+--- PASS: TestToInvocationMeta_UnauthenticatedCannotPickUserID
+--- PASS: TestToInvocationMeta_ClaimsUsedWhenNoMetadata
+--- PASS: TestToInvocationMeta_AnonymousFallback
+--- PASS: TestToInvocationMeta_NonStringUserIDIgnored
+--- PASS: TestToInvocationMeta_MetadataVariantsIgnored
+ok  github.com/verikod/hector/pkg/server
+```
+
+**结论修订**：Issue #2 的核心利用链（伪造 `metadata.user_id` 冒充任意用户）已切断。
+第 2、3（上游部分）项未完成，因此**多用户模式仍然禁用**，V1 保持单用户本地部署，
+与 `DECISIONS.md` 第 13 条一致。以上不构成「安全已完结」结论，只是把最高危的一条封掉。
+
 ---
 
 ## 2. MCP 工具越权

@@ -1,0 +1,66 @@
+# Hector ResearchOS 本地一键部署
+#
+#   cd hector-researchos-codex-pack
+#   export RESEARCHOS_API_TOKEN=$(openssl rand -hex 16)   # Windows: 用 PowerShell 生成随机串
+#   docker compose -f docker-compose.yaml up -d --build
+#   打开 http://127.0.0.1:8080/
+#
+# 首次启动时 app 容器会先执行 migrations（researchos migrate 内嵌在启动流程里），
+# db 容器的健康检查通过后才开始迁移。
+#
+# 注意：本文件未经本机验证（开发环境无 Docker，见 PROGRESS.md）。语法与依赖关系
+# 已按 Compose v2 规范书写，首次在有 Docker 的机器上使用请留意 db 健康检查时机。
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-researchos}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-researchos}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      # 仅本机可达，避免把数据库暴露到局域网
+      - "127.0.0.1:${POSTGRES_PORT:-55432}:5432"
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ./upstream/hector
+      dockerfile: Dockerfile.researchos
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      RESEARCHOS_ADDR: 0.0.0.0:8080
+      RESEARCHOS_DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-researchos}?sslmode=disable
+      RESEARCHOS_API_TOKEN: ${RESEARCHOS_API_TOKEN:?必须设置 RESEARCHOS_API_TOKEN}
+      RESEARCHOS_LOCAL_USER: ${RESEARCHOS_LOCAL_USER:-local-user}
+      RESEARCHOS_DATA_DIR: /data
+      RESEARCHOS_WEB_DIR: /app/web
+      RESEARCHOS_WORKERS: ${RESEARCHOS_WORKERS:-4}
+      RESEARCHOS_MAX_AGENTS: ${RESEARCHOS_MAX_AGENTS:-4}
+      RESEARCHOS_REQUIRE_APPROVAL: ${RESEARCHOS_REQUIRE_APPROVAL:-false}
+      RESEARCHOS_SEARCH_PROVIDERS: ${RESEARCHOS_SEARCH_PROVIDERS:-github,hackernews,wikipedia}
+      # 以下凭据留空即降级：LLM 走启发式规划，检索只用免密钥 Provider。
+      RESEARCHOS_LLM_PROVIDER: ${RESEARCHOS_LLM_PROVIDER:-none}
+      RESEARCHOS_LLM_API_KEY: ${RESEARCHOS_LLM_API_KEY:-}
+      RESEARCHOS_LLM_MODEL: ${RESEARCHOS_LLM_MODEL:-}
+      RESEARCHOS_LLM_BASE_URL: ${RESEARCHOS_LLM_BASE_URL:-}
+      RESEARCHOS_GITHUB_TOKEN: ${RESEARCHOS_GITHUB_TOKEN:-}
+      RESEARCHOS_TAVILY_API_KEY: ${RESEARCHOS_TAVILY_API_KEY:-}
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
+    volumes:
+      - appdata:/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  appdata:

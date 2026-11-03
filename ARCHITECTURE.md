@@ -1,112 +1,226 @@
-# ARCHITECTURE.md — 技术架构设计
+# ARCHITECTURE.md — 已实现架构
 
-## 1. 总体架构：模块化单体 + 独立 Worker
+> 本文描述**当前代码里真实存在的结构**，不是规划稿。
+> 规划阶段的取舍理由留在 `DECISIONS.md`，审计结论留在 `docs/hector-audit.md`。
+> 代码位于 `upstream/hector`（分支 `feature/hector-researchos`），
+> 研究域相关代码全部在 `internal/researchos/` 下，与上游 `pkg/` 隔离。
 
-12 周内不做微服务。微服务会引入服务发现、分布式事务、部署编排等额外复杂度，
-且不能直接提升产品展示效果。但核心执行能力必须有清晰模块边界，后续可独立拆分。
+---
+
+## 1. 总体形态：模块化单体 + 独立 Worker
+
+单进程 `researchos all` 或双进程 `serve` / `worker` 都能跑，二者共用同一套
+Store 与 Domain。没有微服务、没有消息队列中间件——任务队列就在 PostgreSQL 里。
 
 ```
-Presentation: Next.js + React + TypeScript
-  Workspace / Workflow Canvas / Report Center
-        │  REST API + SSE
-Go API Server: Authentication · API · Event Gateway
-Application: Research Service / Planner Service / Workflow Service / Report Service / Evidence Service / Tool Registry
-Execution: DAG Scheduler（依赖管理）/ Agent Runtime（生命周期）/ Worker Pool（并发）/ Tool Router（MCP 路由）
-State: Events · State · Checkpoints → PostgreSQL（主存储）/ Redis（可选，缓存与临时协调）/ Object Storage（报告、附件、网页快照）/ OpenTelemetry
+浏览器
+  │  REST + SSE（同源，Token 只走 Authorization 头）
+  ▼
+┌─────────────────────────────────────────────┐
+│ internal/researchos/api      路由 / 鉴权 / SSE │
+│ internal/researchos/planner  目标 → 计划       │
+│ internal/researchos/dag      依赖就绪 / 认领    │
+│ internal/researchos/exec     节点执行           │
+│ internal/researchos/report   报告渲染           │
+└─────────────────────────────────────────────┘
+  │ sqlc + pgx
+  ▼
+PostgreSQL 16（13 张表，见 docs/DATA_MODEL.md）
+  ▲
+  │ SELECT ... FOR UPDATE SKIP LOCKED
+┌─────────────────────────────────────────────┐
+│ internal/researchos/worker   N 个并发认领循环  │
+└─────────────────────────────────────────────┘
+  │
+  ▼ 外部世界（全部真实调用，无 Mock）
+search: github / hackernews / wikipedia / bing
+fetch : HTTP + robots + SSRF 守卫
+llm   : OpenAI 兼容接口（未配置时降级为本地规则）
 ```
 
-**PostgreSQL 是正式版本主要持久化存储。Redis 不应成为任务状态唯一来源。**
+**为什么不做独立调度进程**：任务状态、节点状态、事件、租约全在一张事务边界内，
+把调度拆出去就要引入跨进程一致性。单机单用户场景下，
+`FOR UPDATE SKIP LOCKED` 已经能让 N 个 Worker 安全并发认领。
 
-## 2. 技术选型
+---
 
-| 层级 | 方案 | 用途 |
+## 2. 代码地图（实测行数）
+
+| 包 | 文件 | 行数 | 职责 | 不负责 |
+|---|---|---|---|---|
+| `api` | 5 | 1434 | 路由、鉴权、SSE、DTO 组装 | 业务执行 |
+| `db` | 10 | 2798 | sqlc 生成代码 + 迁移 SQL | 手写业务查询 |
+| `store` | 2 | 1235 | 事务封装：任务、节点、事件、资料、证据、报告 | HTTP 语义 |
+| `exec` | 6 | 1758 | 节点执行器（search/fetch/analyze/verify/synthesize） | 调度与认领 |
+| `domain` | 3 | 522 | 实体、状态机、事件类型常量 | 持久化细节 |
+| `planner` | 3 | 713 | 启发式计划生成、计划归一化、检索式构造 | 调用模型执行 |
+| `search` | 4 | 1050 | Provider 链、去重、降级、trace | 正文清洗 |
+| `fetch` | 2 | 553 | 抓取、robots、SSRF 守卫、JSON→正文 | 结论抽取 |
+| `report` | 3 | 767 | Markdown 渲染、引用编号、导出 | 数据查询 |
+| `textutil` | 2 | 601 | 正文清洗、模板剥离、URL 规范化、字数统计 | 业务判断 |
+| `worker` | 1 | 323 | 认领循环、心跳、租约续期、优雅退出 | 节点内部逻辑 |
+| `config` | 3 | 471 | 环境变量、`.env` 加载、默认值 | 密钥管理（只读 env） |
+| `dag` | 2 | 275 | 就绪判定、层级计算、环检测工具 | 状态写入 |
+| `llm` | 1 | 219 | OpenAI 兼容薄客户端 | 提示词构造 |
+
+`cmd/researchos/main.go` 提供 6 个子命令：`migrate` / `serve` / `worker` / `all` / `seed` / `version`。
+
+---
+
+## 3. 一次研究的完整链路
+
+```
+POST /api/v1/research
+  └─ 建 research_tasks（status=created）+ research.events(created)
+  └─ 后台 goroutine：Planner 生成计划
+        → 写 workflow_nodes（含 depends_on）
+        → status=awaiting_approval（RESEARCHOS_REQUIRE_APPROVAL=true）
+
+POST /api/v1/research/{id}/approve
+  └─ TransitionTask(awaiting_approval → running)
+  └─ 首个无依赖节点变为 ready
+
+Worker 循环（N 并发）
+  └─ ClaimReadyNodes：SELECT ... WHERE status='ready' AND depends_on 全 completed
+                      ORDER BY priority FOR UPDATE OF n SKIP LOCKED
+  └─ 置 running + lease_expires_at + attempts+1
+  └─ exec.Engine.Run(node)
+        search     → Provider 链检索 + 首批抓取
+        fetch      → 补抓正文（robots / SSRF / 大小上限）
+        analyze    → 抽结论 + 证据边（source_id, quote）
+        verify     → 跨源聚类 + 冲突判定
+        synthesize → 报告落库
+  └─ 写 node 结果 + 事件 + BumpSequence
+  └─ 依赖它的节点在下一轮变为 ready
+
+全部节点终态 → TransitionTask(running → synthesizing → completed)
+任一节点 failed 且无重试额度 → TransitionTask(running → failed)
+```
+
+### 节点类型与产出
+
+| 类型 | 输入 | 产出 | 失败后果 |
+|---|---|---|---|
+| `search` | query | 资料元数据 + 首批正文 | 重试 `max_attempts` 后退避 |
+| `fetch` | source_ids | 补抓正文 | 同上 |
+| `analyze` | question + 依赖资料 | claims + evidence | **无资料/无结论时返回 `skipped` 而非 error** |
+| `verify` | claims | 聚类、支持度、冲突 | 无结论时 `verified=0` 而非 error |
+| `synthesize` | 全部 claims + 证据 | `reports` 一行 | 0 结论时失败（不产出空报告） |
+
+`analyze` 与 `verify` 的「软失败」是刻意设计：单个子问题覆盖不足不应该让整份
+研究崩掉，覆盖缺口会写进报告摘要与争议章节。但 `synthesize` 拿不到任何结论时
+必须失败——一份没有证据的报告比一条失败记录更容易误导人。
+
+---
+
+## 4. 状态机
+
+任务状态白名单与跃迁表在 `internal/researchos/domain/transitions.go`，
+唯一写入入口是 `store.TransitionTask`：
+
+- 同状态跃迁幂等，直接返回；
+- 非法跃迁写审计事件 `research.transition_rejected` 并返回 `ErrInvalidTransition`，
+  API 层映射为 **409 `invalid_transition`**；
+- 合法跃迁带 `WHERE status = <from>` 条件更新，防并发覆盖。
+
+9 个状态 × 8 个目标状态的完整矩阵见 `docs/DATA_MODEL.md` §2。
+
+---
+
+## 5. 事件与 SSE
+
+| 关注点 | 实现 |
+|---|---|
+| 幂等 | 每条事件有 `event_id`（UUID），客户端可去重 |
+| 顺序 | `research_tasks.latest_sequence` 单调自增，任务内严格递增 |
+| 断线续接 | 标准 `Last-Event-ID` 头，或 `?after_sequence=N`（仅 `/events` 接受 query token） |
+| 传输 | `text/event-stream`，15s 心跳注释帧 |
+| 鉴权 | `Authorization: Bearer`；`?token=` 只允许 SSE 端点，其余 401 |
+
+事件类型见 `docs/DATA_MODEL.md` §3。前端 `web/lib/event-map.ts` 做类型 → 文案/图标映射，
+未识别的类型降级为原始 type 名显示，不丢事件。
+
+---
+
+## 6. 并发与恢复
+
+| 机制 | 参数 | 行为 |
 |---|---|---|
-| 后端 | Go | API、调度、执行 |
-| 前端 | Next.js + TypeScript | Web 产品 |
-| UI | Tailwind CSS + shadcn/ui | 组件系统 |
-| 工作流 | React Flow / @xyflow/react | DAG 画布，禁止自研图形编辑器 |
-| 数据请求 | TanStack Query | 服务端状态 |
-| 实时通信 | SSE | 服务端向客户端单向推送，第一版不引入 WebSocket |
-| API | REST + OpenAPI | 前后端接口，见 api/openapi.yaml |
-| 数据库 | PostgreSQL | 核心数据 |
-| 向量检索 | pgvector | 语义检索，不能代替全文搜索与结构化查询 |
-| 缓存 | Redis | 可选 |
-| ORM | GORM 或 sqlc（二选一，Phase 0 锁定，不得混用） | 数据访问 |
-| 日志 | slog / Zap | 结构化日志 |
-| 可观测性 | OpenTelemetry | Trace、Metrics、Logs |
-| 部署 | Docker Compose | 一键启动 |
+| Worker 并发 | `RESEARCHOS_WORKERS`（默认 4） | N 个 goroutine 循环认领 |
+| 租约 | `RESEARCHOS_STALE_LEASE`（默认 3m） | 认领时写 `lease_expires_at`，运行中定期续期 |
+| 崩溃恢复 | 同上 | 租约过期后节点回到 `ready`，**已完成节点不动** |
+| 重试 | `max_attempts` / `next_attempt_at` | 退避重试，用尽后置 `failed` |
+| 暂停闸门 | `paused` 任务 | 认领 SQL 排除 paused 任务的节点 |
 
-决策说明：
-- React Flow：时间应用于节点交互、状态同步、执行可视化，而非重复造图形库。
-- SSE：研究状态主要是单向推送，无需双向复杂度。
-- 优先沿用 Hector 已有 Agent Runtime、MCP、A2A、持久化执行机制，具体接口以源码审查为准。
+故障注入实测见 `docs/benchmark.md` 与 `scripts/fault-injection.sh`。
 
-## 3. 模块边界与职责（Codex 必遵）
+---
 
-| 模块 | 负责什么 | 不负责什么 |
-|---|---|---|
-| API | 接口、参数校验、认证 | 业务执行 |
-| Research | 研究任务生命周期 | 底层并发调度 |
-| Planner | 生成研究计划 | 直接执行所有任务 |
-| Workflow | DAG 定义、依赖管理 | 前端画布渲染 |
-| Scheduler | 节点调度、并发控制 | 模型提示词设计 |
-| Agent Runtime | Agent 生命周期和执行 | 页面展示 |
-| Search | 搜索、抓取、解析 | 研究结论判定 |
-| Evidence | 来源与证据关系 | 生成最终报告 |
-| MCP | 工具注册、发现、调用 | 研究任务拆解 |
-| Report | 报告结构与导出 | 网页搜索 |
-| Observability | 日志、指标、Tracing | 业务状态唯一存储 |
-
-**尤其防止：把所有业务逻辑都写进 Agent Runtime。Agent 是执行单元，不是系统业务中心。**
-
-## 4. 核心业务执行流程
-
-输入示例：分析全球 AI Agent 市场，研究 10 个代表性开源项目，比较架构、社区、商业化，给出未来三年判断。
-
-Pipeline：Research Planning（Planner Agent，结构化计划）→ Task Decomposition（DAG Scheduler，依赖图与并行）
-→ Parallel Research（多个 Researcher）→ Evidence Collection（Search + Web Reader，来源索引）
-→ Cross Verification（Verifier，多源验证、标记冲突与缺口）→ Synthesis（Synthesizer，统一分析）
-→ Report Generation（Reporter，结构化报告、对比表、引用、结论）。
-
-### Agent 角色（V1 先做 6 种，不要预设十几个）
-
-| Agent | 职责 | 主要工具 |
-|---|---|---|
-| Planner | 规划和拆解 | LLM |
-| Researcher | 专项研究，可动态多实例 | Search、Web |
-| Analyst | 分析和比较资料 | RAG、LLM |
-| Verifier | 验证结论、识别冲突 | Search、Evidence |
-| Synthesizer | 整合成果 | Evidence、LLM |
-| Reporter | 生成最终报告 | Markdown、Export |
-
-例如 Researcher A 开源项目 / B 行业发展 / C 商业模式 / D 技术趋势，比固定十几个 Agent 更灵活。
-
-## 5. Go 后端目标目录结构（目标，不是第一天搬迁令）
+## 7. 检索与抓取
 
 ```
-hector-researchos/
-├── cmd/api/main.go  cmd/worker/main.go  cmd/migrate/main.go
-├── internal/api/{handler,middleware,router,dto}
-├── internal/{research,planner,workflow,scheduler,agent,search,evidence,tools,report,events,persistence,observability,config}
-├── web/{app,components,features/{workspace,workflow,agents,sources,evidence,reports,settings},hooks,lib,types}
-├── api/openapi.yaml  deployments/{docker,compose.yaml}  docs/{architecture,development,deployment,api}.md
-├── scripts/  tests/  Dockerfile  Makefile  README.md
+SearchQueryFor(goal, index)
+  ├─ 目标含 ASCII 技术词 → "<技术词...> <英文维度>"
+  └─ 纯中文目标        → "<目标清洗后> <中文维度>"
+        ↓
+Engine.SearchAll（各 Provider 并行，单点失败只记 trace）
+  ├─ 语言路由：纯中文检索式跳过 github / hackernews
+  ├─ Bing：按检索式语种选 mkt（zh-CN / en-US）
+  ├─ 去重：规范化 URL，非 http(s) 一律丢弃
+  └─ 落库：snippet 截断到 600 rune
+        ↓
+fetch：robots.txt → DNS 解析 → Dial 阶段校验真实 IP → 大小上限 → 正文清洗
+        ↓
+textutil：剥脚本/样式/nav/footer、剥 wiki 模板与表格、剥维护提示、去引用残渣
 ```
 
-说明：cmd/api 与 cmd/worker 分离，可独立运行；internal 不对外暴露；api/openapi.yaml 是前后端契约；
-web/features 按产品功能组织；tests 放集成与 E2E。
-**这是一份目标结构，不是要求把 Hector 当前文件机械迁移。原项目包结构与依赖方向先审查，再决定复用。**
+SSRF 防护是三层：host 白名单、解析后 IP 校验、**Dial 阶段再校验一次**
+（挡 DNS rebinding 与 `169.254.169.254` 一类元数据地址）。
 
-## 6. 前端产品结构（Next.js App Router）
+---
+
+## 8. 前端
+
+Next.js 14 App Router + static export（`output: 'export'`，产物 `web/.build`），
+由 Go 进程同源托管：静态资源免鉴权，`/api/` 前缀强制 Bearer。
 
 ```
-web/app/{page.tsx, research/{new,[id]}, reports, tools, settings}
-web/features/{workspace,workflow,execution,sources,evidence,reports}
-web/components/{layout,navigation,charts,ui}  web/hooks  web/lib  web/types
+web/app/page.tsx      Dashboard：新建任务、任务列表、状态、报告入口
+web/app/task/page.tsx 工作台：节点时间线、事件流、资料来源、报告与导出
+web/lib/api.ts        fetch 封装，Token 从内存/输入读取，不进 URL
+web/lib/event-map.ts  事件类型 → 展示语义
+web/lib/types.ts      与 api/openapi.yaml 对应的 TS 类型
 ```
 
-页面：Dashboard（新建、最近任务、状态、最近报告、系统概览）；
-New Research（目标、深度、范围、最大时间、最大并发、是否交叉验证，均给合理默认值）；
-Research Workspace（三栏：左任务与步骤 / 中画布 / 右节点详情+Agent输出+日志，下方实时事件时间线）；
-Report Viewer（目录导航、Markdown、引用脚注、来源弹窗、表格、导出）；
-Tool Hub（MCP Server、工具列表、状态、调用记录、权限）。
+React Flow 在工作台里渲染节点依赖图。`downloadReport()` 用带
+`Authorization` 头的 fetch 取 Blob 再触发下载，**不用 `<a href="...?token=">`**。
+
+---
+
+## 9. 身份与安全边界
+
+| 项 | 现状 |
+|---|---|
+| 部署形态 | 单用户本地，`auth.mode=single-user-local` |
+| API 鉴权 | `/api/` 前缀一律要求 `Authorization: Bearer <RESEARCHOS_API_TOKEN>` |
+| 静态资源 | 免鉴权（浏览器无法为导航请求加头） |
+| 共享密钥 | 固定 `Subject`，因此**不做多用户**；多用户能力需重做身份模型 |
+| admin key | `subtle.ConstantTimeCompare`，空密钥直接拒绝 |
+| A2A 身份 | `pkg/server/events.go` 不再采信客户端 `metadata.user_id`，以 JWT claims 为准 |
+| 密钥落盘 | 只从环境变量/`.env.researchos` 读，`.env.researchos` 在 `.gitignore` 里 |
+
+Issue #2 的修复范围与回归测试见 `docs/security-review.md`。
+
+---
+
+## 10. 与上游 Hector 的关系
+
+| 上游能力 | 复用方式 |
+|---|---|
+| Agent Runtime / WorkerPool / Checkpoint / MCP | 未改，继续服务上游 Agent 功能 |
+| `pkg/server`（A2A 网关） | 修了 Issue #2 的身份覆盖与 admin key 比较 |
+| `pkg/model` | **未复用**：它面向 ADK 多轮工具调用，形状与研究域不匹配 |
+| `task_queue` | **未复用**：FIFO 无法表达 DAG 依赖，改用 `workflow_nodes` |
+
+研究域是新增的 `internal/researchos/`，与 `pkg/` 无循环依赖；
+`pkg/server` 的改动只有身份校验，没有引入研究域概念。

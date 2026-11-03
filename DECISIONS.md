@@ -13,3 +13,10 @@
 11. **数据访问锁定 sqlc + PostgreSQL**（2026-11-03 人工确认，T0.5 结论）。新代码一律用 sqlc 生成类型安全查询，统一 pgx 驱动；不再新增 GORM / MySQL 路径。历史手写 SQL 在迁移时分批收敛。
 12. **开发基线 = 上游仓库**（2026-11-03 人工确认）。产品代码写进 `upstream/hector` 的 `feature/hector-researchos` 分支，不维护脱离上游的独立骨架；开发包文件按 `docs/mapping-table.md` 第 6 节并入。
 13. **身份隔离未修复前不出多用户能力**（2026-11-03 Phase 0 结论）。`metadata.user_id` 伪造问题修复并回归通过前，V1 默认单用户本地模式。
+14. **进入全自主迭代开发模式**（2026-11-04 人工授权）。取消逐阶段人工审批，由执行方自主决定实施顺序、任务拆分、技术细节、代码/DB/API/前端改动、错误修复、重构、文档脚本补齐、验收判断；每完成一项写 `PROGRESS.md` 并自动进入下一任务。禁止事项与 A/B/C 问题处理分级以人工授权原文为准。凭据类操作仍需人工提供，不写入源码/Git/日志。
+15. **不复用上游 `task_queue` 做研究任务调度**（2026-11-04，T2.2/T2.3 结论）。上游队列为 FIFO + 无依赖语义，无法表达 DAG 就绪判定。研究任务改用 `workflow_nodes` 表做依赖驱动队列：`depends_on TEXT[]` 全 completed 才算就绪，`FOR UPDATE OF n SKIP LOCKED` 行锁认领，`lease_expires_at` 租约超时回收，`attempts`/`max_attempts`/`next_attempt_at` 做节点级退避重试。上游队列与其 WorkerPool 保留给旧 chat 链路，不删不改。
+16. **LLM 走自建 OpenAI 兼容薄客户端**（2026-11-04，T2.1 结论）。上游 `pkg/model` 面向 ADK 多轮工具调用，形状与「结构化规划 / 抽取 JSON / 报告改写」不匹配。`internal/researchos/llm` 只做 `Complete` 与 `CompleteJSON`（含 ```json 包裹容错），缺 Key 时 `Available()==false` 并显式降级为启发式，不静默假装调用成功。
+17. **产品前端与既有 Studio 并存、同源托管**（2026-11-04，T1.4 结论）。`studio/`（Vite+React）按原样保留不动；产品前端另建 `web/`（Next.js 14 + React 18 + TS + React Flow 11），`output: 'export'` 静态导出，`API_BASE` 默认空串走同源，由 Go 服务 `RESEARCHOS_WEB_DIR` 托管，避免跨域与第二套鉴权。
+18. **安全修复优先于最低 Go 版本兼容**（2026-11-03，T6.3 结论）。`govulncheck` 在 `internal/researchos` 命中 3 条可达漏洞（pgx SQL 注入、x/text 死循环 ×2）。修复版 `golang.org/x/text@v0.41.0` 要求 `go >= 1.25`，因此 `go.mod` 的 `go` 指令由 1.24.4 提升到 1.25.0，`Dockerfile.researchos` 基础镜像改为 `golang:1.25-alpine`。这是修漏洞换来的版本抬升，不退回旧版本；细节见 `docs/dependency-scan.md`。
+19. **不顺手升级与 ResearchOS 无关的上游能力**（2026-11-03，T6.3 结论）。全模块扫描发现 20 条上游漏洞，只做「抬依赖版本」的批量 `go get -u`（20 → 2），不改上游业务代码；剩余 2 条属上游尚未发版修复，且不在 `researchos` 运行路径上，如实记录不标成已修复。
+20. **没有 LLM 时宁可产出「弱报告 + 明确局限」，也不产出漂亮但无据的报告**（2026-11-03，Phase 4 结论）。规则抽取层的质量闸门只做「挡垃圾」：书名罗列、整段罗列、界面文案、半词碎片、与子问题零重叠的资料一律剔除；`synthesize` 拿不到任何结论时任务失败而非生成空报告。报告摘要与「方法与局限性」章节必须写明结论强度与未做到的事。
