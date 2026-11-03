@@ -3,13 +3,12 @@ package report
 import (
 	"fmt"
 	"html"
-	"regexp"
 	"strings"
 )
 
 // RenderHTML 把报告 Markdown 渲染为独立 HTML 页面。
 //
-// 只支持报告生成器实际用到的子集（标题/列表/表格/链接/加粗/段落），
+// 块解析与 PDF 导出共用 ParseBlocks（见 blocks.go），保证两种导出内容一致；
 // 所有文本先做 HTML 转义，链接只允许 http(s)，避免注入。
 func RenderHTML(title, markdown string) string {
 	body := renderBlocks(markdown)
@@ -49,18 +48,11 @@ footer{margin-top:40px;color:var(--muted);font-size:12px}
 </html>`, html.EscapeString(title), body)
 }
 
-var (
-	linkRe   = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
-	boldRe   = regexp.MustCompile(`\*\*([^*]+)\*\*`)
-	italicRe = regexp.MustCompile(`_([^_]+)_`)
-)
-
 func renderBlocks(md string) string {
 	var b strings.Builder
-	lines := strings.Split(md, "\n")
 	inList := false
-	inTable := false
 	inOrdered := false
+	inTable := false
 
 	closeList := func() {
 		if inList {
@@ -80,96 +72,61 @@ func renderBlocks(md string) string {
 		}
 	}
 
-	for i := 0; i < len(lines); i++ {
-		line := strings.TrimRight(lines[i], " ")
-		trimmed := strings.TrimSpace(line)
+	for _, blk := range ParseBlocks(md) {
+		// 列表与表格的闭合：除连续列表项外都先闭合
+		isListItem := blk.Type == blockUL || blk.Type == blockOL
+		if !isListItem {
+			closeList()
+		}
+		if blk.Type != blockTable {
+			closeTable()
+		}
 
-		if trimmed == "" {
-			closeList()
-			closeTable()
-			continue
-		}
-		// 表格：当前行以 | 开头且下一行是分隔行
-		if strings.HasPrefix(trimmed, "|") && !inTable && i+1 < len(lines) && isTableSeparator(lines[i+1]) {
-			closeList()
-			b.WriteString("<table>\n")
-			inTable = true
-			b.WriteString("<thead><tr>")
-			for _, cell := range splitRow(trimmed) {
-				b.WriteString("<th>" + inline(cell) + "</th>")
-			}
-			b.WriteString("</tr></thead>\n<tbody>\n")
-			i++ // 跳过分隔行
-			continue
-		}
-		if inTable {
-			if strings.HasPrefix(trimmed, "|") {
-				b.WriteString("<tr>")
-				for _, cell := range splitRow(trimmed) {
-					b.WriteString("<td>" + inline(cell) + "</td>")
-				}
-				b.WriteString("</tr>\n")
-				continue
-			}
-			closeTable()
-		}
-		switch {
-		case strings.HasPrefix(trimmed, "### "):
-			closeList()
-			b.WriteString("<h3>" + inline(strings.TrimPrefix(trimmed, "### ")) + "</h3>\n")
-		case strings.HasPrefix(trimmed, "## "):
-			closeList()
-			b.WriteString("<h2>" + inline(strings.TrimPrefix(trimmed, "## ")) + "</h2>\n")
-		case strings.HasPrefix(trimmed, "# "):
-			closeList()
-			b.WriteString("<h1>" + inline(strings.TrimPrefix(trimmed, "# ")) + "</h1>\n")
-		case strings.HasPrefix(trimmed, "- "):
+		switch blk.Type {
+		case blockH1:
+			b.WriteString("<h1>" + inline(blk.Text) + "</h1>\n")
+		case blockH2:
+			b.WriteString("<h2>" + inline(blk.Text) + "</h2>\n")
+		case blockH3:
+			b.WriteString("<h3>" + inline(blk.Text) + "</h3>\n")
+		case blockPara:
+			b.WriteString("<p>" + inline(blk.Text) + "</p>\n")
+		case blockQuote:
+			b.WriteString("<blockquote>" + inline(blk.Text) + "</blockquote>\n")
+		case blockUL:
 			if !inList || inOrdered {
 				closeList()
 				b.WriteString("<ul>\n")
 				inList, inOrdered = true, false
 			}
-			b.WriteString("<li>" + inline(strings.TrimPrefix(trimmed, "- ")) + "</li>\n")
-		case orderedRe.MatchString(trimmed):
+			b.WriteString("<li>" + inline(blk.Text) + "</li>\n")
+		case blockOL:
 			if !inList || !inOrdered {
 				closeList()
 				b.WriteString("<ol>\n")
 				inList, inOrdered = true, true
 			}
-			b.WriteString("<li>" + inline(orderedRe.ReplaceAllString(trimmed, "")) + "</li>\n")
-		default:
-			closeList()
-			b.WriteString("<p>" + inline(trimmed) + "</p>\n")
+			b.WriteString("<li>" + inline(blk.Text) + "</li>\n")
+		case blockTable:
+			b.WriteString("<table>\n<thead><tr>")
+			for _, cell := range blk.Header {
+				b.WriteString("<th>" + inline(cell) + "</th>")
+			}
+			b.WriteString("</tr></thead>\n<tbody>\n")
+			for _, row := range blk.Rows {
+				b.WriteString("<tr>")
+				for _, cell := range row {
+					b.WriteString("<td>" + inline(cell) + "</td>")
+				}
+				b.WriteString("</tr>\n")
+			}
+			b.WriteString("</tbody>\n</table>\n")
+			inTable = true
 		}
 	}
 	closeList()
 	closeTable()
 	return b.String()
-}
-
-var orderedRe = regexp.MustCompile(`^\d+\.\s+`)
-
-func isTableSeparator(line string) bool {
-	t := strings.TrimSpace(line)
-	if !strings.HasPrefix(t, "|") {
-		return false
-	}
-	for _, r := range t {
-		if r != '|' && r != '-' && r != ':' && r != ' ' {
-			return false
-		}
-	}
-	return strings.Contains(t, "-")
-}
-
-func splitRow(line string) []string {
-	t := strings.Trim(strings.TrimSpace(line), "|")
-	parts := strings.Split(t, "|")
-	out := make([]string, 0, len(parts))
-	for _, p := range parts {
-		out = append(out, strings.TrimSpace(p))
-	}
-	return out
 }
 
 func inline(s string) string {

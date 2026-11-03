@@ -79,6 +79,9 @@ type Config struct {
 	// 前端静态资源目录（可选）
 	WebDir string
 
+	// 报告 PDF 导出使用的字体文件（glyf 型 TTF）。留空用内嵌的 Noto Sans SC。
+	PDFFont string
+
 	// SSE 一次性 ticket 的有效期。EventSource 无法自定义请求头，浏览器端只能用查询参数
 	// 传递凭据；为避免长期 API Token 出现在 URL（浏览器历史、Referer、反代访问日志），
 	// 改为由前端先用 Bearer Token 换取短时一次性 ticket，再用 ticket 建立事件流。
@@ -119,6 +122,7 @@ func Load() (*Config, error) {
 		SchedulerTick:   envDuration("RESEARCHOS_SCHEDULER_TICK", 500*time.Millisecond),
 		DataDir:         env("RESEARCHOS_DATA_DIR", "data"),
 		WebDir:          env("RESEARCHOS_WEB_DIR", ""),
+		PDFFont:         env("RESEARCHOS_PDF_FONT", ""),
 		SSETicketTTL:    envDuration("RESEARCHOS_SSE_TICKET_TTL", 60*time.Second),
 	}
 

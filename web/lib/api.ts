@@ -86,7 +86,10 @@ export function eventsURL(taskId: string, after: number, ticket: string): string
 }
 
 // 导出走带 Authorization 的 fetch 再落盘：Token 不进 URL，不会留在浏览历史与代理日志里。
-export async function downloadReport(taskId: string, format: 'md' | 'html'): Promise<void> {
+export async function downloadReport(
+  taskId: string,
+  format: 'md' | 'html' | 'pdf',
+): Promise<void> {
   const res = await fetch(`${API_BASE}/api/v1/research/${taskId}/report.${format}`, {
     headers: { Authorization: `Bearer ${getToken()}` },
     cache: 'no-store',

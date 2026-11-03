@@ -181,7 +181,7 @@ function TaskWorkspace() {
     }
   };
 
-  const exportReport = async (format: 'md' | 'html') => {
+  const exportReport = async (format: 'md' | 'html' | 'pdf') => {
     setBusy(`export-${format}`);
     try {
       await downloadReport(id, format);
@@ -282,6 +282,7 @@ function TaskWorkspace() {
               <Button size="sm" variant="danger" icon={<Icon name="x" size={13} />} onClick={() => setConfirmCancel(true)}>取消</Button>
             )}
             <Button size="sm" variant="secondary" icon={<Icon name="download" size={13} />} loading={busy === 'export-md'} onClick={() => exportReport('md')}>导出</Button>
+            <Button size="sm" variant="secondary" loading={busy === 'export-pdf'} onClick={() => exportReport('pdf')}>PDF</Button>
           </div>
         </div>
 

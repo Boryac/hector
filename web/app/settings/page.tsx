@@ -549,6 +549,60 @@ function McpSection() {
 /* Page                                                                        */
 /* -------------------------------------------------------------------------- */
 
+interface SystemInfo {
+  version: string;
+  uptime_s: number;
+  runtime: { go: string; os: string; arch: string; cpus: number; goroutines: number };
+  service: { addr: string; web_dir: string; data_dir: string; auth: string; user: string };
+  database: { ok: boolean; latency_ms?: number; dsn?: string; migrations?: string[]; error?: string; pool?: { total: number; idle: number; acquired: number; max: number } };
+  llm: { enabled: boolean; provider: string; model: string; key_set: boolean };
+  search: { configured?: string[]; available?: string[] | null };
+}
+
+// SystemRuntime 展示 /api/v1/system 的运行时事实（版本、进程、连接池、迁移）。
+// 部署级参数在上方字段里只读展示环境值；这里补齐「服务此刻的状态」，
+// 让运维不必开 psql 或 curl 就能回答「现在跑的是什么、健康吗」。
+function SystemRuntime() {
+  const info = usePolling<SystemInfo>(() => apiGet<SystemInfo>('/api/v1/system'), { key: 'settings-system' });
+
+  if (info.loading && !info.data) {
+    return <div className="skeleton-block" style={{ marginTop: 14 }}>{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} height={36} />)}</div>;
+  }
+  if (info.error || !info.data) {
+    return <InlineNotice tone="err">运行环境信息不可用：{info.error ?? '未知错误'}</InlineNotice>;
+  }
+  const d = info.data;
+  const rows: Array<[string, React.ReactNode]> = [
+    ['版本', d.version || '—'],
+    ['运行时长', `${Math.floor(d.uptime_s / 3600)}h ${Math.floor((d.uptime_s % 3600) / 60)}m`],
+    ['Go / 平台', `${d.runtime.go} · ${d.runtime.os}/${d.runtime.arch} · ${d.runtime.cpus} 核`],
+    ['goroutines', d.runtime.goroutines],
+    ['监听地址', d.service.addr],
+    ['身份', `${d.service.auth}（${d.service.user}）`],
+    [
+      '数据库',
+      d.database.ok
+        ? `正常 · ${d.database.latency_ms}ms · 连接池 ${d.database.pool?.acquired ?? 0}/${d.database.pool?.total ?? 0}（上限 ${d.database.pool?.max ?? '—'}）`
+        : `异常：${d.database.error ?? '未知'}`,
+    ],
+    ['迁移', (d.database.migrations ?? []).join(', ') || '—'],
+    ['规划 / 模型', d.llm.enabled ? `${d.llm.provider} · ${d.llm.model}` : '启发式（未配置大模型）'],
+    ['检索源', (d.search.available ?? d.search.configured ?? []).join(', ') || '未配置'],
+  ];
+  return (
+    <div className="card-body" style={{ paddingTop: 0 }}>
+      <div className="sysinfo-grid" role="table" aria-label="运行环境">
+        {rows.map(([label, value]) => (
+          <div className="sysinfo-row" key={label} role="row">
+            <span className="sysinfo-label">{label}</span>
+            <span className={cx('sysinfo-value', label === '数据库' && !d.database.ok && 'sysinfo-bad')}>{value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const { push } = useToast();
   const [snapshot, setSnapshot] = useState<SettingsSnapshot | null>(null);
@@ -734,6 +788,7 @@ export default function SettingsPage() {
 
               {section.id === 'model' && <LlmTester />}
               {section.id === 'search' && <SearchTester />}
+              {section.id === 'system' && <SystemRuntime />}
             </section>
           ))}
 

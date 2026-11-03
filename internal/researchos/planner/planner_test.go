@@ -254,7 +254,7 @@ func TestNodeSearchQueryPrefersPlanned(t *testing.T) {
 // LLM 计划的 query 字段要能落到 domain.Subtask 上。
 func TestNormalizeKeepsPlannedQuery(t *testing.T) {
 	plan := &domain.Plan{
-		Goal: "g",
+		Goal:              "g",
 		ResearchQuestions: []domain.Question{{ID: "q1", Question: "q1", Priority: "high"}},
 		Subtasks: []domain.Subtask{
 			{ID: "search_1", NodeType: domain.NodeTypeSearch, Query: "vector db recall", Inputs: []string{"q1"}},

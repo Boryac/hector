@@ -271,6 +271,13 @@ func Sections() []Section {
 					Read: func(c config.Config) any { return c.LocalUser },
 					Get:  func(c config.Config) any { return c.LocalUser },
 				},
+				{
+					Key: "system.pdf_font", Label: "PDF 字体", Kind: KindReadOnly, Scope: ScopeDeploy,
+					Env:  "RESEARCHOS_PDF_FONT",
+					Help: "报告 PDF 导出使用的 glyf 型 TTF 字体文件路径；留空用内嵌的 Noto Sans SC。TTC/OTF 不受支持。",
+					Read: func(c config.Config) any { return c.PDFFont },
+					Get:  func(c config.Config) any { return c.PDFFont },
+				},
 			},
 		},
 	}

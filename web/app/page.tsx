@@ -18,6 +18,16 @@ import { useAppActions } from '@/components/AppShell';
 
 const DAY_MS = 86_400_000;
 
+// GET /api/v1/stats 的响应（服务端 SQL 全量计数）
+interface ServerStats {
+  tasks: { by_status: Record<string, number>; total: number };
+  nodes: { by_status: Record<string, number>; total: number };
+  agents: { by_role: Record<string, number> };
+  sources: number;
+  claims: number;
+  reports: number;
+}
+
 interface DayBucket {
   key: string;
   label: string;
@@ -140,6 +150,8 @@ export default function DashboardPage() {
   const catalog = useTaskCatalog(100, 12);
   const health = usePolling<Health>(() => apiGet<Health>('/api/v1/health'), { intervalMs: 20000, key: 'dash-health' });
   const settings = usePolling<SettingsSnapshot>(() => apiGet<SettingsSnapshot>('/api/v1/settings'), { key: 'dash-settings' });
+  // 服务端 SQL 全量计数：任务列表接口最多拉 100 条，客户端累加在任务多于 100 时会失真。
+  const serverStats = usePolling<ServerStats>(() => apiGet<ServerStats>('/api/v1/stats'), { intervalMs: 30000, key: 'dash-stats' });
   const [refreshing, setRefreshing] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
 
@@ -147,18 +159,22 @@ export default function DashboardPage() {
   const details = catalog.details;
 
   const stats = useMemo(() => {
-    const total = catalog.total;
-    const running = tasks.filter((t) => ['planning', 'running', 'synthesizing'].includes(t.status)).length;
-    const awaiting = tasks.filter((t) => t.status === 'awaiting_approval').length;
-    const paused = tasks.filter((t) => t.status === 'paused').length;
-    const failed = tasks.filter((t) => t.status === 'failed').length;
-    const completed = tasks.filter((t) => t.status === 'completed').length;
-    const sources = tasks.reduce((sum, t) => sum + num(t.stats?.sources), 0);
-    const claims = tasks.reduce((sum, t) => sum + num(t.stats?.claims), 0);
+    const byStatus = serverStats.data?.tasks?.by_status;
+    const sum = (keys: string[]) => keys.reduce((s, k) => s + (byStatus?.[k] ?? 0), 0);
     const weekAgo = Date.now() - 7 * DAY_MS;
-    const recent = tasks.filter((t) => new Date(t.created_at).getTime() >= weekAgo).length;
-    return { total, running, awaiting, paused, failed, completed, sources, claims, recent };
-  }, [tasks, catalog.total]);
+    return {
+      // 有服务端计数就优先用（全量），否则退回列表推算
+      total: serverStats.data?.tasks?.total ?? catalog.total,
+      running: byStatus ? sum(['planning', 'running', 'synthesizing']) : tasks.filter((t) => ['planning', 'running', 'synthesizing'].includes(t.status)).length,
+      awaiting: byStatus ? (byStatus.awaiting_approval ?? 0) : tasks.filter((t) => t.status === 'awaiting_approval').length,
+      paused: byStatus ? (byStatus.paused ?? 0) : tasks.filter((t) => t.status === 'paused').length,
+      failed: byStatus ? (byStatus.failed ?? 0) : tasks.filter((t) => t.status === 'failed').length,
+      completed: byStatus ? (byStatus.completed ?? 0) : tasks.filter((t) => t.status === 'completed').length,
+      sources: serverStats.data?.sources ?? tasks.reduce((sum, t) => sum + num(t.stats?.sources), 0),
+      claims: serverStats.data?.claims ?? tasks.reduce((sum, t) => sum + num(t.stats?.claims), 0),
+      recent: tasks.filter((t) => new Date(t.created_at).getTime() >= weekAgo).length,
+    };
+  }, [tasks, catalog.total, serverStats.data]);
 
   const buckets = useMemo(() => buildBuckets(tasks), [tasks]);
 

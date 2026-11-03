@@ -37,7 +37,7 @@ function ReportPane({ item }: { item: ReportItem }) {
     { key: item.task_id },
   );
 
-  const exportReport = async (format: 'md' | 'html') => {
+  const exportReport = async (format: 'md' | 'html' | 'pdf') => {
     setBusy(format);
     try {
       await downloadReport(item.task_id, format);
@@ -64,6 +64,7 @@ function ReportPane({ item }: { item: ReportItem }) {
         <>
           <Button size="sm" variant="secondary" icon={<Icon name="download" size={13} />} loading={busy === 'md'} onClick={() => exportReport('md')}>Markdown</Button>
           <Button size="sm" variant="secondary" icon={<Icon name="download" size={13} />} loading={busy === 'html'} onClick={() => exportReport('html')}>HTML</Button>
+          <Button size="sm" variant="secondary" loading={busy === 'pdf'} onClick={() => exportReport('pdf')}>PDF</Button>
           <Link href={`/task/?id=${item.task_id}`} className="btn btn-quiet btn-sm">打开工作流 <Icon name="arrow-right" size={13} /></Link>
         </>
       }

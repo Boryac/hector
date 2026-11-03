@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -255,6 +256,34 @@ func (s *Server) handleExportHTML(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(report.RenderHTML(rep.Title, rep.Markdown)))
+}
+
+// handleExportPDF 服务端真实排版生成 PDF（内嵌 CJK 字体，含页码与分页），
+// 不是把 HTML 改名。排版耗时与报告长度相关，典型报告在百毫秒量级。
+func (s *Server) handleExportPDF(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := withTimeout(r, 30*time.Second)
+	defer cancel()
+	task, err := s.Store.GetTaskRow(ctx, r.PathValue("id"))
+	if err != nil || task.CreatedBy != s.owner(r) {
+		writeErr(w, http.StatusNotFound, "not_found", "任务不存在")
+		return
+	}
+	rep, err := s.latestReport(ctx, task.ID, intQuery(r, "version", 0))
+	if err != nil {
+		writeErr(w, http.StatusNotFound, "not_found", "报告尚未生成")
+		return
+	}
+	data, err := report.RenderPDF(rep.Title, rep.Markdown)
+	if err != nil {
+		slog.Error("生成 PDF 失败", "task_id", task.ID, "err", err)
+		writeErr(w, http.StatusInternalServerError, "pdf_render_failed", "PDF 生成失败，请查看服务日志")
+		return
+	}
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="report-%s-v%d.pdf"`, shortID(task.ID), rep.Version))
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(data)
 }
 
 func (s *Server) latestReport(ctx context.Context, taskID string, version int) (*domain.Report, error) {

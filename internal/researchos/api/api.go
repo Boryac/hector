@@ -159,6 +159,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /api/v1/research/{id}/report", s.handleGetReport)
 	mux.HandleFunc("GET /api/v1/research/{id}/report.md", s.handleExportMarkdown)
 	mux.HandleFunc("GET /api/v1/research/{id}/report.html", s.handleExportHTML)
+	mux.HandleFunc("GET /api/v1/research/{id}/report.pdf", s.handleExportPDF)
 
 	mux.HandleFunc("GET /api/v1/tools", s.handleListTools)
 	mux.HandleFunc("GET /api/v1/tools/calls", s.handleListToolCalls)

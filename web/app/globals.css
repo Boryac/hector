@@ -2986,3 +2986,14 @@ kbd {
   .mcp-list { padding: 0 14px; }
   .test-trace { grid-template-columns: 76px 56px 48px minmax(0, 1fr); }
 }
+
+/* 系统设置页「运行环境」卡片（/api/v1/system） */
+.sysinfo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 28px; }
+.sysinfo-row { display: flex; justify-content: space-between; gap: 16px; padding: 7px 0; border-bottom: 1px solid var(--line-soft); }
+.sysinfo-row:last-child { border-bottom: none; }
+.sysinfo-label { color: var(--muted); font-size: 12px; flex: none; }
+.sysinfo-value { font-size: 12.5px; color: var(--text-2); text-align: right; overflow-wrap: anywhere; }
+.sysinfo-bad { color: var(--danger, #b42318); }
+@media (max-width: 720px) {
+  .sysinfo-grid { grid-template-columns: 1fr; }
+}
