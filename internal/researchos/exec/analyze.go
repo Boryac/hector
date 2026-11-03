@@ -30,17 +30,51 @@ const analyzeSystemPrompt = `你是 Hector ResearchOS 的研究分析师（Analy
 
 // runAnalyze 从上游资料的正文中抽取结论与证据。
 func (e *Engine) runAnalyze(s *Session) (map[string]any, int, error) {
+	question := stringInput(s.Node.Input, "question")
+	if question == "" {
+		question = s.Node.Title
+	}
 	s.Progress(10, "汇聚资料")
 	sources, err := e.collectSources(s)
 	if err != nil {
 		return nil, 0, err
 	}
-	if len(sources) == 0 {
-		return nil, 0, fmt.Errorf("分析节点无可用资料（上游 search 未产出正文）")
+	// 与问题无关的资料不得进入抽取：检索分支召回的长尾页面（个人书单仓库、
+	// 无关百科条目）内容再长也不构成研究证据。
+	//
+	// 但闸门必须是「软」的：中文问题配英文资料时词面重叠天然为 0，硬闸门会把
+	// 整个资料池清空，反倒把可用的任务打成失败。所以剔除后若一条不剩，
+	// 退回未过滤的资料池，并在事件流里披露这次降级。
+	if len(sources) > 0 {
+		kept := make([]*domain.Source, 0, len(sources))
+		for _, src := range sources {
+			if relevantEnough(question, src) {
+				kept = append(kept, src)
+			}
+		}
+		switch {
+		case len(kept) == 0:
+			s.Emit(domain.EvtNodeProgress, map[string]any{
+				"phase": "analyze", "filtered_out": len(sources), "relevance_fallback": true,
+				"reason": "资料与子问题词面不重叠，已退回全量资料并披露",
+			})
+		case len(kept) < len(sources):
+			s.Emit(domain.EvtNodeProgress, map[string]any{
+				"phase": "analyze", "kept": len(kept), "filtered_out": len(sources) - len(kept),
+			})
+			sources = kept
+		}
 	}
-	question := stringInput(s.Node.Input, "question")
-	if question == "" {
-		question = s.Node.Title
+	if len(sources) == 0 {
+		// 单个子问题覆盖不足不应拖垮整份研究：标记为「跳过」并在报告里披露覆盖缺口。
+		s.Emit(domain.EvtNodeProgress, map[string]any{
+			"phase": "analyze", "skipped": true,
+			"reason": "无可用的正文资料（抓取失败、被 robots 禁止或与问题不相关）",
+		})
+		return map[string]any{
+			"claims": 0, "skipped": true,
+			"reason": "无可用的正文资料（抓取失败、被 robots 禁止或与问题不相关）",
+		}, 0, nil
 	}
 
 	var (
@@ -64,7 +98,15 @@ func (e *Engine) runAnalyze(s *Session) (map[string]any, int, error) {
 		claims = ruleBasedClaims(sources, question, e.Cfg.MaxClaimsPerNode)
 	}
 	if len(claims) == 0 {
-		return nil, tokens, fmt.Errorf("未从资料中抽取出可引用结论")
+		s.Emit(domain.EvtNodeProgress, map[string]any{
+			"phase": "analyze", "skipped": true,
+			"reason": "资料中未抽取出可引用结论",
+		})
+		return map[string]any{
+			"claims": 0, "skipped": true,
+			"reason": "资料中未抽取出可引用结论",
+			"source_n": len(sources),
+		}, tokens, nil
 	}
 	sort.SliceStable(claims, func(i, j int) bool { return claims[i].Confidence > claims[j].Confidence })
 	if len(claims) > e.Cfg.MaxClaimsPerNode {
@@ -154,7 +196,8 @@ type analyzedClaim struct {
 // 会产出「Repository navigation Security and quality」这类垃圾结论，必须在入口挡住。
 func excerptUsable(src *domain.Source) bool {
 	text := strings.TrimSpace(src.Excerpt)
-	if len([]rune(text)) < 150 {
+	n := len([]rune(text))
+	if n < 150 {
 		return false
 	}
 	lines := 0
@@ -163,17 +206,137 @@ func excerptUsable(src *domain.Source) bool {
 			lines++
 		}
 	}
-	return lines >= 3
+	if lines >= 3 {
+		return true
+	}
+	// 单段落但信息量足够：维基百科一类的正文抽取出来常常只有 1–2 个换行，
+	// 若死守「3 行长行」会把 3999 rune 的完整条目误判成不可用正文，
+	// 导致 analyze 拿不到资料、整条任务在 synthesize 阶段失败。
+	return n >= 400 && countSentenceEnds(text) >= 3 && informativeTokens(text) >= 12
+}
+
+// startsWithSentenceCase 判断字符串是否以「像句子开头」的字符起始。
+//
+// 抓取正文是窗口截取的，首尾常常落在词中间，于是抽出来的「句子」会以
+// 半个单词开头（实测出现「s AI agent deleted a database…」）。
+// 这里要求首字符是大写字母、汉字、数字，或者引号/括号后紧跟这三类之一。
+func startsWithSentenceCase(s string) bool {
+	r := []rune(strings.TrimSpace(s))
+	if len(r) == 0 {
+		return false
+	}
+	isOK := func(c rune) bool {
+		return (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c >= 0x4e00 && c <= 0x9fff)
+	}
+	if isOK(r[0]) {
+		return true
+	}
+	switch r[0] {
+	case '"', '\'', '“', '‘', '「', '《', '（', '(':
+		if len(r) > 1 {
+			return isOK(r[1])
+		}
+	}
+	return false
+}
+
+// countSentenceEnds 统计句末标点数量，作为「这段文字是不是连续正文」的粗判据。
+func countSentenceEnds(s string) int {
+	n := 0
+	for _, r := range s {
+		switch r {
+		case '。', '！', '？', '.', '!', '?':
+			n++
+		}
+	}
+	return n
+}
+
+// snippetUsable 判断检索摘要能否作为降级正文使用。
+//
+// 摘要通常只有一段，不能套用 excerptUsable 的「3 行以上」要求；
+// 但同样要挡住标签串与导航残渣。
+func snippetUsable(snippet string) bool {
+	t := strings.TrimSpace(snippet)
+	if len([]rune(t)) < 120 {
+		return false
+	}
+	if !strings.ContainsAny(t, "。，,.;；!！?？") {
+		return false
+	}
+	return informativeTokens(t) >= 8
+}
+
+// relevantEnough 判断资料与研究问题是否存在实质词面重叠。
+//
+// 没有这道闸门时，只要检索分支召回一条「个人书单」仓库，它就会以 github 的
+// 高可信度进入资料池，并把 README 目录当成结论写进报告。判据是双向的：
+// 问题里的特征 token 至少要有 2 个出现在资料里。
+func relevantEnough(question string, src *domain.Source) bool {
+	q := informativeTokenSet(question)
+	if len(q) < 2 {
+		return true // 问题本身信息量不足，不做判断，交给下游内容判定
+	}
+	hay := informativeTokenSet(src.Title + " " + textutil.Excerpt(src.Excerpt, []string{question}, 1200) + " " + clipRunes(src.Snippet, 800))
+	shared := 0
+	for t := range q {
+		if hay[t] {
+			shared++
+		}
+	}
+	return shared >= 2
+}
+
+// informativeTokenSet 返回 informativeTokens 用到的那批 token 的集合。
+func informativeTokenSet(s string) map[string]bool {
+	out := map[string]bool{}
+	uiWords := map[string]bool{
+		"with": true, "from": true, "this": true, "that": true, "have": true, "will": true,
+		"your": true, "more": true, "than": true, "into": true, "when": true, "they": true,
+		"their": true, "there": true, "which": true, "about": true, "also": true, "been": true,
+		"repository": true, "navigation": true, "quality": true, "security": true,
+	}
+	lower := strings.ToLower(s)
+	for _, w := range strings.FieldsFunc(lower, func(r rune) bool {
+		return !(r >= 'a' && r <= 'z') && !(r >= '0' && r <= '9')
+	}) {
+		if len(w) >= 4 && !uiWords[w] {
+			out[w] = true
+		}
+	}
+	runes := []rune(lower)
+	for i := 0; i+1 < len(runes); i++ {
+		if runes[i] >= 0x4e00 && runes[i] <= 0x9fff && runes[i+1] >= 0x4e00 && runes[i+1] <= 0x9fff {
+			out[string(runes[i:i+2])] = true
+		}
+	}
+	return out
+}
+
+// maxSnippetRunes 限制落库的检索摘要长度。
+//
+// GitHub Provider 会把整份 README 塞进 snippet（实测出现过 5.9 万字符一条），
+// 既不必要，也会让资料列表接口和报告体积失控。
+const maxSnippetRunes = 600
+
+// clipRunes 按 rune 截断，避免把多字节字符切坏。
+func clipRunes(s string, max int) string {
+	if max <= 0 {
+		return ""
+	}
+	r := []rune(s)
+	if len(r) <= max {
+		return s
+	}
+	return string(r[:max])
 }
 
 func (e *Engine) collectSources(s *Session) ([]*domain.Source, error) {
 	seen := map[string]bool{}
 	var out []*domain.Source
-	for _, dep := range s.Node.DependsOn {
-		list, err := e.Store.ListSourcesByNode(s.Ctx, s.Task.ID, dep)
-		if err != nil {
-			return nil, err
-		}
+	// 先看自己依赖的 search 节点；若覆盖不足，再退到全任务的资料池。
+	// 研究报告是对整个任务负责，某个检索分支被打限流时不应让该子问题直接空手。
+	collect := func(list []*domain.Source) {
 		for _, src := range list {
 			if seen[src.ID] {
 				continue
@@ -182,17 +345,28 @@ func (e *Engine) collectSources(s *Session) ([]*domain.Source, error) {
 			case src.Status == "ok" && excerptUsable(src):
 				seen[src.ID] = true
 				out = append(out, src)
-			case (src.Status == "discovered" || src.Status == "fetch_failed") && len([]rune(src.Snippet)) >= 120:
-				// 抓取失败但检索服务返回了足够长的真实摘要：降级使用摘要，可信度折半。
+			case snippetUsable(src.Snippet):
+				// 抓取成功但正文是脚手架残渣时，同样允许用检索摘要降级，
+				// 否则 switch 会直接跳过该资料，等于把它算成「抓取失败」。
 				cp := *src
 				cp.Excerpt = src.Snippet
 				cp.Credibility = downgrade(src.Credibility)
-				if !excerptUsable(&cp) {
-					continue
-				}
 				seen[src.ID] = true
 				out = append(out, &cp)
 			}
+		}
+	}
+	for _, dep := range s.Node.DependsOn {
+		list, err := e.Store.ListSourcesByNode(s.Ctx, s.Task.ID, dep)
+		if err != nil {
+			return nil, err
+		}
+		collect(list)
+	}
+	if len(out) < 2 {
+		// 覆盖不足：补齐全任务资料（含其它检索分支的产出）。
+		if all, err := e.Store.ListSources(s.Ctx, s.Task.ID, "", "", "", 200, 0); err == nil {
+			collect(all)
 		}
 	}
 	sort.SliceStable(out, func(i, j int) bool {
@@ -396,7 +570,14 @@ func ruleBasedClaims(sources []*domain.Source, question string, limit int) []ana
 // usableStatement 判断一句话能否作为结论。
 func usableStatement(s string) bool {
 	t := strings.TrimSpace(s)
-	if len([]rune(t)) < 15 {
+	n := len([]rune(t))
+	if n < 15 {
+		return false
+	}
+	// 「一句话结论」必须真的是一句话：既不能短成标签，也不能是整段粘贴。
+	// 用「句末标点个数」判断是否多句拼接，比按字符数卡更贴近语义——
+	// 之前按 120 字上限卡，把英文资料里 20 词以上的正常句子全判掉了。
+	if n > 300 || countSentenceEnds(t) > 2 {
 		return false
 	}
 	// 括号开头的多为维护标记或补充说明。
@@ -407,18 +588,34 @@ func usableStatement(s string) bool {
 	if strings.Count(t, "[") >= 2 {
 		return false
 	}
+	// 书名/条目罗列：《》成对出现、或顿号逗号密集，都不是陈述句。
+	if strings.Count(t, "《") >= 2 || strings.Count(t, "》") >= 2 {
+		return false
+	}
+	sep := strings.Count(t, "，") + strings.Count(t, ",") + strings.Count(t, "、") + strings.Count(t, "；")
+	if sep >= 6 {
+		return false
+	}
 	letters := 0
 	for _, r := range t {
 		if r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= 0x4e00 && r <= 0x9fff {
 			letters++
 		}
 	}
-	if float64(letters)/float64(len([]rune(t))) < 0.55 {
+	if float64(letters)/float64(n) < 0.55 {
+		return false
+	}
+	// 从词中间开始的碎片不算句子：抓取正文是按窗口截取的，窗口首尾经常
+	// 落在词中间，实测产出了「s AI agent deleted a database…」这类结论。
+	if !startsWithSentenceCase(t) {
 		return false
 	}
 	lower := strings.ToLower(t)
 	for _, kw := range []string{"learn how and when to", "switch to legacy parser", "cookie", "subscribe", "sign in",
-		"repository navigation", "security and quality", "skip to content"} {
+		"repository navigation", "security and quality", "skip to content",
+		"this article is about", "notifications you must be signed in", "change notification settings",
+		"you can't perform that action", "skip to main content", "view this file on github",
+		"redirects here", "may refer to", "for other uses", "see also"} {
 		if strings.Contains(lower, kw) {
 			return false
 		}

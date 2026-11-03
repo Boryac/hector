@@ -152,3 +152,38 @@ func TestNamesVsAvailableNames(t *testing.T) {
 		t.Fatalf("AvailableNames 应只列出可用 Provider，实际 %v", avail)
 	}
 }
+
+// Bing 的市场参数必须跟随检索式语种。
+//
+// 回归用例：此前固定 mkt=en-US，中文检索式在英文市场里被弱化，
+// 实测返回与查询完全无关的本地化页面（从而拖垮下游 analyze）。
+func TestBingMarketFollowsQueryLanguage(t *testing.T) {
+	if got := bingMarket("向量数据库召回质量"); !strings.Contains(got, "zh-CN") {
+		t.Fatalf("中文检索式应使用中文市场，实际 %q", got)
+	}
+	if got := bingMarket("vector database recall benchmark"); !strings.Contains(got, "en-US") {
+		t.Fatalf("英文检索式应使用英文市场，实际 %q", got)
+	}
+	if got := bingMarket("MCP 协议 vs LangGraph"); !strings.Contains(got, "zh-CN") {
+		t.Fatalf("中英混排应优先中文市场，实际 %q", got)
+	}
+}
+
+// 纯中文检索式不应打到英文技术索引上。
+//
+// 回归用例：GitHub 用「向量数据库在检索增强生成中的召回质量对比」检索，
+// 召回到一个个人书单仓库（README 里恰好有这些汉字），其目录被当成研究结论。
+func TestLanguageMismatchSkipsEnglishIndexes(t *testing.T) {
+	if why := languageMismatch("github", "向量数据库召回质量"); why == "" {
+		t.Fatal("纯中文检索式应跳过 github")
+	}
+	if why := languageMismatch("hackernews", "向量数据库召回质量"); why == "" {
+		t.Fatal("纯中文检索式应跳过 hackernews")
+	}
+	if why := languageMismatch("wikipedia", "向量数据库召回质量"); why != "" {
+		t.Fatal("中文维基不应被跳过")
+	}
+	if why := languageMismatch("github", "LangGraph 状态图编排"); why != "" {
+		t.Fatal("含英文技术词的检索式不应跳过 github")
+	}
+}

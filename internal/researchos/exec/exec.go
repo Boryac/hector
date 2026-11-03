@@ -28,6 +28,10 @@ type Config struct {
 	MaxClaimsPerNode     int
 	ExcerptChars         int
 	ProgressMinInterval  time.Duration
+	// LeaseTTL 是进度心跳续租的时长，必须与 Worker 认领节点时的租约一致。
+	// 曾经这里硬编码 3 分钟，导致 RESEARCHOS_STALE_LEASE 调小后崩溃恢复仍然
+	// 要等 3 分钟——配置形同虚设。
+	LeaseTTL time.Duration
 }
 
 func (c *Config) setDefaults() {
@@ -49,6 +53,17 @@ func (c *Config) setDefaults() {
 	if c.ProgressMinInterval <= 0 {
 		c.ProgressMinInterval = 800 * time.Millisecond
 	}
+	if c.LeaseTTL <= 0 {
+		c.LeaseTTL = 3 * time.Minute
+	}
+}
+
+// leaseTTL 返回心跳续租时长，供 Session 使用。
+func (c Config) leaseTTL() time.Duration {
+	if c.LeaseTTL <= 0 {
+		return 3 * time.Minute
+	}
+	return c.LeaseTTL
 }
 
 // Engine 调度不同节点类型的执行器。
@@ -110,7 +125,7 @@ func (s *Session) Progress(pct int, text string) {
 	}
 	s.lastProgress = pct
 	s.lastEmit = time.Now()
-	_ = s.store.UpdateNodeProgress(s.Ctx, s.Task.ID, s.Node.ID, pct, text, 3*time.Minute)
+	_ = s.store.UpdateNodeProgress(s.Ctx, s.Task.ID, s.Node.ID, pct, text, s.cfg.leaseTTL())
 	s.Emit(domain.EvtNodeProgress, map[string]any{"progress": pct, "progress_text": text})
 }
 
@@ -193,7 +208,7 @@ func (e *Engine) runSearch(s *Session) (map[string]any, int, error) {
 			Title:         textutil.CleanText(r.Title),
 			Site:          textutil.Host(r.URL),
 			Provider:      r.Provider,
-			Snippet:       textutil.CleanText(r.Snippet),
+			Snippet:       clipRunes(textutil.CleanText(r.Snippet), maxSnippetRunes),
 			Credibility:   credibilityFor(r.Provider, r.Fields),
 			Status:        "discovered",
 			PublishedAt:   r.PublishedAt,

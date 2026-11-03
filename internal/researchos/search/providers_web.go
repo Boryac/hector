@@ -38,11 +38,23 @@ var (
 	bingLinkRe  = regexp.MustCompile(`(?is)<h2[^>]*>\s*<a[^>]*href="([^"]+)"[^>]*>(.*?)</a>`)
 	bingSnipRe  = regexp.MustCompile(`(?is)<p[^>]*class="[^"]*b_lineclamp[^"]*"[^>]*>(.*?)</p>`)
 	tagStripRe  = regexp.MustCompile(`(?s)<[^>]*>`)
+	hanRe       = regexp.MustCompile(`\p{Han}`)
 )
+
+// bingMarket 依据检索式语种选择市场。
+//
+// 之前固定 mkt=en-US，中文检索式在英文市场里会被弱化处理，返回的是
+// 「和查询无关的本地化页面」（实测一条中文关键词能召回到完全无关的站点）。
+func bingMarket(query string) string {
+	if hanRe.MatchString(query) {
+		return "mkt=zh-CN&setlang=zh-Hans"
+	}
+	return "mkt=en-US&setlang=en"
+}
 
 // Search 抓取并解析 Bing 结果页。
 func (b *Bing) Search(ctx context.Context, query string, limit int) ([]Result, error) {
-	u := "https://www.bing.com/search?q=" + queryEscape(query) + "&mkt=en-US&setlang=en&count=" + fmt.Sprint(maxInt(limit, 5))
+	u := "https://www.bing.com/search?q=" + queryEscape(query) + "&" + bingMarket(query) + "&count=" + fmt.Sprint(maxInt(limit, 5))
 	req, err := NewRequest(ctx, http.MethodGet, u, b.opt.ua())
 	if err != nil {
 		return nil, err

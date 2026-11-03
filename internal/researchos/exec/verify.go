@@ -24,7 +24,8 @@ func (e *Engine) runVerify(s *Session) (map[string]any, int, error) {
 		return nil, 0, err
 	}
 	if len(claims) == 0 {
-		return nil, 0, fmt.Errorf("没有可验证的结论")
+		// 没有任何结论时核验无事可做；由 synthesize 判断是否整体失败。
+		return map[string]any{"verified": 0, "clusters": 0, "reason": "没有可验证的结论"}, 0, nil
 	}
 
 	// 证据 → 站点

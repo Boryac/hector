@@ -167,6 +167,7 @@ func bootstrap(ctx context.Context) (*app, error) {
 	execCfg := exec.Config{
 		FetchConcurrency:     cfg.Workers,
 		MaxSourcesPerAnalyze: 6,
+		LeaseTTL:             cfg.StaleLease,
 	}
 	eng := exec.New(st, engine, fetcher, client, execCfg)
 

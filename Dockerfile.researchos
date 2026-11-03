@@ -24,7 +24,7 @@ COPY web/ ./
 RUN NEXT_TELEMETRY_DISABLED=1 npx next build
 
 # ---------- Go 构建 ----------
-FROM golang:1.24-alpine AS build
+FROM golang:1.25-alpine AS build
 RUN apk add --no-cache git ca-certificates tzdata
 WORKDIR /src
 COPY go.mod go.sum ./

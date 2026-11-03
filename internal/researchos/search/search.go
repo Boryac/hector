@@ -13,6 +13,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"regexp"
 	"sync"
 	"time"
 
@@ -111,6 +112,12 @@ func (e *Engine) SearchAll(ctx context.Context, query string, perProvider int) (
 			mu.Unlock()
 			continue
 		}
+		if why := languageMismatch(p.Name(), query); why != "" {
+			mu.Lock()
+			traces = append(traces, Trace{Provider: p.Name(), Skipped: why})
+			mu.Unlock()
+			continue
+		}
 		wg.Add(1)
 		go func(p Provider) {
 			defer wg.Done()
@@ -160,6 +167,25 @@ func Dedupe(in []Result) []Result {
 		out = append(out, r)
 	}
 	return out
+}
+
+// asciiTokenRe 匹配「有检索意义的英文/数字技术词」。
+var asciiTokenRe = regexp.MustCompile(`[A-Za-z][A-Za-z0-9]{2,}`)
+
+// languageMismatch 判断某个 Provider 是否应当跳过这条检索式。
+//
+// GitHub、Hacker News 是英文技术索引：拿一整句纯中文去查，返回的是「README
+// 里恰好包含这些汉字」的无关仓库（实测召回到个人书单仓库，其目录被当成研究
+// 结论）。这类调用既浪费配额又污染资料池，直接跳过并写入 trace。
+func languageMismatch(provider, query string) string {
+	if !hanRe.MatchString(query) || asciiTokenRe.MatchString(query) {
+		return ""
+	}
+	switch provider {
+	case "github", "hackernews", "hn":
+		return "纯中文检索式，该 Provider 为英文技术索引，已跳过"
+	}
+	return ""
 }
 
 // NewDefault 依据配置构造默认 Provider 链。

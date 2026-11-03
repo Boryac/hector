@@ -166,3 +166,69 @@ func TestFallbackQueryNonEmpty(t *testing.T) {
 		t.Fatal("兜底检索式不应为空")
 	}
 }
+
+// 中文检索式不能从词中间删字。
+//
+// 回归用例：曾把「检索增强生成」中的「生成」当动词剥掉，检索式退化成
+// 「向量数据库在检索增强 中 召回质量对比」，Bing 直接返回无关页面，
+// 进而导致整条任务的 analyze 阶段拿不到可用正文而失败。
+func TestCondenseCJKPreservesContentWords(t *testing.T) {
+	goal := "向量数据库在检索增强生成中的召回质量对比"
+	got := SearchQueryFor(goal, 0)
+	for _, must := range []string{"向量数据库", "检索增强生成", "召回质量"} {
+		if !strings.Contains(got, must) {
+			t.Fatalf("检索式 %q 丢失了内容词 %q", got, must)
+		}
+	}
+	if strings.Contains(got, "检索增强 中") {
+		t.Fatalf("检索式 %q 仍在固定搭配中间插入了空格", got)
+	}
+}
+
+func TestCondenseCJKStripsBoundaryVerbsOnly(t *testing.T) {
+	if got := condenseCJK("分析 MCP(协议) 现状"); strings.HasPrefix(got, "分析") {
+		t.Fatalf("句首研究动作词应被剥离：%q", got)
+	}
+	if got := condenseCJK("向量数据库召回质量研究"); strings.HasSuffix(got, "研究") {
+		t.Fatalf("句末研究动作词应被剥离：%q", got)
+	}
+}
+
+// 纯中文目标的不同检索分支必须生成不同检索式。
+//
+// 回归用例：此前中文分支直接返回 condenseCJK(goal)，index 被忽略，
+// 多个 search 节点召回同一批资料，覆盖度并没有随分支数增加。
+func TestSearchQueryForCJKDiffersByIndex(t *testing.T) {
+	goal := "向量数据库在检索增强生成中的召回质量对比"
+	a := SearchQueryFor(goal, 0)
+	b := SearchQueryFor(goal, 1)
+	c := SearchQueryFor(goal, 2)
+	if a == b || b == c || a == c {
+		t.Fatalf("中文目标的不同维度检索式不应相同：%q / %q / %q", a, b, c)
+	}
+	for _, q := range []string{a, b, c} {
+		if !strings.Contains(q, "检索增强生成") {
+			t.Fatalf("检索式 %q 丢失了内容词", q)
+		}
+		if n := len([]rune(q)); n > 45 {
+			t.Fatalf("中文检索式过长（%d rune）：%q", n, q)
+		}
+	}
+}
+
+func TestFallbackQueryCutsAtWordBoundary(t *testing.T) {
+	goal := "向量数据库在检索增强生成中的召回质量对比与技术选型建议"
+	fb := FallbackQuery(goal)
+	if fb == "" {
+		t.Fatal("兜底检索式不应为空")
+	}
+	if r := []rune(fb); len(r) > 20 {
+		t.Fatalf("兜底检索式应截断到 20 rune，实际 %d：%q", len(r), fb)
+	}
+	if strings.HasSuffix(fb, " ") {
+		t.Fatalf("兜底检索式不应以空格结尾：%q", fb)
+	}
+	if !strings.HasPrefix(condenseCJK(goal), fb) {
+		t.Fatalf("兜底检索式应为压缩检索式的前缀，实际 %q", fb)
+	}
+}

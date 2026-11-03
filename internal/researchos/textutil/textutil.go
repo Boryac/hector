@@ -336,6 +336,19 @@ func Excerpt(text string, terms []string, maxLen int) string {
 	if end > len(runes) {
 		end = len(runes)
 	}
+	// 把窗口边界对齐到句子边界：不对齐时会切出「s AI agent deleted…」这种
+	// 以半个单词开头的引文，读起来像错字，也无法作为证据引用。
+	const snapWindow = 80
+	if start > 0 {
+		if s, ok := nextBoundary(runes, start, start+snapWindow); ok {
+			start = s
+		}
+	}
+	if end < len(runes) {
+		if e, ok := prevBoundary(runes, end-snapWindow, end); ok && e > start {
+			end = e
+		}
+	}
 	out := string(runes[start:end])
 	if start > 0 {
 		out = "…" + out
@@ -344,6 +357,47 @@ func Excerpt(text string, terms []string, maxLen int) string {
 		out += "…"
 	}
 	return CleanText(out)
+}
+
+// isSentenceStop 判断是否句末/句间分隔符。
+func isSentenceStop(r rune) bool {
+	switch r {
+	case '.', '!', '?', '\n', '。', '！', '？', '；', ';':
+		return true
+	}
+	return false
+}
+
+// nextBoundary 返回 [from, to) 内第一个分隔符之后的位置。
+func nextBoundary(runes []rune, from, to int) (int, bool) {
+	if from < 0 {
+		from = 0
+	}
+	if to > len(runes) {
+		to = len(runes)
+	}
+	for i := from; i < to; i++ {
+		if isSentenceStop(runes[i]) {
+			return i + 1, true
+		}
+	}
+	return 0, false
+}
+
+// prevBoundary 返回 [from, to) 内最后一个分隔符之后的位置。
+func prevBoundary(runes []rune, from, to int) (int, bool) {
+	if from < 0 {
+		from = 0
+	}
+	if to > len(runes) {
+		to = len(runes)
+	}
+	for i := to - 1; i >= from; i-- {
+		if isSentenceStop(runes[i]) {
+			return i + 1, true
+		}
+	}
+	return 0, false
 }
 
 // indexRunes 在 rune 切片中查找子串，返回 rune 下标（未命中返回 -1）。
