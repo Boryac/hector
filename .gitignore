@@ -92,3 +92,12 @@ ui/dist/*
 ui/node_modules/
 
 fly.toml
+# --- Hector ResearchOS 本地运行产物（不得入库）---
+.env.researchos
+data/
+bin/
+web/.build/
+web/.next/
+web/outbuild/
+*.exe
+web/node_modules/

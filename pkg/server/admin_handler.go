@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -38,7 +39,7 @@ type AdminHandler struct {
 	taskQueue      native.Queue // Optional: for queue admin endpoints
 	adminKey       string       // CLI-provided admin key for authentication
 	rootDir        string
-	reloadFunc     func()       // Optional: triggers config reload (same as SIGHUP)
+	reloadFunc     func() // Optional: triggers config reload (same as SIGHUP)
 }
 
 // AdminHandlerConfig configures the admin handler.
@@ -148,7 +149,13 @@ func (h *AdminHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // authenticateAdmin checks if the request has valid admin credentials.
+//
+// 比较使用常量时间实现：admin key 是单一长期凭据，逐字节短路的 == 比较会泄露
+// 正确前缀长度，配合高并发请求可被逐位爆破。
 func (h *AdminHandler) authenticateAdmin(r *http.Request) bool {
+	if h.adminKey == "" {
+		return false
+	}
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		return false
@@ -156,7 +163,7 @@ func (h *AdminHandler) authenticateAdmin(r *http.Request) bool {
 
 	// Support "Bearer <token>" format
 	token := strings.TrimPrefix(authHeader, "Bearer ")
-	return token == h.adminKey
+	return subtle.ConstantTimeCompare([]byte(token), []byte(h.adminKey)) == 1
 }
 
 // handleApps handles /admin/apps (list, create).

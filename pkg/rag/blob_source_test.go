@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -32,7 +33,7 @@ func TestBlobSource_LocalFileSystem(t *testing.T) {
 
 	// Create blob source with file:// URL
 	cfg := BlobSourceConfig{
-		URL:         "file://" + tmpDir,
+		URL:         fileURL(tmpDir),
 		Prefix:      "",
 		Include:     nil,                 // Include all
 		Exclude:     []string{".hidden"}, // Exclude specific hidden file (glob pattern .* is treated as extension)
@@ -108,7 +109,7 @@ func TestBlobSource_ReadDocument(t *testing.T) {
 	}
 
 	cfg := BlobSourceConfig{
-		URL:         "file://" + tmpDir,
+		URL:         fileURL(tmpDir),
 		MaxFileSize: 10 * 1024 * 1024,
 	}
 
@@ -146,7 +147,7 @@ func TestBlobSource_SupportsIncrementalIndexing(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	cfg := BlobSourceConfig{
-		URL:         "file://" + tmpDir,
+		URL:         fileURL(tmpDir),
 		MaxFileSize: 10 * 1024 * 1024,
 	}
 
@@ -240,7 +241,7 @@ func TestBlobSource_WithPrefix(t *testing.T) {
 
 	// Create blob source with prefix to only index docs/public/
 	cfg := BlobSourceConfig{
-		URL:         "file://" + tmpDir,
+		URL:         fileURL(tmpDir),
 		Prefix:      "docs/public/",
 		MaxFileSize: 10 * 1024 * 1024,
 	}
@@ -298,4 +299,16 @@ func TestBlobSource_WithPrefix(t *testing.T) {
 			t.Errorf("Document key %q doesn't start with prefix 'docs/public/'", key)
 		}
 	}
+}
+
+// fileURL 把本地目录转换为合法的 file:// URL。
+//
+// 直接拼 "file://" + Windows 路径会得到 file://C://dir，被 url.Parse 解析成
+// host="C" + 非法端口。file:///C:/dir 才是跨平台正确的写法。
+func fileURL(dir string) string {
+	p := filepath.ToSlash(dir)
+	if !strings.HasPrefix(p, "/") {
+		p = "/" + p
+	}
+	return "file://" + p
 }

@@ -1,21 +1,15 @@
 package server
 
-// Phase 0 security review — A2A Issue #2 identity isolation evidence.
+// A2A Issue #2 身份隔离回归测试。
 //
-// These tests document the trust boundary of `user_id` as of commit
-// abe472b6deb12b3dbba290dbec44cd3be27e163d (main).
+// 背景：上游 commit abe472b6（main）中 toInvocationMeta() 先用已验证的 JWT claims
+// 绑定 userID，随后又无条件允许客户端可控的 Message.Metadata["user_id"] 覆盖它。
+// 攻击者因此可以冒充任意用户；会话与任务存储以 (app_name, user_id, ...) 为键，
+// 配合可猜的 context_id 即可跨用户读写。
 //
-// Finding: toInvocationMeta() first binds userID to validated JWT claims,
-// then UNCONDITIONALLY lets client-supplied Message.Metadata["user_id"]
-// override it. A caller can therefore impersonate any user, and session /
-// task stores keyed on (app_name, user_id, ...) become cross-user accessible
-// together with a known/guessable context_id.
-//
-// The tests below PROVE the override behavior. They are expected to PASS
-// against the vulnerable code (i.e. they demonstrate the vulnerability).
-// After a fix (server-side identity binding: metadata must never override
-// claims), TestToInvocationMeta_MetadataMustNotOverrideClaims must be
-// updated to assert claims win, and this file renamed/split accordingly.
+// 现状：已修复（2026-11-04）。身份只认服务端校验结果；metadata 中的 user_id 被忽略
+// 并记录审计日志；未认证请求统一归入常量匿名身份 "anonymous"。
+// 下面的用例锁定修复后的行为，任何回退都会让它们失败。
 
 import (
 	"context"
@@ -27,70 +21,80 @@ import (
 	"github.com/verikod/hector/pkg/auth"
 )
 
-// TestToInvocationMeta_ForgedUserIDOverridesClaims demonstrates Issue #2:
-// an authenticated user "alice" can assert an arbitrary user_id ("bob")
-// via A2A message metadata, and the server accepts it.
-func TestToInvocationMeta_ForgedUserIDOverridesClaims(t *testing.T) {
-	claims := &auth.Claims{Subject: "alice"}
-	ctx := auth.ContextWithClaims(context.Background(), claims)
-
+// 已认证请求：metadata 里的 user_id 不得覆盖 claims.Subject。
+func TestToInvocationMeta_MetadataMustNotOverrideClaims(t *testing.T) {
+	ctx := auth.ContextWithClaims(context.Background(), &auth.Claims{Subject: "alice"})
 	reqCtx := &a2asrv.RequestContext{
 		ContextID: "session-abc",
 		TaskID:    "task-1",
-		Message: &a2a.Message{
-			Metadata: map[string]any{
-				// Attacker-controlled field:
-				"user_id": "bob",
-			},
-		},
+		Message:   &a2a.Message{Metadata: map[string]any{"user_id": "bob"}},
 	}
 
 	meta := toInvocationMeta(ctx, reqCtx)
 
-	if meta.userID != "bob" {
-		t.Fatalf("forged user_id not honored — got %q (vulnerability may be fixed; update this test)", meta.userID)
+	if meta.userID != "alice" {
+		t.Fatalf("身份必须来自已验证 claims：期望 alice，实际 %q（身份伪造漏洞回归）", meta.userID)
 	}
-	// Session key components are both client-influenced:
 	if meta.sessionID != "session-abc" {
-		t.Fatalf("expected client-provided context_id as sessionID, got %q", meta.sessionID)
+		t.Fatalf("context_id 仍应作为会话标识，实际 %q", meta.sessionID)
 	}
-	t.Logf("CONFIRMED: authenticated user %q is replaced by forged metadata user_id %q",
-		claims.Subject, meta.userID)
 }
 
-// TestToInvocationMeta_UnauthenticatedCallerPicksAnyUserID shows that without
-// auth the metadata field alone decides identity — full impersonation.
-func TestToInvocationMeta_UnauthenticatedCallerPicksAnyUserID(t *testing.T) {
+// 未认证请求：metadata 里的 user_id 不得被采纳。
+func TestToInvocationMeta_UnauthenticatedCannotPickUserID(t *testing.T) {
 	reqCtx := &a2asrv.RequestContext{
 		ContextID: "session-xyz",
-		Message: &a2a.Message{
-			Metadata: map[string]any{"user_id": "victim"},
-		},
+		Message:   &a2a.Message{Metadata: map[string]any{"user_id": "victim"}},
 	}
 
 	meta := toInvocationMeta(context.Background(), reqCtx)
-	if meta.userID != "victim" {
-		t.Fatalf("expected forged user_id %q, got %q", "victim", meta.userID)
+
+	if meta.userID == "victim" {
+		t.Fatal("未认证请求采纳了客户端提供的 user_id（身份伪造漏洞回归）")
 	}
-	t.Logf("CONFIRMED: unauthenticated request adopts arbitrary user_id %q", meta.userID)
+	if meta.userID != anonymousUserID {
+		t.Fatalf("未认证请求应归入 %q，实际 %q", anonymousUserID, meta.userID)
+	}
 }
 
-// TestToInvocationMeta_ClaimsUsedWhenNoMetadata documents the intended path
-// (claims.Subject) so the contrast with the forged case is explicit.
+// 没有 metadata 时使用 claims.Subject（正常路径不能被改坏）。
 func TestToInvocationMeta_ClaimsUsedWhenNoMetadata(t *testing.T) {
 	ctx := auth.ContextWithClaims(context.Background(), &auth.Claims{Subject: "alice"})
-	reqCtx := &a2asrv.RequestContext{ContextID: "s1"}
-
-	meta := toInvocationMeta(ctx, reqCtx)
+	meta := toInvocationMeta(ctx, &a2asrv.RequestContext{ContextID: "s1"})
 	if meta.userID != "alice" {
-		t.Fatalf("expected claims subject, got %q", meta.userID)
+		t.Fatalf("期望 claims subject，实际 %q", meta.userID)
 	}
 }
 
-// TestToInvocationMeta_DefaultUserFallback documents the anonymous fallback.
-func TestToInvocationMeta_DefaultUserFallback(t *testing.T) {
+// 无 claims 且无 metadata：匿名常量。
+func TestToInvocationMeta_AnonymousFallback(t *testing.T) {
 	meta := toInvocationMeta(context.Background(), &a2asrv.RequestContext{})
-	if meta.userID != "default" {
-		t.Fatalf("expected default user, got %q", meta.userID)
+	if meta.userID != anonymousUserID {
+		t.Fatalf("期望 %q，实际 %q", anonymousUserID, meta.userID)
+	}
+}
+
+// metadata 里非字符串的 user_id 不应导致 panic 或被字符串化后使用。
+func TestToInvocationMeta_NonStringUserIDIgnored(t *testing.T) {
+	ctx := auth.ContextWithClaims(context.Background(), &auth.Claims{Subject: "carol"})
+	reqCtx := &a2asrv.RequestContext{
+		Message: &a2a.Message{Metadata: map[string]any{"user_id": 12345}},
+	}
+	meta := toInvocationMeta(ctx, reqCtx)
+	if meta.userID != "carol" {
+		t.Fatalf("期望 carol，实际 %q", meta.userID)
+	}
+}
+
+// 大小写/空白变体也不能绕过（历史实现直接取字符串，这里锁定不接受任何变体）。
+func TestToInvocationMeta_MetadataVariantsIgnored(t *testing.T) {
+	for _, key := range []string{"user_id", "userId", "UserID", "user"} {
+		reqCtx := &a2asrv.RequestContext{
+			Message: &a2a.Message{Metadata: map[string]any{key: "attacker"}},
+		}
+		meta := toInvocationMeta(context.Background(), reqCtx)
+		if meta.userID != anonymousUserID {
+			t.Fatalf("metadata key %q 影响了身份：%q", key, meta.userID)
+		}
 	}
 }

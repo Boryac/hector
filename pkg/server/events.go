@@ -20,6 +20,9 @@ const (
 	metaKeyTransfer  = "hector:transfer_to_agent"
 )
 
+// anonymousUserID 是未认证请求的唯一身份，替代历史上可被客户端伪造的 "default"。
+const anonymousUserID = "anonymous"
+
 // invocationMeta contains metadata for an invocation.
 type invocationMeta struct {
 	userID    string
@@ -45,23 +48,31 @@ func toInvocationMeta(ctx context.Context, reqCtx *a2asrv.RequestContext) invoca
 		meta.eventMeta["taskId"] = string(reqCtx.TaskID)
 	}
 
-	// Check for auth from context (Highest Priority)
-	// This ensures that if the request was authenticated (e.g. by API key),
-	// the session is bound to that user ID.
+	// 身份只认服务端校验过的凭据。
+	//
+	// 历史缺陷（A2A Issue #2）：这里曾用 reqCtx.Message.Metadata["user_id"] 覆盖
+	// claims.Subject，导致任何调用方都能在上报的 metadata 里写别人的 user_id，
+	// 从而读写他人会话与任务。A2A 规范把 metadata 定义为客户端可控的透传字段，
+	// 不具备身份语义，因此现在：
+	//   - 有 claims → 只用 claims.Subject；
+	//   - 无 claims → 归入常量匿名身份，绝不采用客户端传入的 user_id；
+	//   - metadata 里出现 user_id 时记审计日志（只记键的存在与冲突，不写具体值）。
 	if claims := auth.ClaimsFromContext(ctx); claims != nil {
 		meta.userID = claims.Subject
 	}
 
-	// Extract user ID from message metadata (Override if explicitly provided in A2A message)
 	if reqCtx.Message != nil && reqCtx.Message.Metadata != nil {
 		if uid, ok := reqCtx.Message.Metadata["user_id"].(string); ok {
-			meta.userID = uid
+			slog.Warn("ignored client-supplied user_id in message metadata",
+				"authenticated_subject", meta.userID,
+				"reason", "metadata is client-controlled and carries no identity guarantees")
+			_ = uid
 		}
 	}
 
-	// Default user ID
+	// 匿名身份是固定常量，避免不同匿名调用方被合并成同一个可变身份。
 	if meta.userID == "" {
-		meta.userID = "default"
+		meta.userID = anonymousUserID
 	}
 
 	return meta

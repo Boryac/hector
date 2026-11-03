@@ -1,0 +1,62 @@
+# Hector ResearchOS 生产镜像（多阶段）
+#
+# 构建：
+#   docker build -f Dockerfile.researchos -t hector-researchos:1.0.0 .
+# 运行：
+#   docker run --rm -p 8080:8080 \
+#     -e RESEARCHOS_DATABASE_URL=postgres://postgres:postgres@db:5432/researchos?sslmode=disable \
+#     -e RESEARCHOS_API_TOKEN=change-me \
+#     hector-researchos:1.0.0
+#
+# 说明：
+#   - 只构建 internal/researchos 这条产品链路，不打包上游 studio/ 与旧的 chat 前端；
+#   - 前端静态产物在构建期生成，运行期由 Go 服务的 RESEARCHOS_WEB_DIR 托管；
+#   - 运行用户为非 root，数据目录固定 /data，便于挂载卷。
+
+# ---------- 前端构建 ----------
+FROM node:20-alpine AS web
+WORKDIR /src/web
+# 先只拷贝依赖清单，命中 Docker 层缓存
+COPY web/package.json web/package-lock.json* ./
+RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+COPY web/ ./
+# Next.js 静态导出（output: 'export'，产物在 .build）
+RUN NEXT_TELEMETRY_DISABLED=1 npx next build
+
+# ---------- Go 构建 ----------
+FROM golang:1.24-alpine AS build
+RUN apk add --no-cache git ca-certificates tzdata
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath \
+      -ldflags "-s -w -X main.Version=1.0.0" \
+      -o /out/researchos ./cmd/researchos
+
+# ---------- 运行镜像 ----------
+FROM alpine:3.20
+RUN apk add --no-cache ca-certificates tzdata wget && \
+    addgroup -g 10001 -S app && adduser -u 10001 -S app -G app && \
+    mkdir -p /data /app/web && chown -R app:app /data /app
+
+WORKDIR /app
+COPY --from=build /out/researchos /app/researchos
+COPY --from=web /src/web/.build /app/web
+
+ENV RESEARCHOS_ADDR=0.0.0.0:8080 \
+    RESEARCHOS_DATA_DIR=/data \
+    RESEARCHOS_WEB_DIR=/app/web \
+    RESEARCHOS_RESPECT_ROBOTS=true \
+    RESEARCHOS_WORKERS=4
+
+USER app
+EXPOSE 8080
+
+# 健康检查走免鉴权端点
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:8080/api/v1/health >/dev/null || exit 1
+
+# 先迁移再启动（迁移幂等）
+ENTRYPOINT ["/app/researchos"]
+CMD ["all"]
