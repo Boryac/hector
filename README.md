@@ -78,6 +78,8 @@ docker compose up -d --build
 
 报告可导出 `.md` / `.html`（带 `Authorization` 的下载，Token 不出现在 URL 里）。
 
+逐步的操作说明（建任务 → 批准 → 看过程 → 拿报告 → 用 API）见 [`docs/USAGE.md`](docs/USAGE.md)。
+
 ---
 
 ## 工作流长什么样
@@ -193,6 +195,7 @@ bash scripts/screenshot.sh                     # 生成界面截图（需可用�
 
 | 文档 | 内容 |
 |---|---|
+| [`docs/USAGE.md`](docs/USAGE.md) | 使用手册：界面操作顺序、API 调用、常见问题与排查 |
 | [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) | 表结构、状态机全矩阵、队列并发语义、恢复路径 |
 | [`api/openapi.yaml`](api/openapi.yaml) | REST + SSE 契约（含身份与错误语义） |
 | [`docs/hector-audit.md`](docs/hector-audit.md) | 上游源码审计与复用结论 |

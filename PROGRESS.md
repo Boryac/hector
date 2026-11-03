@@ -154,3 +154,8 @@
   4. 长度上限 120 字把英文正常长句全判掉（报告一度只剩 3 条结论）→ 改成「≤300 字且句末标点 ≤2」的语义判据。
 - 遗留问题 / 假设：无 LLM 时规则抽取做不到「筛选 10 个项目并做竞争分析」，报告里 7 条结论多为单一来源简介、部分偏营销句；已在报告「方法与局限性」、`docs/demo.md` §2.1、`docs/benchmark.md` §4 三处写明。截图与录屏需图形界面，未产出。
 - 下一步：最终交付报告与 Git 提交。
+
+### 2026-11-03 — [docs] 新增使用手册 docs/USAGE.md
+- 做了什么：按界面真实点击顺序写使用手册（确认在跑 → 打开界面 → 建任务 → 批准 → 看五个 Tab → 导出报告 → API 调用 → FAQ → 停止清理）。README 增加入口与文档索引条目。
+- 事实核对：写完后逐条对照代码核了三个容易写错的点并改掉——端口变量是 `RESEARCHOS_ADDR`（不是 `RESEARCHOS_PORT`）、LLM 变量是 `RESEARCHOS_LLM_API_KEY` + `RESEARCHOS_LLM_PROVIDER`、来源状态是 `robots_blocked`（不是 `robots_denied`）；补充 `RESEARCHOS_REQUIRE_APPROVAL` 对批准闸门的控制，以及 `RESEARCHOS_ADDR` 改端口的方式。
+- 遗留问题 / 假设：手册里的耗时区间（quick 10–20s、standard 15–40s）取自本机此前实测任务，非本轮重新采集；外部检索配额波动时会明显偏长，已在正文标注为「本机实测」。
