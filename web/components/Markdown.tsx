@@ -1,7 +1,45 @@
 import React from 'react';
 
-// 轻量 Markdown 渲染（仅支持后端报告生成器实际使用的子集）。
-// 不使用 dangerouslySetInnerHTML，避免任何注入风险。
+// Lightweight Markdown renderer for the subset produced by the report
+// generator. No dangerouslySetInnerHTML: report content can never inject HTML.
+
+export function headingSlug(text: string): string {
+  const base = text
+    .replace(/^#+\s*/, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 64);
+  return `sec-${base || 'section'}`;
+}
+
+function decorate(text: string, keyPrefix: string): React.ReactNode[] {
+  const out: React.ReactNode[] = [];
+  const citationRe = /\[(\d+(?:\s*,\s*\d+)*)\]/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let n = 0;
+  while ((m = citationRe.exec(text)) !== null) {
+    if (m.index > last) out.push(...bold(text.slice(last, m.index), `${keyPrefix}-b${n}`));
+    const first = Number(m[1].split(',')[0].trim());
+    out.push(
+      <a key={`${keyPrefix}-c${n}`} className="citation-ref" href={`#cite-${first}`} title={`引用 ${m[1]}`}>
+        [{m[1].replace(/\s+/g, '')}]
+      </a>,
+    );
+    n += 1;
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(...bold(text.slice(last), `${keyPrefix}-b${n}`));
+  return out;
+}
+
+function bold(text: string, key: string): React.ReactNode[] {
+  if (!text) return [];
+  const parts = text.split(/\*\*([^*]+)\*\*/g);
+  return parts.map((part, i) => (i % 2 === 1 ? <strong key={`${key}-${i}`}>{part}</strong> : part));
+}
 
 function inline(text: string, keyPrefix: string): React.ReactNode[] {
   const nodes: React.ReactNode[] = [];
@@ -10,37 +48,25 @@ function inline(text: string, keyPrefix: string): React.ReactNode[] {
   let m: RegExpExecArray | null;
   let i = 0;
   while ((m = linkRe.exec(text)) !== null) {
-    if (m.index > last) nodes.push(text.slice(last, m.index));
+    if (m.index > last) nodes.push(...decorate(text.slice(last, m.index), `${keyPrefix}-t${i}`));
     const [, label, href] = m;
     if (/^https?:\/\//.test(href)) {
       nodes.push(
-        <a key={`${keyPrefix}-l${i++}`} href={href} target="_blank" rel="noopener noreferrer">
+        <a key={`${keyPrefix}-l${i}`} href={href} target="_blank" rel="noopener noreferrer">
           {label}
         </a>,
       );
     } else {
       nodes.push(label);
     }
+    i += 1;
     last = m.index + m[0].length;
   }
-  if (last < text.length) nodes.push(text.slice(last));
-
-  // 处理加粗
-  const result: React.ReactNode[] = [];
-  nodes.forEach((node, idx) => {
-    if (typeof node !== 'string') {
-      result.push(node);
-      return;
-    }
-    const parts = node.split(/\*\*([^*]+)\*\*/g);
-    parts.forEach((p, j) => {
-      result.push(j % 2 === 1 ? <strong key={`${keyPrefix}-b${idx}-${j}`}>{p}</strong> : p);
-    });
-  });
-  return result;
+  if (last < text.length) nodes.push(...decorate(text.slice(last), `${keyPrefix}-t${i}`));
+  return nodes;
 }
 
-export function Markdown({ source }: { source: string }) {
+export function Markdown({ source, className }: { source: string; className?: string }) {
   const lines = source.split('\n');
   const out: React.ReactNode[] = [];
   let i = 0;
@@ -55,25 +81,37 @@ export function Markdown({ source }: { source: string }) {
   while (i < lines.length) {
     const line = lines[i].trimEnd();
     const trimmed = line.trim();
-    if (!trimmed) { i++; continue; }
+    if (!trimmed) { i += 1; continue; }
 
     if (trimmed.startsWith('### ')) {
-      out.push(<h3 key={`h3-${key++}`}>{inline(trimmed.slice(4), `h3-${key}`)}</h3>);
-      i++; continue;
+      const text = trimmed.slice(4);
+      out.push(<h3 key={`h3-${key}`} id={headingSlug(text)}>{inline(text, `h3-${key++}`)}</h3>);
+      i += 1; continue;
     }
     if (trimmed.startsWith('## ')) {
-      out.push(<h2 key={`h2-${key++}`}>{inline(trimmed.slice(3), `h2-${key}`)}</h2>);
-      i++; continue;
+      const text = trimmed.slice(3);
+      out.push(<h2 key={`h2-${key}`} id={headingSlug(text)}>{inline(text, `h2-${key++}`)}</h2>);
+      i += 1; continue;
     }
     if (trimmed.startsWith('# ')) {
-      out.push(<h1 key={`h1-${key++}`}>{inline(trimmed.slice(2), `h1-${key}`)}</h1>);
-      i++; continue;
+      const text = trimmed.slice(2);
+      out.push(<h1 key={`h1-${key}`} id={headingSlug(text)}>{inline(text, `h1-${key++}`)}</h1>);
+      i += 1; continue;
+    }
+    if (trimmed.startsWith('> ')) {
+      const quote: string[] = [];
+      while (i < lines.length && lines[i].trim().startsWith('> ')) {
+        quote.push(lines[i].trim().slice(2));
+        i += 1;
+      }
+      out.push(<blockquote key={`q-${key++}`}>{inline(quote.join(' '), `q-${key}`)}</blockquote>);
+      continue;
     }
     if (trimmed.startsWith('- ')) {
       const items: string[] = [];
       while (i < lines.length && lines[i].trim().startsWith('- ')) {
         items.push(lines[i].trim().slice(2));
-        i++;
+        i += 1;
       }
       flushList(items, false, `ul-${key++}`);
       continue;
@@ -82,7 +120,7 @@ export function Markdown({ source }: { source: string }) {
       const items: string[] = [];
       while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
         items.push(lines[i].trim().replace(/^\d+\.\s/, ''));
-        i++;
+        i += 1;
       }
       flushList(items, true, `ol-${key++}`);
       continue;
@@ -93,7 +131,7 @@ export function Markdown({ source }: { source: string }) {
       const rows: string[][] = [];
       while (i < lines.length && lines[i].trim().startsWith('|')) {
         rows.push(lines[i].trim().replace(/^\||\|$/g, '').split('|').map((s) => s.trim()));
-        i++;
+        i += 1;
       }
       out.push(
         <table key={`tbl-${key++}`}>
@@ -109,8 +147,9 @@ export function Markdown({ source }: { source: string }) {
       );
       continue;
     }
-    out.push(<p key={`p-${key++}`}>{inline(trimmed, `p-${key}`)}</p>);
-    i++;
+    out.push(<p key={`p-${key}`}>{inline(trimmed, `p-${key++}`)}</p>);
+    i += 1;
   }
-  return <div className="report">{out}</div>;
+
+  return <div className={className ?? 'md'}>{out}</div>;
 }
