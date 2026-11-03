@@ -251,6 +251,18 @@ python scripts/mock-llm.py --port 11434
 
 关于 `scripts/mock-llm.py` 的定位必须说清楚：它不做任何推理，只按提示词类型返回预置 JSON，并且**故意**在每次抽取里混一条编造引文和一条不存在的 `source_id`。它的作用是证明「引擎没有盲信模型输出」——正常跑完 `dropped_ungrounded` 应该 ≥2。用它产出的报告**不能**当作模型质量证据。
 
+### 让校验脚本自己证明会失败
+
+一个永远打 PASS 的校验脚本等于没有校验。`verify-citations.py` 支持用 `--md-file` 把报告换成改坏的本地副本，用来确认对应检查项真的会 FAIL：
+
+```bash
+# 把「争议与不确定性」章节内容替换成「未检测到冲突」，再让脚本判定
+python scripts/verify-citations.py --task <task-id> \
+    --md-file /tmp/report_tampered.md
+```
+
+预期输出 `[FAIL] 冲突披露  有 N 条冲突结论，但报告写「未检测到冲突」`，退出码 1。改坏的副本可以自己在报告导出物上编辑，没人替你兜底——这条路径专门用来防「检查项写错键名、恒真通过」这类问题。
+
 ---
 
 ## 9. 停止与清理

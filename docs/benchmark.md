@@ -75,7 +75,7 @@ search 节点，共 12 路外部请求并发打向 bing/wikipedia，多路触发
 | `textutil` | 74.0% | 正文清洗、模板剥离、截断、逐字子串保证 |
 | `planner` | 73.3% | 计划归一化、环检测、检索式优先级 |
 | `fetch` | 37.8% | robots、SSRF 守卫、JSON 渲染 |
-| `exec` | 31.3% | 结论闸门、相关性、交叉验证状态映射、永久错误分类 |
+| `exec` | 32.2% | 结论闸门、相关性、交叉验证状态映射、永久错误分类 |
 | `search` | 19.7% | 去重、降级、语言路由、市场选择 |
 | `api` | 12.7% | 鉴权中间件、SSE ticket 全生命周期（新增 24 条） |
 | `db` / `store` / `worker` | 0.0% | 以端到端与故障注入验证，见 §2.1 |
@@ -112,6 +112,8 @@ search 节点，共 12 路外部请求并发打向 bing/wikipedia，多路触发
 | 交叉验证 / 冲突识别 | 集群 3 组：supported=2、conflicting=2、unverified=1，冲突双方共享冲突组 | `RESEARCHOS_TEST_DSN=... go test ./internal/researchos/exec -run TestVerifyIntegration` |
 | 中断恢复 | 强杀 Worker → 租约过期 → 接管，8/8 节点完成，停机前已完成节点 attempts 保持 1 | `scripts/fault-injection.sh`（PASS） |
 | 节点重试语义 | 确定性失败 attempts=1（修复前 3 次）；人工 retry 后 attempts=2；对已完成节点 retry → 409 | `POST /nodes/{id}/retry` 实测 |
+| 校验脚本自证会失败 | 篡改报告后冲突检查判 FAIL（`有 2 条冲突结论，但报告写「未检测到冲突」`），退出码 1 | `verify-citations.py --md-file <篡改副本>` |
+| 验证措辞准确性 | 同站点两页面数值相同不再写「多来源」（改为「N 个来源页面」）；`0 vs 23.6` 的相对差异由 `2359999999900%` 修正为 `100%` | `aad4e77b` 实测 notes；`TestRelativeSpreadEdgeCases` |
 
 ### 3.1 未实测项（明确标注）
 

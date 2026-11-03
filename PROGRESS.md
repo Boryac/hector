@@ -201,3 +201,9 @@
 - 做了什么：`docs/USAGE.md` 增加 ticket 四条硬规则表、ticket 报错排查、LLM 开启后三处可见变化、验收脚本清单（`verify-citations.py` / `load-test.sh` / `fault-injection.sh` / `mock-llm.py`）；`api/openapi.yaml` 加 ticket 端点与 401/403 语义；`docs/security-review.md` 新增 §1.8（泄露面、方案、验证表、剩余风险）；`ARCHITECTURE.md` §5 重写；README 状态表按本轮实测改（含「LLM 链路已验证 / 真实质量未验证」的区分）。
 - 测试结果：`python -c "yaml.safe_load(openapi.yaml)"` 通过，25 条 path、ticket 端点与 events 参数可读；`tsc --noEmit` 与 `next build` 通过。
 - 遗留问题 / 假设：真实大模型质量、Docker、浏览器截图仍是未验证项，已在 README 与 `docs/benchmark.md` §3.1 标注。
+
+### 2026-11-03 — [T7.8] 提交后复验：校验脚本与验证措辞的三处真缺陷
+- 做了什么：双仓提交后再跑一遍端到端，用 LLM 模式任务（测试替身）复核冲突披露，连着抓出三个缺陷并修掉——① `verify-citations.py` 把状态名写成 `conflicted` / `verified`（真实值为 `conflicting` / `supported`），两个键都不存在，冲突检查恒真 PASS；② `detectConflict` 只数数值个数不看来源页数，同一站点两条结论数值相同也写「多来源数值一致」；③ 相对差异在最小值为 0 时把分母换成 `1e-9`，全零算出 `-100%`、`0 vs 23.6` 算出 `2359999999900%`。
+- 测试结果：`TestDetectConflictSingleSourceWording` / `TestRelativeSpreadEdgeCases` 新增并通过；`go test ./internal/researchos/...` 全绿，`go vet` 干净。线上三连跑（`fd08c2b0` → `082a3def` → `aad4e77b`）逐次验证措辞收敛：最后一条为「不同来源页面上的数值差异显著（最小 0 / 最大 23.6，相对差异 100%，涉及 2 个来源页面）」，配置项状态同时给出「仅 1 个来源页面，数值无跨来源可比」。`verify-citations.py` 对 `aad4e77b` 判 PASS，对篡改副本判 FAIL（`--md-file` 负向验证）。
+- 过程中的坑与修复：`b16455ba` 旧数据里 `source_count=1` 与 notes 的「多来源」自相矛盾，由此才顺线查到 ②③ 两处；`/tmp` 在 Windows Python 下不可写（Git Bash 的 `/tmp` 与 Windows Python 不互通），中间产物统一落 `.devtools/`。
+- 遗留问题 / 假设：真实大模型质量仍未验证（无 Key），这三处修复本身不改变「测试替身不做推理」的事实。

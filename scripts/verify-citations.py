@@ -61,6 +61,8 @@ def main():
     ap.add_argument("--base", default="http://127.0.0.1:8080")
     ap.add_argument("--token", default="local-dev-token")
     ap.add_argument("--task", required=True)
+    ap.add_argument("--md-file", default="",
+                    help="用本地报告文件代替线上报告，便于做负向验证（改坏报告看检查是否会失败）")
     args = ap.parse_args()
     base, tok, task = args.base.rstrip("/"), args.token, args.task
     c = Checker()
@@ -75,7 +77,12 @@ def main():
 
     ev = http_json("%s/api/v1/research/%s/evidence?limit=500" % (base, task), tok)
     src = http_json("%s/api/v1/research/%s/sources?limit=500" % (base, task), tok)
-    md = http_text("%s/api/v1/research/%s/report.md" % (base, task), tok)
+    if args.md_file:
+        with open(args.md_file, encoding="utf-8") as f:
+            md = f.read()
+        print("  （报告取自本地文件 %s）" % args.md_file)
+    else:
+        md = http_text("%s/api/v1/research/%s/report.md" % (base, task), tok)
 
     claims = ev.get("items") or []
     sources = {s["id"]: s for s in (src.get("items") or [])}
@@ -141,20 +148,35 @@ def main():
     m2 = re.search(r"^## 争议与不确定性\s*$(.*?)(?=^## |\Z)", md, re.S | re.M)
     if m2:
         dispute = m2.group(1)
-    conflicted = by_status.get("conflicted", 0)
+    # 状态名必须与 domain.Claim* 常量逐字一致：conflicting / supported / partially_supported /
+    # unverified / refuted。这里曾写成 conflicted 与 verified，两个键都不存在，
+    # 于是无论报告有没有披露冲突都会落到「无冲突结论」分支——一个恒真的假 PASS。
+    conflicted = by_status.get("conflicting", 0)
     unverified = by_status.get("unverified", 0)
+    conflicted_claims = [cl for cl in claims if cl.get("status") == "conflicting"]
     if conflicted and "未检测到" in dispute:
         c.fail("冲突披露", "有 %d 条冲突结论，但报告写「未检测到冲突」" % conflicted)
-    elif conflicted and str(conflicted) not in dispute and "冲突" not in dispute:
-        c.fail("冲突披露", "有 %d 条冲突结论，报告争议章节未列出" % conflicted)
     elif conflicted:
-        c.ok("冲突披露", "%d 条冲突结论已在争议章节列出" % conflicted)
+        # 只查「冲突」二字太松，报告模板里本来就有该词。
+        # 要求至少一条冲突结论的陈述片段真的出现在争议章节里。
+        nd = norm(dispute)
+        hit = 0
+        for cl in conflicted_claims:
+            head = norm(cl.get("statement"))[:24]
+            if head and head in nd:
+                hit += 1
+        if not dispute.strip():
+            c.fail("冲突披露", "有 %d 条冲突结论，但报告没有「争议与不确定性」章节" % conflicted)
+        elif hit == 0:
+            c.fail("冲突披露", "有 %d 条冲突结论，争议章节未出现任何一条" % conflicted)
+        else:
+            c.ok("冲突披露", "%d 条冲突结论已在争议章节列出（命中 %d 条）" % (conflicted, hit))
     else:
         c.ok("冲突披露", "无冲突结论，报告声明一致")
     if unverified:
         c.note("存在 %d 条未验证结论（单来源或引用不足），需人工判断可信度" % unverified)
 
-    verified = by_status.get("verified", 0)
+    verified = by_status.get("supported", 0)
     if verified:
         c.ok("交叉验证生效", "%d 条结论通过多来源验证" % verified)
     else:
