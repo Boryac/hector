@@ -421,6 +421,30 @@ paths:
               schema: { type: string }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /api/v1/research/{id}/report.pdf:
+    get:
+      tags: [report]
+      summary: 导出 PDF（服务端排版，内嵌 CJK 字体，含页码与分页）
+      description: |
+        由报告 Markdown 服务端真实排版生成，不是 HTML 改名。
+        字体默认内嵌 Noto Sans SC（OFL），可用环境变量 RESEARCHOS_PDF_FONT 指定其他
+        glyf 型 TTF；排版不含时间戳，同一输入产出字节级相同的文件。
+      parameters:
+        - { $ref: '#/components/parameters/TaskID' }
+        - { name: version, in: query, schema: { type: integer, minimum: 1 }, description: 指定版本，缺省取最新 }
+      responses:
+        '200':
+          description: PDF 文档
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500':
+          description: 排版失败（如自定义字体不可读）
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
   /api/v1/research/{id}/agents:
     get:
       tags: [research]

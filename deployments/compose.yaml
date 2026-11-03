@@ -1,41 +1,103 @@
-# Hector ResearchOS — Docker Compose 模板（Codex 按实际服务名与端口补齐，不得直接照抄未验证）
+# Hector ResearchOS — 生产编排（单机 app + postgres）
+#
+# 与仓库根部 docker-compose.yaml 的区别：根部那份是本地一键体验版（默认只绑 127.0.0.1、
+# 审批默认关闭、日志不轮转）；这份供真实服务器使用，多了日志轮转、内存上限、
+# 更严格的默认值。两者构建同一个镜像（upstream/hector/Dockerfile.researchos），
+# 不存在两份实现。
+#
+# 用法：
+#   cd hector-researchos-codex-pack
+#   cp deployments/.env.example deployments/.env    # 填 RESEARCHOS_API_TOKEN / POSTGRES_PASSWORD
+#   docker compose -f deployments/compose.yaml --env-file deployments/.env up -d --build
+#   docker compose -f deployments/compose.yaml logs -f app
+#
+# 首次启动：app 入口先执行 `researchos migrate`（幂等），再 `all`（API + worker 同进程）。
+# 需要横向扩 worker 时把 app 拆成 serve / worker 两个 service，见 DEPLOYMENT.md 第 5 节。
+
+name: hector-researchos
+
 services:
-  postgres:
-    image: pgvector/pgvector:pg16
+  db:
+    image: postgres:16-alpine
     environment:
-      POSTGRES_USER: hector
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
-      POSTGRES_DB: hector
-    ports: ["5432:5432"]
-    volumes: [postgres_data:/var/lib/postgresql/data]
+      POSTGRES_USER: ${POSTGRES_USER:-researchos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?必须设置 POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-researchos}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hector"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-researchos} -d ${POSTGRES_DB:-researchos}"]
       interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    ports:
+      # 只绑本机：数据库不对外暴露，需要远程访问请走 SSH 隧道
+      - "127.0.0.1:${POSTGRES_PORT:-55432}:5432"
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  app:
+    image: hector-researchos:${RESEARCHOS_VERSION:-1.0.0}
+    build:
+      context: ../upstream/hector
+      dockerfile: Dockerfile.researchos
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      RESEARCHOS_ADDR: 0.0.0.0:8080
+      RESEARCHOS_DATABASE_URL: postgres://${POSTGRES_USER:-researchos}:${POSTGRES_PASSWORD:?必须设置 POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-researchos}?sslmode=disable
+      # 必填，未设置时 compose 直接报错退出，不静默使用默认 token
+      RESEARCHOS_API_TOKEN: ${RESEARCHOS_API_TOKEN:?必须设置 RESEARCHOS_API_TOKEN}
+      RESEARCHOS_LOCAL_USER: ${RESEARCHOS_LOCAL_USER:-local-user}
+      RESEARCHOS_DATA_DIR: /data
+      RESEARCHOS_WEB_DIR: /app/web
+      # 主密钥：设置后密钥由环境变量提供；留空则用 /data/secret.key（落在 appdata 卷上）
+      RESEARCHOS_SECRET_KEY: ${RESEARCHOS_SECRET_KEY:-}
+      RESEARCHOS_WORKERS: ${RESEARCHOS_WORKERS:-4}
+      RESEARCHOS_MAX_AGENTS: ${RESEARCHOS_MAX_AGENTS:-4}
+      RESEARCHOS_NODE_TIMEOUT: ${RESEARCHOS_NODE_TIMEOUT:-180s}
+      RESEARCHOS_REQUIRE_APPROVAL: ${RESEARCHOS_REQUIRE_APPROVAL:-true}
+      RESEARCHOS_RESPECT_ROBOTS: ${RESEARCHOS_RESPECT_ROBOTS:-true}
+      RESEARCHOS_SEARCH_PROVIDERS: ${RESEARCHOS_SEARCH_PROVIDERS:-github,hackernews,wikipedia}
+      # 以下凭据留空即降级：LLM 走启发式规划，检索只用免密钥 Provider。
+      # 也可以启动后在「设置 → 模型 / 搜索」里填，即时生效、无需重建容器。
+      RESEARCHOS_LLM_PROVIDER: ${RESEARCHOS_LLM_PROVIDER:-none}
+      RESEARCHOS_LLM_API_KEY: ${RESEARCHOS_LLM_API_KEY:-}
+      RESEARCHOS_LLM_MODEL: ${RESEARCHOS_LLM_MODEL:-}
+      RESEARCHOS_LLM_BASE_URL: ${RESEARCHOS_LLM_BASE_URL:-}
+      RESEARCHOS_GITHUB_TOKEN: ${RESEARCHOS_GITHUB_TOKEN:-}
+      RESEARCHOS_TAVILY_API_KEY: ${RESEARCHOS_TAVILY_API_KEY:-}
+      RESEARCHOS_SERPAPI_KEY: ${RESEARCHOS_SERPAPI_KEY:-}
+      RESEARCHOS_BRAVE_API_KEY: ${RESEARCHOS_BRAVE_API_KEY:-}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${APP_BIND:-127.0.0.1}:${APP_PORT:-8080}:8080"
+    volumes:
+      - appdata:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/v1/health"]
+      interval: 30s
       timeout: 5s
-      retries: 10
-  redis:
-    image: redis:7-alpine
-    ports: ["6379:6379"]
-    profiles: ["optional"]
-  api:
-    build: {context: .., dockerfile: Dockerfile}
-    command: ["./api"]
-    environment:
-      DATABASE_URL: postgres://hector:${POSTGRES_PASSWORD:-changeme}@postgres:5432/hector?sslmode=disable
-    ports: ["8080:8080"]
-    depends_on: {postgres: {condition: service_healthy}}
-  worker:
-    build: {context: .., dockerfile: Dockerfile}
-    command: ["./worker"]
-    environment:
-      DATABASE_URL: postgres://hector:${POSTGRES_PASSWORD:-changeme}@postgres:5432/hector?sslmode=disable
-      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-4}
-    depends_on: {postgres: {condition: service_healthy}}
-  web:
-    build: {context: ../web, dockerfile: Dockerfile}
-    ports: ["3000:3000"]
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
-    depends_on: [api]
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: ${APP_MEMORY_LIMIT:-2g}
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
 volumes:
-  postgres_data:
+  pgdata:
+  appdata:
+    # 存放网页原文快照，以及未设置 RESEARCHOS_SECRET_KEY 时生成的主密钥 secret.key
