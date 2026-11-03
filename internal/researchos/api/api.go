@@ -23,6 +23,7 @@ import (
 	"github.com/verikod/hector/internal/researchos/llm"
 	"github.com/verikod/hector/internal/researchos/planner"
 	"github.com/verikod/hector/internal/researchos/search"
+	"github.com/verikod/hector/internal/researchos/settings"
 	"github.com/verikod/hector/internal/researchos/store"
 )
 
@@ -39,6 +40,11 @@ type Server struct {
 
 	requireApproval bool
 
+	// Settings 是设置中心。非 nil 时，Cfg / LLM / Search / Planner 一律以它的
+	// 运行时快照为准——用户改了模型或搜索配置，下一个请求就生效。
+	// 为 nil 时回退到构造时注入的静态值（便于单测直接构造 Server）。
+	Settings *settings.Manager
+
 	// tickets 存放 SSE 一次性 ticket（短时、绑定任务、用完即销毁）。
 	tickets    *ticketStore
 	ticketOnce sync.Once
@@ -54,6 +60,7 @@ type Options struct {
 	Pool            *pgxpool.Pool
 	RequireApproval bool
 	Version         string
+	Settings        *settings.Manager
 }
 
 // NewServer 创建服务。
@@ -62,7 +69,59 @@ func NewServer(opts Options) *Server {
 		Cfg: opts.Cfg, Store: opts.Store, Planner: opts.Planner, LLM: opts.LLM,
 		Search: opts.Search, Pool: opts.Pool, StartedAt: time.Now(),
 		Version: opts.Version, requireApproval: opts.RequireApproval,
+		Settings: opts.Settings,
 	}
+}
+
+// runtime 返回当前生效快照；未接入设置中心时为 nil。
+func (s *Server) runtime() *settings.Runtime {
+	if s.Settings == nil {
+		return nil
+	}
+	return s.Settings.Runtime()
+}
+
+// cfg 返回当前生效配置。
+//
+// 返回副本而不是指针：设置中心可能正在替换配置，把指针递出去会让调用方
+// 读到一半新一半旧的字段。
+func (s *Server) cfg() config.Config {
+	if rt := s.runtime(); rt != nil {
+		return rt.Cfg
+	}
+	if s.Cfg == nil {
+		return config.Config{}
+	}
+	return *s.Cfg
+}
+
+func (s *Server) llmClient() llm.Client {
+	if rt := s.runtime(); rt != nil && rt.LLM != nil {
+		return rt.LLM
+	}
+	return s.LLM
+}
+
+func (s *Server) searchEngine() *search.Engine {
+	if rt := s.runtime(); rt != nil && rt.Search != nil {
+		return rt.Search
+	}
+	return s.Search
+}
+
+func (s *Server) plannerNow() planner.Planner {
+	if rt := s.runtime(); rt != nil && rt.Planner != nil {
+		return rt.Planner
+	}
+	return s.Planner
+}
+
+// approvalRequired 返回当前审批策略（设置中心可热改）。
+func (s *Server) approvalRequired() bool {
+	if rt := s.runtime(); rt != nil {
+		return rt.Cfg.RequireApproval
+	}
+	return s.approvalRequired()
 }
 
 // Handler 返回带中间件的路由。
@@ -71,7 +130,12 @@ func (s *Server) Handler() http.Handler {
 
 	mux.HandleFunc("GET /api/v1/health", s.handleHealth)
 	mux.HandleFunc("GET /api/v1/settings", s.handleGetSettings)
-	mux.HandleFunc("PUT /api/v1/settings", s.handlePutSettings)
+	mux.HandleFunc("PUT /api/v1/settings/{section}", s.handlePutSection)
+	mux.HandleFunc("DELETE /api/v1/settings/{section}/{key}", s.handleClearSetting)
+	mux.HandleFunc("POST /api/v1/settings/llm/test", s.handleTestLLM)
+	mux.HandleFunc("POST /api/v1/settings/search/test", s.handleTestSearch)
+	mux.HandleFunc("GET /api/v1/system", s.handleSystemInfo)
+	mux.HandleFunc("GET /api/v1/stats", s.handleStats)
 
 	mux.HandleFunc("POST /api/v1/research", s.handleCreateResearch)
 	mux.HandleFunc("GET /api/v1/research", s.handleListResearch)
@@ -98,14 +162,22 @@ func (s *Server) Handler() http.Handler {
 
 	mux.HandleFunc("GET /api/v1/tools", s.handleListTools)
 	mux.HandleFunc("GET /api/v1/tools/calls", s.handleListToolCalls)
+	mux.HandleFunc("GET /api/v1/tools/servers", s.handleListMCPServers)
 	mux.HandleFunc("POST /api/v1/tools/servers", s.handleRegisterMCP)
-	mux.HandleFunc("POST /api/v1/tools/servers/{id}/{action}", s.handleMCPServerAction)
+	mux.HandleFunc("POST /api/v1/tools/servers/{id}/discover", s.handleDiscoverMCPTools)
+	mux.HandleFunc("POST /api/v1/tools/servers/{id}/approve", s.handleApproveMCP)
+	mux.HandleFunc("DELETE /api/v1/tools/servers/{id}", s.handleDeleteMCP)
+	mux.HandleFunc("POST /api/v1/tools/servers/{id}/{action}", s.handleStartMCPServer)
 
-	if s.Cfg.WebDir != "" {
-		mux.Handle("GET /", http.FileServer(http.Dir(s.Cfg.WebDir)))
+	mux.HandleFunc("GET /api/v1/sources", s.handleListAllSources)
+	mux.HandleFunc("GET /api/v1/reports", s.handleListAllReports)
+	mux.HandleFunc("GET /api/v1/agents", s.handleListRunningAgents)
+
+	if s.cfg().WebDir != "" {
+		mux.Handle("GET /", http.FileServer(http.Dir(s.cfg().WebDir)))
 	}
 
-	return withRecover(withCORS(s.Cfg.Addr, s.withAuth(mux)))
+	return withRecover(withCORS(s.cfg().Addr, s.withAuth(mux)))
 }
 
 // ---------------------------------------------------------------------------
@@ -152,7 +224,7 @@ func (s *Server) withAuth(next http.Handler) http.Handler {
 		}
 
 		got := bearerToken(r)
-		if subtle.ConstantTimeCompare([]byte(got), []byte(s.Cfg.APIToken)) != 1 {
+		if subtle.ConstantTimeCompare([]byte(got), []byte(s.cfg().APIToken)) != 1 {
 			writeErr(w, http.StatusUnauthorized, "unauthorized", "缺少或无效的 API Token")
 			return
 		}
@@ -242,7 +314,7 @@ func decodeJSON(r *http.Request, dst any) error {
 }
 
 // owner 返回当前请求的服务端身份（单用户本地模式下等价于本地用户）。
-func (s *Server) owner(*http.Request) string { return s.Cfg.LocalUser }
+func (s *Server) owner(*http.Request) string { return s.cfg().LocalUser }
 
 // withTimeout 为请求派生带超时的上下文。
 func withTimeout(r *http.Request, d time.Duration) (context.Context, context.CancelFunc) {

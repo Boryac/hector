@@ -13,6 +13,7 @@ import (
 
 	"github.com/verikod/hector/internal/researchos/db"
 	"github.com/verikod/hector/internal/researchos/domain"
+	"github.com/verikod/hector/internal/researchos/settings"
 )
 
 // ---------------------------------------------------------------------------
@@ -601,4 +602,55 @@ func (s *Store) ListToolCalls(ctx context.Context, taskID string, limit int) ([]
 		p.TaskID = pgtype.Text{String: taskID, Valid: true}
 	}
 	return s.Q.ListToolInvocations(ctx, p)
+}
+
+// LoadSettings 读取全部设置行（含 section / encrypted 元数据）。
+func (s *Store) LoadSettings(ctx context.Context) (map[string]settings.StoredValue, error) {
+	rows, err := s.Q.ListSettingRows(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[string]settings.StoredValue, len(rows))
+	for _, r := range rows {
+		var v any
+		if err := json.Unmarshal(r.Value, &v); err != nil {
+			// 解析不了就跳过：坏数据不该让整个设置中心打不开。
+			continue
+		}
+		out[r.Key] = settings.StoredValue{Value: v, Encrypted: r.Encrypted}
+	}
+	return out, nil
+}
+
+// SaveSettingRow 写入设置行（携带分组与加密标记）。
+func (s *Store) SaveSettingRow(ctx context.Context, key, section string, value any, encrypted bool, updatedBy string) error {
+	raw, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	return s.Q.UpsertSettingRow(ctx, db.UpsertSettingRowParams{
+		Key: key, Value: raw, Section: section, Encrypted: encrypted, UpdatedBy: updatedBy,
+	})
+}
+
+// DeleteSettingRow 删除设置行。
+func (s *Store) DeleteSettingRow(ctx context.Context, key string) error {
+	return s.Q.DeleteSettingRow(ctx, key)
+}
+
+// SetMCPServerApproved 设置审批状态并同步运行状态。
+func (s *Store) SetMCPServerApproved(ctx context.Context, id string, approved bool, status string) error {
+	return s.Q.SetMCPServerApproved(ctx, db.SetMCPServerApprovedParams{ID: id, Approved: approved, Status: status})
+}
+
+// UpdateMCPServerTools 写入工具发现结果。
+func (s *Store) UpdateMCPServerTools(ctx context.Context, id string, tools json.RawMessage, status, lastErr string) error {
+	return s.Q.UpdateMCPServerTools(ctx, db.UpdateMCPServerToolsParams{
+		ID: id, Tools: tools, Status: status, LastError: lastErr,
+	})
+}
+
+// DeleteMCPServer 删除 MCP 服务登记。
+func (s *Store) DeleteMCPServer(ctx context.Context, id string) error {
+	return s.Q.DeleteMCPServer(ctx, id)
 }

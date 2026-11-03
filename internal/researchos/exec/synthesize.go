@@ -38,8 +38,8 @@ func (e *Engine) runSynthesize(s *Session) (map[string]any, int, error) {
 
 	s.Progress(55, "构建报告结构")
 	modelNote := "本地确定性流程（未使用大模型）"
-	if e.LLM != nil && e.LLM.Available() {
-		modelNote = "LLM 规划 + 规则/LLM 混合抽取（" + e.LLM.Model() + "）"
+	if e.llmClient().Available() {
+		modelNote = "LLM 规划 + 规则/LLM 混合抽取（" + e.llmClient().Model() + "）"
 	}
 	rep, err := report.Build(report.Input{
 		Task:        s.Task,

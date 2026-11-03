@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -33,6 +34,8 @@ import (
 	"github.com/verikod/hector/internal/researchos/llm"
 	"github.com/verikod/hector/internal/researchos/planner"
 	"github.com/verikod/hector/internal/researchos/search"
+	"github.com/verikod/hector/internal/researchos/secrets"
+	"github.com/verikod/hector/internal/researchos/settings"
 	"github.com/verikod/hector/internal/researchos/store"
 	"github.com/verikod/hector/internal/researchos/worker"
 )
@@ -110,14 +113,15 @@ func slogLevel() slog.Level {
 // ---------------------------------------------------------------------------
 
 type app struct {
-	cfg     *config.Config
-	pool    *pgxpool.Pool
-	store   *store.Store
-	search  *search.Engine
-	fetcher *fetch.Fetcher
-	llm     llm.Client
-	planner planner.Planner
-	engine  *exec.Engine
+	cfg      *config.Config
+	pool     *pgxpool.Pool
+	store    *store.Store
+	search   *search.Engine
+	fetcher  *fetch.Fetcher
+	llm      llm.Client
+	planner  planner.Planner
+	engine   *exec.Engine
+	settings *settings.Manager
 }
 
 func bootstrap(ctx context.Context) (*app, error) {
@@ -142,41 +146,57 @@ func bootstrap(ctx context.Context) (*app, error) {
 		return nil, fmt.Errorf("数据库不可达（%s）: %w", config.RedactDSN(cfg.DatabaseURL), err)
 	}
 
-	var providers []search.Provider
-	engine, unknown := search.NewDefault(cfg.SearchProviders, search.ProviderOptions{
-		UserAgent: cfg.UserAgent, Timeout: cfg.SearchTimeout,
-		TavilyKey: cfg.TavilyAPIKey, SerpAPIKey: cfg.SerpAPIKey,
-		BraveKey: cfg.BraveAPIKey, GitHubToken: cfg.GitHubToken,
-	})
-	_ = providers
-	if len(unknown) > 0 {
-		slog.Warn("部分搜索 Provider 未识别，已忽略", "names", unknown)
-	}
-
-	fetcher := fetch.New(fetch.Options{
-		UserAgent: cfg.UserAgent, Timeout: cfg.FetchTimeout,
-		MaxBytes: cfg.FetchMaxBytes, RespectRobots: cfg.RespectRobots, DataDir: cfg.DataDir,
-	})
-
-	client := llm.New(llm.Config{
-		Provider: string(cfg.LLMProvider), APIKey: cfg.LLMAPIKey,
-		Model: cfg.LLMModel, BaseURL: cfg.LLMBaseURL, Timeout: cfg.LLMTimeout,
-	})
 	st := store.New(pool)
 
-	execCfg := exec.Config{
-		FetchConcurrency:     cfg.Workers,
-		MaxSourcesPerAnalyze: 6,
-		LeaseTTL:             cfg.StaleLease,
+	// 设置中心：把数据库里保存的运行配置叠加到环境变量之上。
+	// 环境变量是首次启动的种子与部署级唯一来源，Web 保存值优先（见 DECISIONS 第 29 条）。
+	keyFile := filepath.Join(cfg.DataDir, secrets.KeyFileName)
+	box, keySource, boxErr := secrets.FromEnvOrFile(os.Getenv(secrets.EnvKey), keyFile)
+	if boxErr != nil {
+		// 没有主密钥时敏感项不可写，但设置中心其余功能照常可用——不因此拒绝启动。
+		slog.Warn("主密钥不可用，敏感配置将无法通过界面保存", "err", boxErr)
+		box = nil
+		keySource = "unavailable: " + boxErr.Error()
 	}
-	eng := exec.New(st, engine, fetcher, client, execCfg)
+	backend := settings.StoreBackend{
+		Load: st.LoadSettings,
+		Save: st.SaveSettingRow,
+		Del:  st.DeleteSettingRow,
+	}
+	mgr := settings.NewManager(backend, box, keySource, *cfg)
+	if err := mgr.Reload(ctx); err != nil {
+		slog.Error("读取已保存设置失败，本次按环境变量基线运行", "err", err)
+	}
+	rt := mgr.Runtime()
+	if len(rt.SearchUnknown) > 0 {
+		slog.Warn("部分搜索 Provider 未识别，已忽略", "names", rt.SearchUnknown)
+	}
+	slog.Info("运行配置已装载",
+		"llm_provider", string(rt.Cfg.LLMProvider), "llm_enabled", rt.Cfg.LLMEnabled(),
+		"search_available", rt.Search.AvailableNames(), "settings_key_source", keySource)
+
+	fetcher := fetch.New(fetch.Options{
+		UserAgent: rt.Cfg.UserAgent, Timeout: rt.Cfg.FetchTimeout,
+		MaxBytes: rt.Cfg.FetchMaxBytes, RespectRobots: rt.Cfg.RespectRobots, DataDir: rt.Cfg.DataDir,
+	})
+
+	execCfg := exec.Config{
+		FetchConcurrency:     rt.Cfg.Workers,
+		MaxSourcesPerAnalyze: 6,
+		LeaseTTL:             rt.Cfg.StaleLease,
+	}
+	eng := exec.New(st, rt.Search, fetcher, rt.LLM, execCfg)
+	// 节点执行时向设置中心要「当前」客户端：用户改了模型或搜索源，下一个节点即生效。
+	eng.SetRuntime(func() (llm.Client, *search.Engine) {
+		cur := mgr.Runtime()
+		return cur.LLM, cur.Search
+	})
 
 	return &app{
-		cfg: cfg, pool: pool, store: st, search: engine, fetcher: fetcher,
-		llm: client, planner: planner.New(client), engine: eng,
+		cfg: cfg, pool: pool, store: st, search: rt.Search, fetcher: fetcher,
+		llm: rt.LLM, planner: rt.Planner, engine: eng, settings: mgr,
 	}, nil
 }
-
 
 func (a *app) close() { a.pool.Close() }
 
@@ -230,7 +250,7 @@ func runServe(args []string) error {
 
 	srv := api.NewServer(api.Options{
 		Cfg: a.cfg, Store: a.store, Planner: a.planner, LLM: a.llm, Search: a.search,
-		Pool: a.pool, RequireApproval: envBool("RESEARCHOS_REQUIRE_APPROVAL", true), Version: Version,
+		Pool: a.pool, RequireApproval: a.cfg.RequireApproval, Version: Version, Settings: a.settings,
 	})
 	httpSrv := &http.Server{
 		Addr:              a.cfg.Addr,
@@ -269,9 +289,13 @@ func runWorker(args []string) error {
 	if err := db.Migrate(ctx, a.pool); err != nil {
 		return err
 	}
+	wcfg := a.cfg
+	if rt := a.settings.Runtime(); rt != nil {
+		wcfg = &rt.Cfg
+	}
 	w := worker.New(a.store, a.engine, worker.Config{
-		Workers: a.cfg.Workers, NodeTimeout: a.cfg.NodeTimeout, TaskTimeout: a.cfg.TaskTimeout,
-		Lease: a.cfg.StaleLease, Tick: a.cfg.SchedulerTick, MaxAttempts: a.cfg.NodeMaxAttempts,
+		Workers: wcfg.Workers, NodeTimeout: wcfg.NodeTimeout, TaskTimeout: wcfg.TaskTimeout,
+		Lease: wcfg.StaleLease, Tick: wcfg.SchedulerTick, MaxAttempts: wcfg.NodeMaxAttempts,
 	})
 	if err := w.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
 		return err
@@ -295,9 +319,13 @@ func runAll(args []string) error {
 		return err
 	}
 
+	wcfg := a.cfg
+	if rt := a.settings.Runtime(); rt != nil {
+		wcfg = &rt.Cfg
+	}
 	w := worker.New(a.store, a.engine, worker.Config{
-		Workers: a.cfg.Workers, NodeTimeout: a.cfg.NodeTimeout, TaskTimeout: a.cfg.TaskTimeout,
-		Lease: a.cfg.StaleLease, Tick: a.cfg.SchedulerTick, MaxAttempts: a.cfg.NodeMaxAttempts,
+		Workers: wcfg.Workers, NodeTimeout: wcfg.NodeTimeout, TaskTimeout: wcfg.TaskTimeout,
+		Lease: wcfg.StaleLease, Tick: wcfg.SchedulerTick, MaxAttempts: wcfg.NodeMaxAttempts,
 	})
 	go func() {
 		if err := w.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
@@ -308,7 +336,7 @@ func runAll(args []string) error {
 
 	srv := api.NewServer(api.Options{
 		Cfg: a.cfg, Store: a.store, Planner: a.planner, LLM: a.llm, Search: a.search,
-		Pool: a.pool, RequireApproval: envBool("RESEARCHOS_REQUIRE_APPROVAL", true), Version: Version,
+		Pool: a.pool, RequireApproval: a.cfg.RequireApproval, Version: Version, Settings: a.settings,
 	})
 	httpSrv := &http.Server{
 		Addr:              a.cfg.Addr,

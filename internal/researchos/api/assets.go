@@ -2,16 +2,13 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 
-	"github.com/verikod/hector/internal/researchos/config"
 	"github.com/verikod/hector/internal/researchos/db"
 	"github.com/verikod/hector/internal/researchos/domain"
 	"github.com/verikod/hector/internal/researchos/report"
@@ -54,14 +51,14 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	resp["checks"] = map[string]any{
 		"database": dbCheck,
 		"llm": map[string]any{
-			"enabled":  s.Cfg.LLMEnabled(),
-			"provider": string(s.Cfg.LLMProvider),
-			"model":    s.Cfg.LLMModel,
-			"note":     noteIf(!s.Cfg.LLMEnabled(), "未配置 RESEARCHOS_LLM_API_KEY（或 RESEARCHOS_LLM_PROVIDER=none），规划与抽取降级为本地确定性流程"),
+			"enabled":  s.cfg().LLMEnabled(),
+			"provider": string(s.cfg().LLMProvider),
+			"model":    s.cfg().LLMModel,
+			"note":     noteIf(!s.cfg().LLMEnabled(), "未配置 RESEARCHOS_LLM_API_KEY（或 RESEARCHOS_LLM_PROVIDER=none），规划与抽取降级为本地确定性流程"),
 		},
 		"search": map[string]any{
-			"providers": s.Search.Names(),
-			"note":      noteIf(len(s.Search.Names()) == 0, "未配置任何搜索 Provider"),
+			"providers": s.searchEngine().Names(),
+			"note":      noteIf(len(s.searchEngine().Names()) == 0, "未配置任何搜索 Provider"),
 		},
 		"auth": map[string]any{"mode": "single-user-local"},
 	}
@@ -79,110 +76,6 @@ func noteIf(cond bool, note string) string {
 		return note
 	}
 	return ""
-}
-
-// ---------------------------------------------------------------------------
-// 设置
-// ---------------------------------------------------------------------------
-
-func (s *Server) handleGetSettings(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := withTimeout(r, 10*time.Second)
-	defer cancel()
-	stored := map[string]any{}
-	for _, key := range runtimeSettingKeys {
-		if raw, err := s.Store.GetSetting(ctx, key); err == nil && raw != nil {
-			var v any
-			if err := json.Unmarshal(raw, &v); err == nil {
-				stored[key] = v
-			}
-		}
-	}
-	writeJSON(w, http.StatusOK, map[string]any{
-		"runtime": stored,
-		"effective": map[string]any{
-			"max_agents":       s.Cfg.MaxAgents,
-			"workers":          s.Cfg.Workers,
-			"search_providers": s.Search.Names(),
-			"search_results":   s.Cfg.SearchResults,
-			"node_timeout":     s.Cfg.NodeTimeout.String(),
-			"task_timeout":     s.Cfg.TaskTimeout.String(),
-			"require_approval": s.requireApproval,
-			"planner_mode":     s.Cfg.PlannerMode(),
-			"respect_robots":   s.Cfg.RespectRobots,
-		},
-		"credentials": map[string]any{
-			"llm_api_key":  config.Mask(s.Cfg.LLMAPIKey),
-			"tavily":       config.Mask(s.Cfg.TavilyAPIKey),
-			"serpapi":      config.Mask(s.Cfg.SerpAPIKey),
-			"brave":        config.Mask(s.Cfg.BraveAPIKey),
-			"github_token": config.Mask(s.Cfg.GitHubToken),
-			"note":         "凭据只从环境变量读取，接口仅返回掩码",
-		},
-	})
-}
-
-var runtimeSettingKeys = []string{"max_agents", "require_approval", "default_depth", "search_results"}
-
-func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request) {
-	var body map[string]any
-	if err := decodeJSON(r, &body); err != nil {
-		writeErr(w, http.StatusBadRequest, "invalid_body", err.Error())
-		return
-	}
-	ctx, cancel := withTimeout(r, 10*time.Second)
-	defer cancel()
-	applied := map[string]any{}
-	for _, key := range runtimeSettingKeys {
-		v, ok := body[key]
-		if !ok {
-			continue
-		}
-		switch key {
-		case "max_agents":
-			n, ok := toInt(v)
-			if !ok || n < 1 || n > 8 {
-				writeErr(w, http.StatusUnprocessableEntity, "invalid_value", "max_agents 必须是 1-8 的整数")
-				return
-			}
-			s.Cfg.MaxAgents = n
-		case "require_approval":
-			b, ok := v.(bool)
-			if !ok {
-				writeErr(w, http.StatusUnprocessableEntity, "invalid_value", "require_approval 必须是布尔值")
-				return
-			}
-			s.requireApproval = b
-		case "search_results":
-			n, ok := toInt(v)
-			if !ok || n < 1 || n > 20 {
-				writeErr(w, http.StatusUnprocessableEntity, "invalid_value", "search_results 必须是 1-20 的整数")
-				return
-			}
-			s.Cfg.SearchResults = n
-		case "default_depth":
-			str, ok := v.(string)
-			if !ok || (str != "quick" && str != "standard" && str != "deep") {
-				writeErr(w, http.StatusUnprocessableEntity, "invalid_value", "default_depth 只能是 quick/standard/deep")
-				return
-			}
-		}
-		if err := s.Store.SetSetting(ctx, key, v); err != nil {
-			writeErr(w, http.StatusInternalServerError, "save_failed", err.Error())
-			return
-		}
-		applied[key] = v
-	}
-	writeJSON(w, http.StatusOK, map[string]any{"applied": applied})
-}
-
-func toInt(v any) (int, bool) {
-	switch n := v.(type) {
-	case float64:
-		return int(n), true
-	case int:
-		return n, true
-	}
-	return 0, false
 }
 
 // ---------------------------------------------------------------------------
@@ -446,27 +339,3 @@ func (s *Server) handleRegisterMCP(w http.ResponseWriter, r *http.Request) {
 		"note":   "已登记，未启动。启动需要显式批准（approved=true）",
 	})
 }
-
-func (s *Server) handleMCPServerAction(w http.ResponseWriter, r *http.Request) {
-	action := r.PathValue("action")
-	id := r.PathValue("id")
-	ctx, cancel := withTimeout(r, 10*time.Second)
-	defer cancel()
-	var status string
-	switch action {
-	case "start":
-		status = "pending_approval"
-	case "stop":
-		status = "stopped"
-	default:
-		writeErr(w, http.StatusNotFound, "not_found", "未知操作")
-		return
-	}
-	if err := s.Store.SetMCPServerStatus(ctx, id, status); err != nil {
-		writeErr(w, http.StatusInternalServerError, "update_failed", err.Error())
-		return
-	}
-	writeJSON(w, http.StatusOK, map[string]any{"id": id, "status": status})
-}
-
-var _ = strconv.Itoa

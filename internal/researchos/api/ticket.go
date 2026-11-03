@@ -203,8 +203,8 @@ func (s *Server) handleIssueEventTicket(w http.ResponseWriter, r *http.Request) 
 func (s *Server) tstore() *ticketStore {
 	s.ticketOnce.Do(func() {
 		ttl := 60 * time.Second
-		if s.Cfg != nil && s.Cfg.SSETicketTTL > 0 {
-			ttl = s.Cfg.SSETicketTTL
+		if s.Cfg != nil && s.cfg().SSETicketTTL > 0 {
+			ttl = s.cfg().SSETicketTTL
 		}
 		if s.tickets == nil {
 			s.tickets = newTicketStore(ttl)

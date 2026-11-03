@@ -60,6 +60,10 @@ type Config struct {
 	// 默认研究深度（quick/standard/deep）
 	DefaultDepth string
 
+	// 审批策略：新建任务是否先停在规划结果等待人工批准。
+	// 放到 Config 里是为了让它能被设置中心统一管理（此前散落在 api.Options）。
+	RequireApproval bool
+
 	// 执行
 	Workers         int
 	MaxAgents       int
@@ -105,6 +109,7 @@ func Load() (*Config, error) {
 		RespectRobots:   envBool("RESEARCHOS_RESPECT_ROBOTS", true),
 		UserAgent:       env("RESEARCHOS_USER_AGENT", "HectorResearchOS/1.0 (+local research agent)"),
 		DefaultDepth:    env("RESEARCHOS_DEFAULT_DEPTH", "standard"),
+		RequireApproval: envBool("RESEARCHOS_REQUIRE_APPROVAL", true),
 		Workers:         envInt("RESEARCHOS_WORKERS", 4),
 		MaxAgents:       envInt("RESEARCHOS_MAX_AGENTS", 4),
 		NodeTimeout:     envDuration("RESEARCHOS_NODE_TIMEOUT", 180*time.Second),
@@ -143,12 +148,12 @@ func Load() (*Config, error) {
 }
 
 // LLMEnabled 表示是否具备真实 LLM 调用条件。
-func (c *Config) LLMEnabled() bool {
+func (c Config) LLMEnabled() bool {
 	return c.LLMProvider != "" && c.LLMProvider != LLMNone && c.LLMAPIKey != ""
 }
 
 // PlannerMode 返回规划器工作模式的机器可读标识，用于在报告与 UI 中如实标注。
-func (c *Config) PlannerMode() string {
+func (c Config) PlannerMode() string {
 	if c.LLMEnabled() {
 		return "llm"
 	}
@@ -156,7 +161,7 @@ func (c *Config) PlannerMode() string {
 }
 
 // Redacted 返回可安全写入日志的配置副本（凭据只留掩码）。
-func (c *Config) Redacted() map[string]any {
+func (c Config) Redacted() map[string]any {
 	return map[string]any{
 		"addr":             c.Addr,
 		"database":         RedactDSN(c.DatabaseURL),

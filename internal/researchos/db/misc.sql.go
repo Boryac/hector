@@ -262,7 +262,7 @@ func (q *Queries) ListAgentExecutions(ctx context.Context, taskID string) ([]Age
 }
 
 const listMCPServers = `-- name: ListMCPServers :many
-SELECT id, name, command, args, env, status, approved, created_at FROM mcp_servers ORDER BY created_at
+SELECT id, name, command, args, env, status, approved, created_at, tools, last_error, updated_at FROM mcp_servers ORDER BY created_at
 `
 
 func (q *Queries) ListMCPServers(ctx context.Context) ([]McpServer, error) {
@@ -283,6 +283,9 @@ func (q *Queries) ListMCPServers(ctx context.Context) ([]McpServer, error) {
 			&i.Status,
 			&i.Approved,
 			&i.CreatedAt,
+			&i.Tools,
+			&i.LastError,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -385,7 +388,7 @@ INSERT INTO mcp_servers (id, name, command, args, env, status, approved)
 VALUES ($1, $2, $3, $4, $5, $6, $7)
 ON CONFLICT (name) DO UPDATE SET command = EXCLUDED.command, args = EXCLUDED.args,
     env = EXCLUDED.env, status = EXCLUDED.status, approved = EXCLUDED.approved
-RETURNING id, name, command, args, env, status, approved, created_at
+RETURNING id, name, command, args, env, status, approved, created_at, tools, last_error, updated_at
 `
 
 type UpsertMCPServerParams struct {
@@ -418,6 +421,9 @@ func (q *Queries) UpsertMCPServer(ctx context.Context, arg UpsertMCPServerParams
 		&i.Status,
 		&i.Approved,
 		&i.CreatedAt,
+		&i.Tools,
+		&i.LastError,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

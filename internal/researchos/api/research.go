@@ -52,14 +52,14 @@ func (s *Server) handleCreateResearch(w http.ResponseWriter, r *http.Request) {
 	}
 	maxAgents := req.MaxAgents
 	if maxAgents <= 0 {
-		maxAgents = s.Cfg.MaxAgents
+		maxAgents = s.cfg().MaxAgents
 	}
 	if maxAgents > 8 {
 		maxAgents = 8
 	}
 	maxDuration := req.MaxDurationSeconds
 	if maxDuration <= 0 {
-		maxDuration = int(s.Cfg.TaskTimeout.Seconds())
+		maxDuration = int(s.cfg().TaskTimeout.Seconds())
 	}
 
 	task := &domain.Task{
@@ -73,7 +73,7 @@ func (s *Server) handleCreateResearch(w http.ResponseWriter, r *http.Request) {
 		EnableVerification: enableVerify,
 		Status:             domain.TaskCreated,
 		CreatedBy:          s.owner(r),
-		PlannerMode:        s.Cfg.PlannerMode(),
+		PlannerMode:        s.cfg().PlannerMode(),
 	}
 	ctx, cancel := withTimeout(r, 15*time.Second)
 	defer cancel()
@@ -118,11 +118,11 @@ func (s *Server) planAsync(taskID, goal, depth string, verify bool) {
 		return
 	}
 
-	plan, usage, perr := s.Planner.Plan(ctx, goal, planner.Options{
+	plan, usage, perr := s.plannerNow().Plan(ctx, goal, planner.Options{
 		Depth: depth, EnableVerification: verify, MaxQuestions: questionsForDepth(depth), Scope: task.Scope,
 	})
 	if perr != nil {
-		_ = s.Store.SetTaskPlan(ctx, taskID, nil, s.Cfg.PlannerMode(), perr.Error())
+		_ = s.Store.SetTaskPlan(ctx, taskID, nil, s.cfg().PlannerMode(), perr.Error())
 		_ = s.Store.SetTaskError(ctx, taskID, "规划失败："+perr.Error())
 		_, _ = s.Store.TransitionTask(ctx, taskID, domain.TaskFailed, domain.EvtResearchFailed,
 			map[string]any{"phase": "planning", "error": perr.Error()})
@@ -134,12 +134,12 @@ func (s *Server) planAsync(taskID, goal, depth string, verify bool) {
 		plan.Goal = goal
 	}
 	if len(plan.ResearchQuestions) == 0 {
-		_ = s.Store.SetTaskPlan(ctx, taskID, nil, s.Cfg.PlannerMode(), "计划缺少研究问题")
+		_ = s.Store.SetTaskPlan(ctx, taskID, nil, s.cfg().PlannerMode(), "计划缺少研究问题")
 		_, _ = s.Store.TransitionTask(ctx, taskID, domain.TaskFailed, domain.EvtResearchFailed,
 			map[string]any{"phase": "planning", "error": "计划缺少研究问题"})
 		return
 	}
-	if err := s.Store.SetTaskPlan(ctx, taskID, plan, s.Cfg.PlannerMode(), ""); err != nil {
+	if err := s.Store.SetTaskPlan(ctx, taskID, plan, s.cfg().PlannerMode(), ""); err != nil {
 		slog.Error("plan: save failed", "err", err)
 		return
 	}
@@ -155,13 +155,13 @@ func (s *Server) planAsync(taskID, goal, depth string, verify bool) {
 		_ = s.Store.SetTaskTitle(ctx, taskID, plan.Goal)
 	}
 	next := domain.TaskAwaitingApproval
-	if !s.requireApproval {
+	if !s.approvalRequired() {
 		next = domain.TaskRunning
 	}
 	payload := map[string]any{
 		"nodes":     len(plan.Subtasks),
 		"questions": len(plan.ResearchQuestions),
-		"planner":   s.Cfg.PlannerMode(),
+		"planner":   s.cfg().PlannerMode(),
 		"tokens":    usage.TotalTokens,
 	}
 	if _, err := s.Store.TransitionTask(ctx, taskID, next, domain.EvtWorkflowCreated, payload); err != nil {
@@ -171,7 +171,7 @@ func (s *Server) planAsync(taskID, goal, depth string, verify bool) {
 	if next == domain.TaskRunning {
 		_, _ = s.Store.Emit(ctx, &domain.Event{TaskID: taskID, Type: domain.EvtResearchStarted, Payload: map[string]any{"auto": true}})
 	}
-	slog.Info("plan ready", "task", taskID, "nodes", len(plan.Subtasks), "mode", s.Cfg.PlannerMode())
+	slog.Info("plan ready", "task", taskID, "nodes", len(plan.Subtasks), "mode", s.cfg().PlannerMode())
 }
 
 // materializeNodes 把计划写入 worklow_nodes（先清空旧节点，支持重规划）。
@@ -183,7 +183,7 @@ func (s *Server) materializeNodes(ctx context.Context, taskID string, plan *doma
 	if _, err := s.Store.Q.DeleteNodesByTask(ctx, taskID); err != nil {
 		return err
 	}
-	maxAttempts := s.Cfg.NodeMaxAttempts
+	maxAttempts := s.cfg().NodeMaxAttempts
 	searchIdx := 0
 	questions := map[string]string{}
 	for _, q := range plan.ResearchQuestions {

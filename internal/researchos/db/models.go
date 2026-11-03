@@ -31,6 +31,9 @@ type AppSetting struct {
 	Key       string          `json:"key"`
 	Value     json.RawMessage `json:"value"`
 	UpdatedAt time.Time       `json:"updated_at"`
+	Section   string          `json:"section"`
+	Encrypted bool            `json:"encrypted"`
+	UpdatedBy string          `json:"updated_by"`
 }
 
 type Claim struct {
@@ -70,6 +73,9 @@ type McpServer struct {
 	Status    string          `json:"status"`
 	Approved  bool            `json:"approved"`
 	CreatedAt time.Time       `json:"created_at"`
+	Tools     json.RawMessage `json:"tools"`
+	LastError string          `json:"last_error"`
+	UpdatedAt time.Time       `json:"updated_at"`
 }
 
 type NodeExecution struct {

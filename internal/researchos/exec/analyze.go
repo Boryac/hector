@@ -81,7 +81,7 @@ func (e *Engine) runAnalyze(s *Session) (map[string]any, int, error) {
 		claims []analyzedClaim
 		tokens int
 	)
-	if e.LLM != nil && e.LLM.Available() {
+	if e.llmClient().Available() {
 		s.Progress(35, "调用大模型抽取结论")
 		claims, tokens, err = e.llmAnalyze(s, sources, question)
 		if err != nil || len(claims) == 0 {
@@ -104,7 +104,7 @@ func (e *Engine) runAnalyze(s *Session) (map[string]any, int, error) {
 		})
 		return map[string]any{
 			"claims": 0, "skipped": true,
-			"reason": "资料中未抽取出可引用结论",
+			"reason":   "资料中未抽取出可引用结论",
 			"source_n": len(sources),
 		}, tokens, nil
 	}
@@ -171,8 +171,8 @@ func (e *Engine) runAnalyze(s *Session) (map[string]any, int, error) {
 	return map[string]any{
 		"claims":   stored,
 		"question": question,
-		"llm_used": e.LLM != nil && e.LLM.Available(),
-		"model":    modelName(e.LLM),
+		"llm_used": e.llmClient().Available(),
+		"model":    modelName(e.llmClient()),
 		"tokens":   tokens,
 		"source_n": len(sources),
 	}, tokens, nil
@@ -425,7 +425,7 @@ func (e *Engine) llmAnalyze(s *Session, sources []*domain.Source, question strin
 	}
 	b.WriteString("\n请输出结论 JSON。")
 
-	raw, usage, err := e.LLM.CompleteJSON(s.Ctx, analyzeSystemPrompt, b.String())
+	raw, usage, err := e.llmClient().CompleteJSON(s.Ctx, analyzeSystemPrompt, b.String())
 	if err != nil {
 		return nil, usage.TotalTokens, err
 	}

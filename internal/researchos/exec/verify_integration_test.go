@@ -63,7 +63,7 @@ func TestVerifyIntegration(t *testing.T) {
 	// 四个来源，分属四个独立站点。
 	mkSource := func(site, url string) string {
 		src := &domain.Source{
-			ID: uuid.NewString(),
+			ID:     uuid.NewString(),
 			TaskID: taskID, NodeID: nodeID, URL: url, NormalizedURL: url,
 			Title: site, Site: site, Provider: "test", Status: "ok",
 			Credibility: "medium", Excerpt: "测试正文",
@@ -83,7 +83,7 @@ func TestVerifyIntegration(t *testing.T) {
 	// 中间两条是同一指标的冲突数值（应 conflicting）；最后一条没有证据（应 unverified）。
 	mkClaim := func(statement string, value *float64, key string, sources ...string) *domain.Claim {
 		c := &domain.Claim{
-			ID: uuid.NewString(),
+			ID:     uuid.NewString(),
 			TaskID: taskID, NodeID: nodeID, Statement: statement,
 			NormalizedKey: key, Status: domain.ClaimUnverified, Confidence: 0.3,
 			NumericValue: value,
@@ -94,7 +94,7 @@ func TestVerifyIntegration(t *testing.T) {
 		}
 		for _, sid := range sources {
 			if _, err := st.InsertEvidence(ctx, &domain.Evidence{
-				ID: uuid.NewString(),
+				ID:     uuid.NewString(),
 				TaskID: taskID, ClaimID: saved.ID, SourceID: sid, NodeID: nodeID,
 				Quote: statement,
 			}); err != nil {

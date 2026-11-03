@@ -73,6 +73,47 @@ type Engine struct {
 	Fetcher *fetch.Fetcher
 	LLM     llm.Client
 	Cfg     Config
+
+	// runtime 提供「当前生效」的 LLM 与搜索引擎。
+	//
+	// 设置中心允许用户在不重启的情况下更换模型或搜索 Provider，因此执行节点
+	// 不能一直握着启动时构造的客户端——那样界面显示已切换、实际还在用旧配置。
+	// 未设置时回退到构造时传入的静态值（测试与旧调用方无需改动）。
+	runtimeMu sync.RWMutex
+	runtime   func() (llm.Client, *search.Engine)
+}
+
+// SetRuntime 注入运行时提供器。
+func (e *Engine) SetRuntime(fn func() (llm.Client, *search.Engine)) {
+	e.runtimeMu.Lock()
+	defer e.runtimeMu.Unlock()
+	e.runtime = fn
+}
+
+// llmClient 返回当前生效的 LLM 客户端。
+func (e *Engine) llmClient() llm.Client {
+	e.runtimeMu.RLock()
+	fn := e.runtime
+	e.runtimeMu.RUnlock()
+	if fn != nil {
+		if c, _ := fn(); c != nil {
+			return c
+		}
+	}
+	return e.LLM
+}
+
+// searchEngine 返回当前生效的检索引擎。
+func (e *Engine) searchEngine() *search.Engine {
+	e.runtimeMu.RLock()
+	fn := e.runtime
+	e.runtimeMu.RUnlock()
+	if fn != nil {
+		if _, s := fn(); s != nil {
+			return s
+		}
+	}
+	return e.Search
 }
 
 // New 创建执行引擎。
@@ -171,15 +212,15 @@ func (e *Engine) runSearch(s *Session) (map[string]any, int, error) {
 	s.Progress(5, "检索中")
 
 	start := time.Now()
-	results, traces := e.Search.SearchAll(s.Ctx, query, resultsPerProvider(s.Task.Depth))
+	results, traces := e.searchEngine().SearchAll(s.Ctx, query, resultsPerProvider(s.Task.Depth))
 	s.Emit(domain.EvtToolInvoked, map[string]any{
-		"tool": "search", "query": query, "providers": e.Search.Names(),
+		"tool": "search", "query": query, "providers": e.searchEngine().Names(),
 	})
 	if len(results) == 0 {
 		if fb := stringInput(s.Node.Input, "fallback_query"); fb != "" && fb != query {
 			s.Progress(12, "首选检索式无结果，使用简化检索式重试")
 			query = fb
-			results, traces = e.Search.SearchAll(s.Ctx, query, resultsPerProvider(s.Task.Depth))
+			results, traces = e.searchEngine().SearchAll(s.Ctx, query, resultsPerProvider(s.Task.Depth))
 		}
 	}
 	if len(results) == 0 {
@@ -257,7 +298,7 @@ func (e *Engine) runSearch(s *Session) (map[string]any, int, error) {
 		"fetched":      fetched,
 		"failed":       failed,
 		"source_ids":   ids,
-		"providers":    e.Search.Names(),
+		"providers":    e.searchEngine().Names(),
 		"trace":        traces,
 	}, 0, nil
 }
