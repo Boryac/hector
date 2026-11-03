@@ -1,610 +1,213 @@
-```
-██╗  ██╗███████╗ ██████╗████████╗ ██████╗ ██████╗ 
-██║  ██║██╔════╝██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗
-███████║█████╗  ██║        ██║   ██║   ██║██████╔╝
-██╔══██║██╔══╝  ██║        ██║   ██║   ██║██╔══██╗
-██║  ██║███████╗╚██████╗   ██║   ╚██████╔╝██║  ██║
-╚═╝  ╚═╝╚══════╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
-```
+# Hector ResearchOS
 
-[![Go Version](https://img.shields.io/badge/go-1.24+-00ADD8.svg)](https://golang.org/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![A2A Protocol](https://img.shields.io/badge/A2A%20v0.3.0-100%25%20compliant-brightgreen.svg)](https://a2a-protocol.org/latest/community/#a2a-integrations)
-[![Documentation](https://img.shields.io/badge/docs-gohector.dev-blue.svg)](https://gohector.dev)
-[![Go Report Card](https://goreportcard.com/badge/github.com/verikod/hector)](https://goreportcard.com/report/github.com/verikod/hector)
+把一句研究目标变成**带来源、可追溯、可复核**的研究报告：规划 → 检索 → 抓取 → 抽取结论 → 交叉验证 → 生成报告，全过程在界面上实时可见。
 
-**Your agents. Your infrastructure. Your rules.**
-
-Hector is an open-source AI agent runtime built for teams that need full control over their AI infrastructure. One self-contained binary, one YAML config, production-ready defaults. Deploy on-premise, in air-gapped environments, or in any cloud. No external dependencies, no runtime interpreters, no mandatory cloud accounts.
-
-![Hector Studio](docs/assets/ss.png)
-
-**[Documentation](https://gohector.dev)** · **[Config Ref](https://gohector.dev/reference/configuration/)** · **[CLI Ref](https://gohector.dev/reference/cli/)** · **[API Ref](https://gohector.dev/reference/api/)**
+- **基础**：Fork 自 [verikod/hector](https://github.com/verikod/hector)，保留上游 Agent Runtime / MCP / RAG 能力，产品链路另建 `internal/researchos`
+- **技术栈**：Go 1.24 · PostgreSQL（sqlc + pgx） · Next.js 14 + React 18 + React Flow · SSE
+- **形态**：模块化单体 + 独立 Worker，单用户本地部署（多用户能力未开放，见 [安全边界](#安全边界)）
 
 ---
 
-## Why Hector?
+## 当前状态（先看这一节，避免误判）
 
-- **Single Binary. Zero Dependencies.** A ~30MB Go executable with the visual Studio UI baked in. Copy it to a server and run. No interpreters, no virtualenvs, no package managers. Works out of the box on any Linux, macOS, or Windows host
-- **Self-Sovereign by Design**: Deploy on-premise, in air-gapped networks, or behind your firewall. LLM keys stay on your machines, data never transits third-party infrastructure, and there is zero telemetry. MIT licensed, fully auditable
-- **Open Standards, Zero Lock-In**: Built entirely on A2A protocol for agent interop and MCP for tool connectivity. Swap LLM providers (Anthropic, OpenAI, Gemini, Ollama) with a one-line config change. Your investment is portable
-- **Config-Driven Operations**: Agents, orchestration patterns, RAG pipelines, guardrails, triggers, and notifications. All defined in YAML, all version-controllable, all reviewable in CI. Or use the fluent Go API for full programmatic control
-- **SQL-Backed Durability**: Sessions, tasks, and checkpoints persist to SQLite or PostgreSQL. Survives restarts, enables fault recovery, and powers human-in-the-loop workflows with built-in state management
-- **Enterprise Security & Multi-Tenancy**: JWKS/OIDC authentication, prompt injection detection, PII redaction, tool sandboxing, rate limiting, agent visibility controls, and full tenant isolation. All declarative, all without writing code
+| 能力 | 状态 | 证据 |
+|---|---|---|
+| 统一校验 | ✅ 14 通过 / 0 失败 / 0 跳过 | `bash scripts/verify.sh`（含负向自检：注入坏文件确认校验器抓得到） |
+| Go 构建 / 全量单测 | ✅ 通过 | `go test -count=1 ./internal/researchos/...` 14 包全绿、196 个测试函数 |
+| 数据库迁移 | ✅ 通过 | `0001_init.sql` + `0002_settings_center.sql`，连续执行两次幂等 |
+| 端到端研究任务 | ✅ 通过 | 任务 `497ba966`：3 researcher 并发执行、7 来源全 `ok`、15 结论、PDF 4 页内容比对一致 |
+| 报告导出 md / html / pdf | ✅ 通过 | PDF 为服务端真实排版（内嵌中文字体、页码、表格跨页），`scripts/verify_pdf_content.py` 比对通过 |
+| SSE 实时事件 | ✅ 通过 | 一次性 ticket 通道，13 条 ticket 测试；浏览器审计确认事件流建立 |
+| 设置中心 | ✅ 通过 | 27 项配置入库持久化、热/需重启/部署三层、密钥 AES-256-GCM 加密、GET 只回掩码 |
+| 前端（7 页） | ✅ 通过 | `ui-audit.mjs` 双视口 14 项 + `ui-functional.mjs` 37 项断言（真实 API 调用、UI 创建任务落库）；截图见 `docs/screenshots/` |
+| LLM 链路（客户端 → 规划 → 抽取 → 报告） | ✅ 已验证（用本地测试替身） | `planner_mode=llm`、编造引文与伪造 `source_id` 被丢弃 |
+| 真实大模型接入（Solar Mini 4） | ✅ 已接入并验证 | 设置中心真实 UI 接入 14/14；加密落库 + 重启持久化；能力探测 16/18（`docs/RC1_MODEL_CAPABILITY_REPORT.md`） |
+| 真实大模型研究质量 | ✅ 部分达标（如实标注） | A/B/C 三任务真实执行；C 40/50、A 36.5/50、B 30.5/50；独立事实核查 8/8、0 编造（`docs/RC1_RESEARCH_QUALITY_REPORT.md`） |
+| 安全复查 | ✅ 13/13 | CORS 反射缺陷已修复 + 回归测试；`docs/RC1_SECURITY_REPORT.md` |
+| Docker Compose | ⚠️ **未在本机验证** | 本机无 Docker（BLOCKED）；compose 静态校验通过，容器网络注意事项见 `docs/RC1_DEPLOYMENT_REPORT.md` |
+| 多用户隔离 | 🚫 **禁用** | V1 保持单用户；身份只认服务端 Bearer Token，多用户能力在 A2A 身份隔离修复并回归前不开放 |
 
----
-
-## Quick Start
-
-**macOS / Linux:**
-
-```bash
-curl -fsSL https://gohector.dev/install.sh | sh
-hector serve
-```
-
-**Windows (PowerShell):**
-
-```powershell
-irm https://gohector.dev/install.ps1 | iex
-hector serve
-```
-
-**Homebrew:**
-
-```bash
-brew install verikod/tap/hector
-hector serve
-```
-
-**Docker:**
-
-```bash
-docker run -p 8080:8080 ghcr.io/verikod/hector:latest serve
-```
-
-Open **http://localhost:8080/** — an admin secret is printed in the terminal. Enter it to unlock Studio and configure LLM providers, create agents, and start chatting. No config files needed
-```
-
-**Homebrew:**
-
-```bash
-brew install verikod/tap/hector
-hector serve
-```
-
-**Docker:**
-
-```bash
-docker run -p 8080:8080 ghcr.io/verikod/hector:latest serve
-```
-
-Open **http://localhost:8080/** — an admin secret is printed in the terminal. Enter it to unlock Studio and configure LLM providers, create agents, and start chatting. No config files needed.
+> 表格中带 ⚠️ 的项**尚未真实验证**，不得当作已完成。逐项细节见 [`docs/FINAL_AUDIT.md`](docs/FINAL_AUDIT.md)（含 RC1 增补审计）与 [`CHANGELOG.md`](CHANGELOG.md)。
 
 ---
 
-## Hector Studio
+## 快速开始
 
-Hector Studio is the web UI for designing, testing, and managing agents. It's embedded in the Hector binary — just run `hector serve` and open **http://localhost:8080/**.
-
-- **Visual Flow Builder**: Drag-and-drop canvas with bi-directional YAML sync
-- **Integrated Chat**: Streaming responses with tool-call trace view
-- **Resource Management**: Configure LLMs, tools, and guardrails without editing YAML
-
-Studio is also embedded in release builds and served at `/`. For development builds:
+### 方式 A：本机已有 PostgreSQL
 
 ```bash
-# Option 1: Build a single binary with UI embedded (requires Node.js)
-make build-release
+cd upstream/hector
 
-# Option 2: Run Studio dev server (hot-reload for UI development)
-cd studio && npm run dev   # → http://localhost:5173
+# 1. 配置（.env.researchos 已被 .gitignore 忽略）
+cp .env.example .env.researchos
+#    至少设置 RESEARCHOS_DATABASE_URL 与 RESEARCHOS_API_TOKEN
+
+# 2. 前端静态产物（可选，仅构建界面时需要）
+cd web && npm ci && npx next build && cd ..
+
+# 3. 迁移并启动（API + Worker 同进程）
+go run ./cmd/researchos all
 ```
 
-See the [Studio Guide](https://gohector.dev/guides/studio/) for details.
+打开 <http://127.0.0.1:8080/>。
 
----
-
-## Core Architecture
-
-### SQL-Backed Foundation
-
-All runtime state persists to SQL (SQLite or PostgreSQL):
-
-| Component | Persistence |
-|-----------|-------------|
-| **Sessions** | Event-sourced state with scoped variables (app/user/temp) |
-| **Tasks** | Durable queue with retry, exponential backoff, and recovery |
-| **Checkpoints** | Incremental progress snapshots for long-running operations |
-| **App Configs** | Hot-reloadable YAML with database sync |
+### 方式 B：Docker Compose
 
 ```bash
-# SQLite (default)
-hector serve --database sqlite://.hector/hector.db
-
-# PostgreSQL
-hector serve --database postgres://user:pass@localhost/hector
+cd hector-researchos-codex-pack
+export RESEARCHOS_API_TOKEN=$(head -c 24 /dev/urandom | base64 | tr -d '/+=')
+docker compose up -d --build
 ```
 
-### Multi-Tenant Architecture
+> **未在本机验证**（开发环境无 Docker）。首次使用请留意 `db` 健康检查与迁移时机。
 
-A single Hector deployment can host multiple isolated apps via the **Admin API** (not file-based configs). Each app has:
-
-- Isolated agent configurations
-- Separate session and state storage
-- Independent vector store collections
-- Per-app JWT authentication
-
----
-
-## Admin API
-
-Manage apps, sessions, and queue via REST endpoints. Requires `--auth-secret` for authentication.
+### 方式 C：分进程（调试推荐）
 
 ```bash
-hector serve --auth-secret "admin-secret"
-```
-
-### App Management
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/admin/apps` | GET | List all apps |
-| `/admin/apps` | POST | Create new app (returns JWT) |
-| `/admin/apps/{id}` | GET | Get app details |
-| `/admin/apps/{id}` | PUT | Update app config |
-| `/admin/apps/{id}` | DELETE | Delete app and all resources |
-| `/admin/apps/{id}/token` | POST | Regenerate app JWT |
-
-**Create App:**
-```bash
-curl -X POST http://localhost:8080/admin/apps \
-  -H "Authorization: Bearer admin-secret" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "customer-support", "config_json": "{...}"}'
-
-# Response includes JWT for app authentication
-{
-  "app": {"id": "abc123", "name": "customer-support"},
-  "access_token": "eyJhbGc...",
-  "token_type": "bearer"
-}
-```
-
-### Session Management
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/admin/sessions` | GET | List sessions (paginated) |
-| `/admin/sessions/{id}` | GET | Get session with events |
-| `/admin/sessions/{id}` | DELETE | Delete session |
-
-### Queue Management
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/admin/queue/stats` | GET | Queue statistics |
-| `/admin/queue/dlq` | GET | List dead-letter queue items |
-| `/admin/queue/dlq/{id}/requeue` | POST | Requeue failed task |
-
-### JWKS Endpoint
-
-```bash
-# Public key for JWT verification
-curl http://localhost:8080/admin/jwks
+./researchos migrate     # 只跑迁移
+./researchos serve       # API + 静态前端
+./researchos worker      # DAG 执行器（可多开，靠租约互斥）
+./researchos seed        # 创建演示任务并跑到完成
 ```
 
 ---
 
-## Agent Capabilities
+## 界面
 
-### Agent Types
+| 页面 | 内容 |
+|---|---|
+| `/` Dashboard | 健康状态（DB / LLM / 检索 Provider）、创建任务、任务列表 |
+| `/task/?id=...` 任务详情 | React Flow 工作流 DAG、节点状态与重试、事件流（SSE）、资料、证据、Agent、报告 |
 
-| Type | Description |
-|------|-------------|
-| `llm` | Standard LLM-backed agent (default) |
-| `sequential` | Runs sub-agents in order |
-| `parallel` | Runs sub-agents concurrently |
-| `loop` | Iterates until condition met |
-| `conditional` | Routes based on evaluation |
-| `remote` | Proxies to external A2A server |
+报告可导出 `.md` / `.html`（带 `Authorization` 的下载，Token 不出现在 URL 里）。
 
-### Multi-Agent Patterns
-
-```yaml
-agents:
-  # Agent-as-tool: Call other agents like functions
-  orchestrator:
-    llm: default
-    agent_tools: [researcher, writer]
-
-  # Sub-agent delegation: Transfer control
-  manager:
-    llm: default
-    sub_agents: [analyst, reporter]
-
-  # Conditional routing
-  router:
-    type: conditional
-    condition_agent: classifier
-    condition_field: category
-    on_true_agent: sales
-    on_false_response: Redirecting to support...
-```
-
-### Instruction Templating
-
-Dynamic instruction resolution from session state:
-
-```yaml
-agents:
-  assistant:
-    instruction: |
-      Hello {user:name}, you're working on {app:project}.
-      
-      Context: {artifact.context.md}
-      
-      Previous summary: {temp:last_summary?}
-```
-
-| Syntax | Resolution |
-|--------|------------|
-| `{variable}` | Session state |
-| `{app:variable}` | App-scoped state |
-| `{user:variable}` | User-scoped state |
-| `{temp:variable}` | Temporary state |
-| `{artifact.file}` | Artifact content |
-| `{variable?}` | Optional (empty if missing) |
+逐步的操作说明（建任务 → 批准 → 看过程 → 拿报告 → 用 API）见 [`docs/USAGE.md`](docs/USAGE.md)。
 
 ---
 
-## Automation & Integration
+## 工作流长什么样
 
-### Scheduled Triggers
+规划器产出的是一张 DAG，节点类型决定执行器：
 
-Run agents on cron schedules with timezone support:
-
-```yaml
-agents:
-  daily_report:
-    llm: default
-    instruction: Generate the daily summary report.
-    trigger:
-      type: schedule
-      cron: "0 9 * * *"  # Daily at 9am
-      timezone: America/New_York
-      input: "Generate report for {{.Date}}"
+```
+search ──► analyze ──┐
+search ──► analyze ──┼──► verify ──► synthesize
+                     ┘
 ```
 
-### Webhook Triggers
+- **search**：多 Provider 并发检索，URL 规范化 + 内容指纹去重后落库
+- **analyze**：选资料（站点多样性优先）→ 抓取正文 → 逐字校验引文后才产结论
+- **verify**：结论聚类 → 独立站点数 + 数值一致性 → `supported / partially_supported / conflicting`
+- **synthesize**：生成结构化报告，引用编号稳定映射到真实 URL
 
-Invoke agents via HTTP with payload transformation:
+节点依赖写在 `workflow_nodes.depends_on`，认领用 `FOR UPDATE … SKIP LOCKED`，租约超时自动回收。
+单个子问题覆盖不足时该分析节点降级跳过，不拖垮整份研究；只有「一条结论都没有」才判定任务失败。
+细节见 [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md)。
 
-```yaml
-agents:
-  github_handler:
-    llm: default
-    trigger:
-      type: webhook
-      path: /webhooks/github
-      methods: [POST]
-      secret: ${WEBHOOK_SECRET}
-      signature_header: X-Hub-Signature-256
-      webhook_input:
-        template: "PR #{{.number}} by {{.user.login}}: {{.title}}"
-        session_id: "pr-{{.number}}"
-        extract_fields:
-          - path: pull_request.title
-            as: title
-      response:
-        mode: async  # sync | async | callback
+---
+
+## 目录结构（真实路径）
+
 ```
-
-### Outbound Notifications
-
-A2A-compliant push notifications on agent events:
-
-```yaml
-agents:
-  processor:
-    llm: default
-    notifications:
-      - id: slack-notify
-        url: https://hooks.slack.com/services/xxx
-        events: [task_completed, task_failed]
-        headers:
-          Content-Type: application/json
-        payload:
-          template: |
-            {"text": "Agent {{.AgentName}}: {{.Status}}"}
-        retry:
-          max_attempts: 3
-          initial_delay: 1s
-          max_delay: 30s
+hector-researchos-codex-pack/
+├── upstream/hector/                 # 上游仓库（分支 feature/hector-researchos）
+│   ├── internal/researchos/         # 产品链路（本项目主要代码）
+│   │   ├── api/                     # REST + SSE + 静态托管
+│   │   ├── domain/                  # 领域模型 + 状态机
+│   │   ├── store/                   # 事务性状态变更 + 事件写入
+│   │   ├── db/                      # 迁移、sqlc 生成代码
+│   │   ├── planner/ dag/            # 规划与图校验
+│   │   ├── search/ fetch/           # 真实检索与抓取（含 SSRF 防护）
+│   │   ├── textutil/                # 正文抽取、URL 规范化、关键词
+│   │   ├── exec/                    # 节点执行器（含交叉验证）
+│   │   ├── report/                  # 报告生成与渲染
+│   │   └── worker/                  # 调度循环、重试、收尾
+│   ├── cmd/researchos/              # 入口：migrate/serve/worker/all/seed
+│   └── web/                         # 产品前端（Next.js 静态导出）
+├── api/openapi.yaml                 # API 契约（OpenAPI 3.1）
+├── docs/                            # 审计、数据模型、安全、基准
+├── scripts/                         # 验证 / 压测 / 故障注入 / 截图
+└── docker-compose.yaml
 ```
 
 ---
 
-## Tool Ecosystem
+## 配置
 
-### MCP Protocol Support
+全部走环境变量，完整注释见 `upstream/hector/.env.example`：
 
-Native Model Context Protocol with all transports:
+| 变量 | 说明 | 默认 |
+|---|---|---|
+| `RESEARCHOS_DATABASE_URL` | 必填，PostgreSQL DSN | — |
+| `RESEARCHOS_API_TOKEN` | 必填（`serve`/`all` 强制），Bearer Token | — |
+| `RESEARCHOS_LOCAL_USER` | 服务端唯一身份，客户端不可指定 | `local-user` |
+| `RESEARCHOS_LLM_PROVIDER` | `openai` / `anthropic` / `none`；`none` 走本地确定性流程 | `none` |
+| `RESEARCHOS_LLM_API_KEY` | 模型服务密钥；为空时即使 provider 填了也不启用 | 空 |
+| `RESEARCHOS_LLM_MODEL` / `RESEARCHOS_LLM_BASE_URL` | 模型名 / 自建网关地址（OpenAI 兼容） | 空 |
+| `RESEARCHOS_SEARCH_PROVIDERS` | `github,hackernews,wikipedia,bing,tavily,serpapi,brave` | `bing,github,wikipedia` |
+| `RESEARCHOS_WORKERS` / `MAX_AGENTS` | 并发 Worker 数 / 单任务 Agent 上限 | `4` / `4` |
+| `RESEARCHOS_REQUIRE_APPROVAL` | 规划后是否需人工批准 | `true` |
+| `RESEARCHOS_ADDR` | 监听地址 | `:8080` |
+| `RESEARCHOS_SSE_TICKET_TTL` | SSE 一次性 ticket 有效期（上限 10 分钟） | `60s` |
+| `RESEARCHOS_WEB_DIR` | 前端静态产物目录 | 空（不托管 UI） |
 
-```yaml
-tools:
-  filesystem:
-    type: mcp
-    transport: stdio
-    command: npx
-    args: [-y, "@modelcontextprotocol/server-filesystem", "./data"]
-    filter: [read_file, write_file]  # Limit exposed tools
-
-  remote_mcp:
-    type: mcp
-    transport: sse
-    url: http://localhost:8000/mcp
-```
-
-### Built-in Tools
-
-| Tool | Description |
-|------|-------------|
-| `filetool` | File system operations with sandboxing |
-| `webtool` | HTTP requests, web scraping |
-| `commandtool` | Shell execution with allowlists |
-| `memorytool` | Cross-session memory persistence |
-| `searchtool` | RAG document search |
-| `todotool` | Task/checklist management |
-| `approvaltool` | Human-in-the-loop approvals |
-| `agenttool` | Agent-as-callable-tool |
-
-### Command Tool with Security
-
-```yaml
-tools:
-  shell:
-    type: command
-    allowed_commands: [ls, cat, grep, find]
-    denied_commands: [rm, sudo]
-    working_directory: /app/workspace
-    max_execution_time: 30s
-    require_approval: true
-    approval_prompt: "Allow command execution?"
-```
+`.env.researchos` 在启动时自动加载，且**不覆盖**已存在的 shell 变量。
 
 ---
 
-## RAG Pipeline
-
-Enterprise-grade retrieval-augmented generation:
-
-### Document Sources
-
-| Source | Description |
-|--------|-------------|
-| `directory` | File system with glob patterns |
-| `sql` | Database tables with incremental sync |
-| `api` | REST endpoints |
-| `blob` | Cloud storage (S3, GCS, Azure) |
-
-### Advanced Retrieval
-
-```yaml
-document_stores:
-  knowledge:
-    source:
-      type: directory
-      include: ["**/*.md", "**/*.pdf"]
-      exclude: ["**/node_modules/**"]
-    
-    chunking:
-      strategy: semantic
-      size: 1000
-      overlap: 200
-    
-    search:
-      top_k: 10
-      threshold: 0.7
-      enable_hyde: true      # Hypothetical document embeddings
-      enable_rerank: true    # LLM reranking
-      enable_multi_query: true  # Query expansion
-    
-    vector_store: default
-    embedder: default
-    watch: true  # Real-time indexing
-    incremental_indexing: true
-```
-
-### Vector Stores
-
-| Provider | Type |
-|----------|------|
-| chromem | Embedded (default) |
-| Qdrant | External |
-| Pinecone | Cloud |
-| Weaviate | External |
-| Milvus | External |
-
----
-
-## Guardrails
-
-Deterministic and LLM-powered content protection:
-
-### Input Guardrails
-
-```yaml
-guardrails:
-  default:
-    input:
-      length:
-        max_length: 50000
-        action: block
-      injection:
-        enabled: true
-        patterns: ["ignore previous", "system:"]
-        action: block
-        severity: critical
-      sanitizer:
-        trim_whitespace: true
-        strip_html: true
-```
-
-### Output Guardrails
-
-```yaml
-guardrails:
-  default:
-    output:
-      pii:
-        enabled: true
-        detect_email: true
-        detect_phone: true
-        detect_ssn: true
-        detect_credit_card: true
-        redact_mode: mask  # mask | remove | hash
-      content:
-        blocked_keywords: [profanity_list]
-        blocked_patterns: ["(?i)password.*=.*"]
-```
-
-### LLM Moderation
-
-```yaml
-guardrails:
-  default:
-    moderation:
-      enabled: true
-      strategy: openai  # openai | lakera | prompt
-      openai:
-        model: omni-moderation-latest
-        threshold: 0.8
-      action: block
-```
-
----
-
-## Authentication
-
-### JWKS/OIDC Integration
+## 测试与验收
 
 ```bash
-hector serve \
-  --auth-jwks-url "https://auth.example.com/.well-known/jwks.json" \
-  --auth-issuer "https://auth.example.com/" \
-  --auth-audience "hector-api"
+cd upstream/hector
+go build ./...
+go test ./...                                  # 全量单测（含上游）
+go test -cover ./internal/researchos/...       # 覆盖率（数字见 docs/benchmark.md）
+
+cd ../../..
+bash scripts/verify.sh                         # 契约与结构检查
+bash scripts/fault-injection.sh                # 杀 Worker → 租约恢复验证
+bash scripts/load-test.sh 5 quick              # 5 任务并发压测
+bash scripts/screenshot.sh                     # 生成界面截图（需可用桌面）
 ```
 
-### Simple Token Auth
-
-```bash
-hector serve --auth-secret "your-admin-secret"
-```
+已知环境问题：本机 `go test -cover` 对**无测试文件的包**（`db`/`llm`/`store`/`worker`）会报
+`cmd/internal/cov is not in std`，属 Go 工具链问题，不影响 `go test ./...`。
 
 ---
 
-## Observability
+## 安全边界
 
-### Prometheus Metrics
+- 身份**只认服务端配置**：请求体 / 查询串 / 请求头里的 `user_id` 一律忽略（A2A Issue #2，已修复并回归）
+- 所有 `/api/` 路径必须带 Bearer Token；静态资源免鉴权，但不含任何任务数据
+- Token 用 `subtle.ConstantTimeCompare` 比较；SSE 支持 `?token=`，**仅限** `/events`
+- 抓取侧：遵循 robots.txt、Dial 阶段校验真实 IP（挡 SSRF / DNS rebinding / 云元数据地址）、限大小与超时
+- 报告渲染：HTML 转义 + 仅允许 `http(s)` 链接，越界引用标记会被剔除
 
-```bash
-hector serve --metrics
-# Metrics available at /metrics
-```
-
-### OpenTelemetry Tracing
-
-```bash
-hector serve --tracing-endpoint "jaeger:4317"
-```
+未完成项（因此**多用户能力保持禁用**）：会话归属校验（`context_id → owner`）、上游 `pkg/task` 的 user 过滤。
+详见 [`docs/security-review.md`](docs/security-review.md) 第 1.7 节。
 
 ---
 
-## LLM Providers
+## 已知限制
 
-| Provider | Features |
-|----------|----------|
-| **Anthropic** | Claude 4, streaming, thinking blocks, multimodal |
-| **OpenAI** | GPT-4o, structured output, reasoning |
-| **Gemini** | Multimodal (audio, image, video) |
-| **Ollama** | Local inference, any open model |
-
-```yaml
-llms:
-  claude:
-    provider: anthropic
-    model: claude-sonnet-4
-    api_key: ${ANTHROPIC_API_KEY}
-    thinking:
-      enabled: true
-      budget_tokens: 4096
-  
-  gpt4:
-    provider: openai
-    model: gpt-4o
-    api_key: ${OPENAI_API_KEY}
-    
-  local:
-    provider: ollama
-    model: llama3.2
-    base_url: http://localhost:11434
-```
+1. 未配 LLM 时结论由「关键词句抽取 + 跨源比对」产生，深度弱于模型综述，报告中已标注 `heuristic`。
+2. GitHub 匿名配额会 403（配 `RESEARCHOS_GITHUB_TOKEN` 可解）；Bing 中文结果质量不稳定。
+3. PDF 导出未实现（`.md` / `.html` 可用）。
+4. 前端页面未经真实截图验证（当前环境无法启动浏览器）。
+5. Docker 路径未在本机跑过。
 
 ---
 
-## Deployment
+## 文档
 
-### Single Binary
-
-```bash
-# Build
-go build -o hector ./cmd/hector
-
-# Run
-./hector serve --config config.yaml
-```
-
-### Docker
-
-```dockerfile
-FROM golang:1.24-alpine AS builder
-WORKDIR /app
-COPY . .
-RUN go build -o hector ./cmd/hector
-
-FROM alpine:latest
-COPY --from=builder /app/hector /usr/local/bin/
-EXPOSE 8080
-CMD ["hector", "serve"]
-```
-
-### Configuration Validation
-
-```bash
-# Validate before deploy
-hector validate --config production.yaml
-
-# JSON Schema available
-curl http://localhost:8080/schema
-```
-
----
-
-## Documentation
-
-| Resource | Description |
-|----------|-------------|
-| [Quick Start](https://gohector.dev/getting-started/quick-start/) | Get running in 5 minutes |
-| [Hector Studio](https://gohector.dev/guides/studio/) | Web UI for agent development |
-| [Configuration Reference](https://gohector.dev/reference/configuration/) | Complete YAML schema |
-| [CLI Reference](https://gohector.dev/reference/cli/) | All commands and flags |
-| [API Reference](https://gohector.dev/reference/api/) | HTTP API & Admin endpoints |
-| [Go API Reference](https://gohector.dev/reference/go-api/) | Programmatic API |
-| [Architecture](https://gohector.dev/reference/architecture/) | System design & internals |
-
----
-
-## License
-
-MIT (see [LICENSE](LICENSE)).
+| 文档 | 内容 |
+|---|---|
+| [`docs/USAGE.md`](docs/USAGE.md) | 使用手册：界面操作顺序、API 调用、常见问题与排查 |
+| [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) | 表结构、状态机全矩阵、队列并发语义、恢复路径 |
+| [`api/openapi.yaml`](api/openapi.yaml) | REST + SSE 契约（含身份与错误语义） |
+| [`docs/hector-audit.md`](docs/hector-audit.md) | 上游源码审计与复用结论 |
+| [`docs/mapping-table.md`](docs/mapping-table.md) | 模块映射：保留 / 修改 / 新增 / 替换 |
+| [`docs/security-review.md`](docs/security-review.md) | 安全审查结论与修复状态 |
+| [`docs/benchmark.md`](docs/benchmark.md) | 覆盖率与并发实测数据 |
+| [`DECISIONS.md`](DECISIONS.md) · [`TASKS.md`](TASKS.md) · [`PROGRESS.md`](PROGRESS.md) | 决策记录 / 任务清单 / 迭代账本 |
+| [`AGENTS.md`](AGENTS.md) · [`CODEX.md`](CODEX.md) | 面向接续开发者（含 AI Agent）的工作约定 |

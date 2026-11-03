@@ -271,3 +271,10 @@ a2a-tests:
 	@echo "🧪 Running A2A compliance tests..."
 	@go test -v ./pkg/a2a -run TestCompliance
 
+
+# --- Hector ResearchOS（合并自开发包仓库）---
+.PHONY: researchos-verify researchos-up researchos-down researchos-build
+researchos-verify: ; bash scripts/verify.sh
+researchos-build: ; go build -o bin/researchos.exe ./cmd/researchos
+researchos-up: ; docker compose -f deployments/compose.yaml up --build
+researchos-down: ; docker compose -f deployments/compose.yaml down

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -103,3 +104,22 @@ web/outbuild/
 web/node_modules/
 web/tsconfig.tsbuildinfo
 web/.tsbuildinfo
+=======
+.env
+.env.local
+data/
+*.log
+node_modules/
+dist/
+.hector/
+
+# 上游仓库为独立 git 工作副本，保留其完整历史，不并入本仓库索引
+upstream/
+
+# 本地工作记忆（不属于交付内容）
+.workbuddy/
+
+# 本地工具链与临时产物（便携 PostgreSQL、探针脚本、中间输出），不入库
+.devtools/
+*.tmp
+>>>>>>> devpack/consolidation/restructure

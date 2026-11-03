@@ -1,0 +1,150 @@
+{
+ "summary": {
+  "model": "cline/cline-free/solar-mini4",
+  "total": 18,
+  "pass": 16,
+  "fail": 2,
+  "note": "tool_single 重试后判定可用；json_schema 判定不可用但有兼容替代"
+ },
+ "results": [
+  {
+   "test": "model_id",
+   "pass": true,
+   "detail": "使用模型 ID: cline/cline-free/solar-mini4"
+  },
+  {
+   "test": "chat_zh",
+   "pass": true,
+   "detail": "HTTP 200 5.0s: 幂等性是指同一个操作无论执行一次还是多次，所产生的效果和结果都与只执行一次相同。",
+   "extra": {
+    "usage": {
+     "prompt_tokens": 63,
+     "completion_tokens": 138,
+     "total_tokens": 201,
+     "prompt_tokens_details": {
+      "cached_tokens": 0
+     },
+     "reasoning_tokens": 106,
+     "completion_tokens_details": {
+      "reasoning_tokens": 106
+     }
+    }
+   }
+  },
+  {
+   "test": "chat_en",
+   "pass": true,
+   "detail": "HTTP 200 9.4s: \n\nThe CAP theorem states that a distributed system can only guarantee two of the three properties—consistency, availabil"
+  },
+  {
+   "test": "chat_multiturn",
+   "pass": true,
+   "detail": "round2 HTTP 200: 你的姓是**黄**。"
+  },
+  {
+   "test": "chat_long_input",
+   "pass": true,
+   "detail": "输入约2010字, HTTP 200 7.0s: 导出权限与千并发"
+  },
+  {
+   "test": "json_object",
+   "pass": true,
+   "detail": "HTTP 200: {\"ok\": true, \"n\": 3}",
+   "extra": {
+    "parsed": {
+     "ok": true,
+     "n": 3
+    }
+   }
+  },
+  {
+   "test": "json_schema",
+   "pass": false,
+   "detail": "HTTP 200: Go 语言（通常也叫 **Golang**）是一种由 Google 开发的开源、静态类型、编译型编程语言，特点是语法简单、并发支持好、编译速度快，常用于后端服务、云原生工具、CLI 工具、微服务等。\n\n如果你要给 **name** 与 **version** 字段，可以这样填：\n\n```json\n{\n  \"name\":",
+   "extra": {
+    "note": "不支持时看错误信息"
+   },
+   "retest": "重试仍被忽略：HTTP 200 但返回散文/代码块，schema 未生效。判定为模型/中继不支持 json_schema；json_object 模式可靠可用",
+   "pass_after_retest": false,
+   "workaround": "ResearchOS 使用 response_format=json_object + 容忍式 JSON 提取，兼容"
+  },
+  {
+   "test": "streaming",
+   "pass": true,
+   "detail": "HTTP True, 72 chunks: 1, 2, 3, 4, 5",
+   "extra": {
+    "stream_usage": {
+     "prompt_tokens": 63,
+     "completion_tokens": 77,
+     "total_tokens": 140,
+     "prompt_tokens_details": {
+      "cached_tokens": 0
+     },
+     "reasoning_tokens": 62,
+     "completion_tokens_details": {
+      "reasoning_tokens": 62
+     }
+    }
+   }
+  },
+  {
+   "test": "usage_stats",
+   "pass": true,
+   "detail": "HTTP 200: usage={\"prompt_tokens\": 55, \"completion_tokens\": 101, \"total_tokens\": 156, \"prompt_tokens_details\": {\"cached_tokens\": 0}, \"reasoning_tokens\": 90, \"completion_tokens_details\": {\"reasoning_tokens\": 90}}"
+  },
+  {
+   "test": "err_bad_model",
+   "pass": true,
+   "detail": "HTTP 400: {\"error\": {\"message\": \"model must use provider/model format\", \"type\": \"invalid_request_error\", \"code\": \"invalid_request\"}}"
+  },
+  {
+   "test": "err_empty_messages",
+   "pass": true,
+   "detail": "HTTP 400: {\"error\": {\"message\": \"messages must be a non-empty array\", \"type\": \"invalid_request_error\", \"code\": \"invalid_request\"}}"
+  },
+  {
+   "test": "timeout_cancel",
+   "pass": true,
+   "detail": "客户端超时生效: err=timed out, 耗时0.05s"
+  },
+  {
+   "test": "tool_single",
+   "pass": false,
+   "detail": "HTTP 502: 0个调用, args={}",
+   "extra": {
+    "finish": null
+   },
+   "retest": "重试4/4成功(1.5-2.4s,finish=tool_calls)；首次502为中继瞬态错误，非能力缺失",
+   "pass_after_retest": true
+  },
+  {
+   "test": "tool_parallel",
+   "pass": true,
+   "detail": "HTTP 200: 2个调用 ['get_weather', 'get_time']",
+   "extra": {
+    "finish": "tool_calls"
+   }
+  },
+  {
+   "test": "tool_followup",
+   "pass": true,
+   "detail": "HTTP 200: ### 北京天气 ☀️\n- **温度**：22°C\n- **天气状况**：晴\n\n### 上海时间 🕒\n- **当前时间**：10:30\n\n如果需要更详细的变化（比如未来几天的天气预报、上海具体日期等）"
+  },
+  {
+   "test": "tool_invalid_params",
+   "pass": true,
+   "detail": "HTTP 200: {\"role\": \"assistant\", \"content\": \"我需要您提供具体的城市名称才能查询天气。请告诉我您想查询哪个城市的天气？\\n\\n例如：\\n- 北京\\n- 上海\\n- 首尔\\n- 东京\\n- 等等\\n\\n请告诉我城市名称，我会帮您使用天气查询工具。\", \"reasoning_content\": \"Th"
+  },
+  {
+   "test": "tool_refusal",
+   "pass": true,
+   "detail": "HTTP 200: content=7, tool_calls=False"
+  },
+  {
+   "test": "reasoning_param",
+   "pass": true,
+   "detail": "不支持 reasoning_effort（HTTP 502），不强发 — ResearchOS 不使用该参数"
+  }
+ ],
+ "probed_at": "2026-11-04 00:53:32"
+}

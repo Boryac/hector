@@ -1,0 +1,1147 @@
+{
+ "key": "B-comparison",
+ "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+ "goal": "对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异",
+ "depth": "standard",
+ "created_at": "2026-11-04 01:31:41",
+ "model_id_expected": "cline/cline-free/solar-mini4",
+ "wall_seconds": 132.3,
+ "status": "completed",
+ "planner_mode": "llm",
+ "task_detail": {
+  "id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+  "title": "对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异",
+  "goal": "对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异",
+  "depth": "standard",
+  "scope": {},
+  "max_agents": 4,
+  "max_duration_seconds": 1800,
+  "enable_verification": true,
+  "status": "completed",
+  "created_by": "local-user",
+  "planner_mode": "llm",
+  "plan": {
+   "goal": "对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异",
+   "research_questions": [
+    {
+     "id": "q1",
+     "question": "PostgreSQL、MySQL、SQLite 的许可证类型、授权条款与商业使用限制有何差异？",
+     "priority": "high"
+    },
+    {
+     "id": "q2",
+     "question": "PostgreSQL、MySQL、SQLite 在典型应用场景、工作负载适配和部署模式上有何差异？",
+     "priority": "high"
+    },
+    {
+     "id": "q3",
+     "question": "PostgreSQL、MySQL、SQLite 在嵌入式适用性、资源占用、移动/边缘/桌面场景中的适用程度有何差异？",
+     "priority": "high"
+    }
+   ],
+   "subtasks": [
+    {
+     "id": "search_1",
+     "title": "检索三种数据库许可证对比资料",
+     "agent_role": "researcher",
+     "inputs": [],
+     "outputs": [
+      "search results",
+      "candidate license facts"
+     ],
+     "depends_on": [],
+     "node_type": "search",
+     "query": "PostgreSQL MySQL SQLite license comparison OSI GPL"
+    },
+    {
+     "id": "analyze_1",
+     "title": "分析许可证差异",
+     "agent_role": "analyst",
+     "inputs": [
+      "search_1"
+     ],
+     "outputs": [
+      "structured license comparison"
+     ],
+     "depends_on": [
+      "search_1"
+     ],
+     "node_type": "analyze"
+    },
+    {
+     "id": "search_2",
+     "title": "检索三种数据库典型应用场景资料",
+     "agent_role": "researcher",
+     "inputs": [],
+     "outputs": [
+      "search results",
+      "candidate use case facts"
+     ],
+     "depends_on": [],
+     "node_type": "search",
+     "query": "PostgreSQL MySQL SQLite typical application scenarios OLTP web mobile"
+    },
+    {
+     "id": "analyze_2",
+     "title": "分析典型应用场景差异",
+     "agent_role": "analyst",
+     "inputs": [
+      "search_2"
+     ],
+     "outputs": [
+      "structured use case comparison"
+     ],
+     "depends_on": [
+      "search_2"
+     ],
+     "node_type": "analyze"
+    },
+    {
+     "id": "search_3",
+     "title": "检索三种数据库嵌入式适用性资料",
+     "agent_role": "researcher",
+     "inputs": [],
+     "outputs": [
+      "search results",
+      "candidate embedded suitability facts"
+     ],
+     "depends_on": [],
+     "node_type": "search",
+     "query": "SQLite embedded database PostgreSQL MySQL embedded suitability mobile edge"
+    },
+    {
+     "id": "analyze_3",
+     "title": "分析嵌入式适用性差异",
+     "agent_role": "analyst",
+     "inputs": [
+      "search_3"
+     ],
+     "outputs": [
+      "structured embedded suitability comparison"
+     ],
+     "depends_on": [
+      "search_3"
+     ],
+     "node_type": "analyze"
+    },
+    {
+     "id": "verify_1",
+     "title": "交叉验证许可证、应用场景与嵌入式适用性发现",
+     "agent_role": "verifier",
+     "inputs": [
+      "analyze_1",
+      "analyze_2",
+      "analyze_3"
+     ],
+     "outputs": [
+      "verified comparison facts"
+     ],
+     "depends_on": [
+      "analyze_1",
+      "analyze_2",
+      "analyze_3"
+     ],
+     "node_type": "verify"
+    },
+    {
+     "id": "synthesize_1",
+     "title": "生成三种数据库综合对比结论",
+     "agent_role": "synthesizer",
+     "inputs": [
+      "verify_1"
+     ],
+     "outputs": [
+      "final comparative summary"
+     ],
+     "depends_on": [
+      "verify_1"
+     ],
+     "node_type": "synthesize"
+    }
+   ],
+   "workflow": {
+    "nodes": null,
+    "edges": null
+   },
+   "risks_and_gaps": [
+    "许可证细节可能随版本或发行版变化，需以官方文档和权威来源为准",
+    "嵌入式适用性受具体硬件、资源约束、应用场景和部署方式影响，结论需要场景化判断",
+    "不同来源对“嵌入式”“典型应用场景”的定义可能不一致，需统一比较标准",
+    "部分性能或扩展性差异可能未被本计划覆盖，属于后续可扩展研究方向"
+   ]
+  },
+  "workflow": {
+   "nodes": [
+    {
+     "id": "search_1",
+     "type": "search",
+     "title": "检索三种数据库许可证对比资料",
+     "agent_role": "researcher",
+     "depends_on": []
+    },
+    {
+     "id": "analyze_1",
+     "type": "analyze",
+     "title": "分析许可证差异",
+     "agent_role": "analyst",
+     "depends_on": [
+      "search_1"
+     ]
+    },
+    {
+     "id": "search_2",
+     "type": "search",
+     "title": "检索三种数据库典型应用场景资料",
+     "agent_role": "researcher",
+     "depends_on": []
+    },
+    {
+     "id": "analyze_2",
+     "type": "analyze",
+     "title": "分析典型应用场景差异",
+     "agent_role": "analyst",
+     "depends_on": [
+      "search_2"
+     ]
+    },
+    {
+     "id": "search_3",
+     "type": "search",
+     "title": "检索三种数据库嵌入式适用性资料",
+     "agent_role": "researcher",
+     "depends_on": []
+    },
+    {
+     "id": "analyze_3",
+     "type": "analyze",
+     "title": "分析嵌入式适用性差异",
+     "agent_role": "analyst",
+     "depends_on": [
+      "search_3"
+     ]
+    },
+    {
+     "id": "verify_1",
+     "type": "verify",
+     "title": "交叉验证许可证、应用场景与嵌入式适用性发现",
+     "agent_role": "verifier",
+     "depends_on": [
+      "analyze_1",
+      "analyze_2",
+      "analyze_3"
+     ]
+    },
+    {
+     "id": "synthesize_1",
+     "type": "synthesize",
+     "title": "生成三种数据库综合对比结论",
+     "agent_role": "synthesizer",
+     "depends_on": [
+      "verify_1"
+     ]
+    }
+   ],
+   "edges": [
+    {
+     "source": "search_1",
+     "target": "analyze_1"
+    },
+    {
+     "source": "search_2",
+     "target": "analyze_2"
+    },
+    {
+     "source": "search_3",
+     "target": "analyze_3"
+    },
+    {
+     "source": "analyze_1",
+     "target": "verify_1"
+    },
+    {
+     "source": "analyze_2",
+     "target": "verify_1"
+    },
+    {
+     "source": "analyze_3",
+     "target": "verify_1"
+    },
+    {
+     "source": "verify_1",
+     "target": "synthesize_1"
+    }
+   ]
+  },
+  "stats": {
+   "claims": 1,
+   "finished_at": "2026-11-03T17:33:51Z",
+   "nodes_done": 8,
+   "nodes_total": 8,
+   "sources": 12
+  },
+  "created_at": "2026-11-04T01:31:41.637211+08:00",
+  "updated_at": "2026-11-04T01:33:51.919329+08:00",
+  "started_at": "2026-11-04T01:32:17.71429+08:00",
+  "finished_at": "2026-11-04T01:33:51.919329+08:00",
+  "nodes": [
+   {
+    "id": "search_1",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "title": "检索三种数据库许可证对比资料",
+    "type": "search",
+    "agent_role": "researcher",
+    "agent_name": "",
+    "depends_on": [],
+    "position": 0,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "fallback_query": "PostgreSQL MySQL SQLite",
+     "query": "PostgreSQL MySQL SQLite license comparison OSI GPL"
+    },
+    "output": {
+     "failed": 1,
+     "fetched": 5,
+     "providers": [
+      "github",
+      "hackernews",
+      "wikipedia",
+      "bing"
+     ],
+     "query": "PostgreSQL MySQL SQLite license comparison OSI GPL",
+     "result_count": 7,
+     "source_ids": [
+      "7ef1ee91-61a9-40c8-8241-e6517ad26f30",
+      "0d15a4ed-12bd-4df3-8416-0d340092d549",
+      "510e688c-1823-4a70-830e-eb5e6012b8e1",
+      "d8ee90fc-8ba2-4386-ae03-4bedc13f9f13",
+      "cb6745b6-9798-4bed-956a-2283ce22826e",
+      "a3ca5b1c-4314-4e93-acfb-854e748a66a0",
+      "2276d147-abfa-4d04-b1b4-dc6666cbcedf"
+     ],
+     "trace": [
+      {
+       "count": 5,
+       "duration_ms": 567,
+       "provider": "bing"
+      },
+      {
+       "count": 0,
+       "duration_ms": 693,
+       "provider": "hackernews"
+      },
+      {
+       "count": 0,
+       "duration_ms": 752,
+       "provider": "github"
+      },
+      {
+       "count": 2,
+       "duration_ms": 991,
+       "provider": "wikipedia"
+      }
+     ]
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:32:12.400647+08:00",
+    "updated_at": "2026-11-04T01:32:20.740075+08:00",
+    "started_at": "2026-11-04T01:32:17.897092+08:00",
+    "completed_at": "2026-11-04T01:32:20.740075+08:00"
+   },
+   {
+    "id": "analyze_1",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "title": "分析许可证差异",
+    "type": "analyze",
+    "agent_role": "analyst",
+    "agent_name": "",
+    "depends_on": [
+     "search_1"
+    ],
+    "position": 1,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "分析许可证差异"
+    },
+    "output": {
+     "claims": 1,
+     "llm_used": true,
+     "model": "cline/cline-free/solar-mini4",
+     "question": "分析许可证差异",
+     "source_n": 1,
+     "tokens": 3670
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 3670,
+    "created_at": "2026-11-04T01:32:12.402126+08:00",
+    "updated_at": "2026-11-04T01:32:42.314893+08:00",
+    "started_at": "2026-11-04T01:32:20.896935+08:00",
+    "completed_at": "2026-11-04T01:32:42.314893+08:00"
+   },
+   {
+    "id": "search_2",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "title": "检索三种数据库典型应用场景资料",
+    "type": "search",
+    "agent_role": "researcher",
+    "agent_name": "",
+    "depends_on": [],
+    "position": 2,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "fallback_query": "PostgreSQL MySQL SQLite",
+     "query": "PostgreSQL MySQL SQLite typical application scenarios OLTP web mobile"
+    },
+    "output": {
+     "failed": 1,
+     "fetched": 3,
+     "providers": [
+      "github",
+      "hackernews",
+      "wikipedia",
+      "bing"
+     ],
+     "query": "PostgreSQL MySQL SQLite typical application scenarios OLTP web mobile",
+     "result_count": 5,
+     "source_ids": [
+      "510e688c-1823-4a70-830e-eb5e6012b8e1",
+      "d8ee90fc-8ba2-4386-ae03-4bedc13f9f13",
+      "cb6745b6-9798-4bed-956a-2283ce22826e",
+      "a3ca5b1c-4314-4e93-acfb-854e748a66a0",
+      "2276d147-abfa-4d04-b1b4-dc6666cbcedf"
+     ],
+     "trace": [
+      {
+       "count": 5,
+       "duration_ms": 574,
+       "provider": "bing"
+      },
+      {
+       "count": 0,
+       "duration_ms": 684,
+       "provider": "hackernews"
+      },
+      {
+       "count": 0,
+       "duration_ms": 786,
+       "provider": "github"
+      },
+      {
+       "count": 0,
+       "duration_ms": 986,
+       "provider": "wikipedia"
+      }
+     ]
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:32:12.402664+08:00",
+    "updated_at": "2026-11-04T01:32:20.561608+08:00",
+    "started_at": "2026-11-04T01:32:17.897092+08:00",
+    "completed_at": "2026-11-04T01:32:20.561608+08:00"
+   },
+   {
+    "id": "analyze_2",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "title": "分析典型应用场景差异",
+    "type": "analyze",
+    "agent_role": "analyst",
+    "agent_name": "",
+    "depends_on": [
+     "search_2"
+    ],
+    "position": 3,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "分析典型应用场景差异"
+    },
+    "output": {
+     "claims": 0,
+     "reason": "资料中未抽取出可引用结论",
+     "skipped": true,
+     "source_n": 6
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:32:12.403181+08:00",
+    "updated_at": "2026-11-04T01:33:50.963785+08:00",
+    "started_at": "2026-11-04T01:32:20.896935+08:00",
+    "completed_at": "2026-11-04T01:33:50.963785+08:00"
+   },
+   {
+    "id": "search_3",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "title": "检索三种数据库嵌入式适用性资料",
+    "type": "search",
+    "agent_role": "researcher",
+    "agent_name": "",
+    "depends_on": [],
+    "position": 4,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "fallback_query": "PostgreSQL MySQL SQLite",
+     "query": "SQLite embedded database PostgreSQL MySQL embedded suitability mobile edge"
+    },
+    "output": {
+     "failed": 1,
+     "fetched": 4,
+     "providers": [
+      "github",
+      "hackernews",
+      "wikipedia",
+      "bing"
+     ],
+     "query": "SQLite embedded database PostgreSQL MySQL embedded suitability mobile edge",
+     "result_count": 5,
+     "source_ids": [
+      "43f3a3ae-9ffb-4b1f-9f2d-4d0c7f073aa9",
+      "27b564ad-d50f-403b-8e98-0d91a1160e43",
+      "843e2f24-2742-41be-9512-7b993afac430",
+      "ff44e1db-c0cd-49a2-8828-d21e99c4c520",
+      "21eaae9f-ee5e-4d50-b1dc-eb0ff7272932"
+     ],
+     "trace": [
+      {
+       "count": 5,
+       "duration_ms": 585,
+       "provider": "bing"
+      },
+      {
+       "count": 0,
+       "duration_ms": 668,
+       "provider": "hackernews"
+      },
+      {
+       "count": 0,
+       "duration_ms": 733,
+       "provider": "github"
+      },
+      {
+       "count": 0,
+       "duration_ms": 990,
+       "provider": "wikipedia"
+      }
+     ]
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:32:12.403569+08:00",
+    "updated_at": "2026-11-04T01:32:20.687931+08:00",
+    "started_at": "2026-11-04T01:32:17.897092+08:00",
+    "completed_at": "2026-11-04T01:32:20.687931+08:00"
+   },
+   {
+    "id": "analyze_3",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "title": "分析嵌入式适用性差异",
+    "type": "analyze",
+    "agent_role": "analyst",
+    "agent_name": "",
+    "depends_on": [
+     "search_3"
+    ],
+    "position": 5,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "分析嵌入式适用性差异"
+    },
+    "output": {
+     "claims": 0,
+     "reason": "资料中未抽取出可引用结论",
+     "skipped": true,
+     "source_n": 1
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:32:12.403932+08:00",
+    "updated_at": "2026-11-04T01:33:50.95908+08:00",
+    "started_at": "2026-11-04T01:32:20.896935+08:00",
+    "completed_at": "2026-11-04T01:33:50.95908+08:00"
+   },
+   {
+    "id": "verify_1",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "title": "交叉验证许可证、应用场景与嵌入式适用性发现",
+    "type": "verify",
+    "agent_role": "verifier",
+    "agent_name": "",
+    "depends_on": [
+     "analyze_1",
+     "analyze_2",
+     "analyze_3"
+    ],
+    "position": 6,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异"
+    },
+    "output": {
+     "clusters": 1,
+     "conflicting": 0,
+     "partial": 1,
+     "supported": 0,
+     "unverified": 0,
+     "verified": 1
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:32:12.404239+08:00",
+    "updated_at": "2026-11-04T01:33:51.426381+08:00",
+    "started_at": "2026-11-04T01:33:51.396547+08:00",
+    "completed_at": "2026-11-04T01:33:51.426381+08:00"
+   },
+   {
+    "id": "synthesize_1",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "title": "生成三种数据库综合对比结论",
+    "type": "synthesize",
+    "agent_role": "synthesizer",
+    "agent_name": "",
+    "depends_on": [
+     "verify_1"
+    ],
+    "position": 7,
+    "status": "completed",
+    "attempts": 1,
+    "max_attempts": 3,
+    "input": {
+     "question": "对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异"
+    },
+    "output": {
+     "citation_count": 1,
+     "claims": 1,
+     "report_id": "47734c5a-2cc1-4939-b9b4-b8be553de26b",
+     "sources": 1,
+     "version": 1,
+     "word_count": 503
+    },
+    "progress": 100,
+    "progress_text": "completed",
+    "tokens_total": 0,
+    "created_at": "2026-11-04T01:32:12.404523+08:00",
+    "updated_at": "2026-11-04T01:33:51.913337+08:00",
+    "started_at": "2026-11-04T01:33:51.896978+08:00",
+    "completed_at": "2026-11-04T01:33:51.913337+08:00"
+   }
+  ],
+  "latest_sequence": 87
+ },
+ "agents": {
+  "items": [
+   {
+    "id": "2deced9f-90e7-445e-884f-e8f0db286041",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "run_id": "b469b727-63ee-4835-b86b-899db0c9133d",
+    "node_id": "synthesize_1",
+    "role": "synthesizer",
+    "name": "Report Synthesizer",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:33:51.900426+08:00",
+    "duration_ms": 14,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "c5dfb442-d9f1-4378-ad7c-a7c1f3cba6ad",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "run_id": "b469b727-63ee-4835-b86b-899db0c9133d",
+    "node_id": "verify_1",
+    "role": "verifier",
+    "name": "Cross-Validator",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:33:51.403031+08:00",
+    "duration_ms": 25,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "85bb6398-506a-480d-883e-eae3d2a02550",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "run_id": "b469b727-63ee-4835-b86b-899db0c9133d",
+    "node_id": "analyze_1",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:32:20.898987+08:00",
+    "duration_ms": 21417,
+    "token_usage": {
+     "prompt_tokens": 3670,
+     "total_tokens": 3670
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "8bb6d05e-b5c7-4824-9a1b-19f793120cc6",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "run_id": "b469b727-63ee-4835-b86b-899db0c9133d",
+    "node_id": "analyze_3",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:32:20.898948+08:00",
+    "duration_ms": 90069,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "43a850f1-09f7-48db-bee7-563e5728944e",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "run_id": "b469b727-63ee-4835-b86b-899db0c9133d",
+    "node_id": "analyze_2",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:32:20.898849+08:00",
+    "duration_ms": 90070,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "ea994b5f-7cbc-4c65-bf56-689a6be042ec",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "run_id": "b469b727-63ee-4835-b86b-899db0c9133d",
+    "node_id": "search_2",
+    "role": "researcher",
+    "name": "Open Source Researcher",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:32:17.905549+08:00",
+    "duration_ms": 2658,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "be6bcf54-aa71-46fb-8e27-98e7737de78e",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "run_id": "",
+    "node_id": "search_1",
+    "role": "researcher",
+    "name": "Open Source Researcher",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:32:17.899772+08:00",
+    "duration_ms": 2841,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "2db99957-9798-4747-9eb9-4fde48a4a92b",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "run_id": "b469b727-63ee-4835-b86b-899db0c9133d",
+    "node_id": "search_3",
+    "role": "researcher",
+    "name": "Open Source Researcher",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T01:32:17.899328+08:00",
+    "duration_ms": 2790,
+    "token_usage": {
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    },
+    "tool_calls": []
+   }
+  ],
+  "total": 8
+ },
+ "sources": {
+  "items": [
+   {
+    "id": "43f3a3ae-9ffb-4b1f-9f2d-4d0c7f073aa9",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "search_3",
+    "url": "https://sqlite.org/index.html",
+    "normalized_url": "https://sqlite.org/index.html",
+    "title": "SQLite Home Page",
+    "site": "sqlite.org",
+    "provider": "bing",
+    "snippet": "Oct 16, 2026 · SQLite is a C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL …",
+    "excerpt": "Small. Fast. Reliable.\nSearch Documentation\nDate & time functions\nC/C++ Interface Spec\nList of C-language APIs\nThe CLI (Command-Line Interface)\nThe TCL Interface Spec\nFrequently Asked Questions\nSQLite is a C-language library that implements a\nSQL database engine.\nSQLite is the most used database engine in the world.\nSQLite is built into all mobile phones and most computers and\ncomes bundled inside countless other applications that people\nis in the public-domain and is free to\neveryone to use for any purpose.\nDate & time functions\nC/C++ Interface Spec\nList of C-language APIs\nThe CLI (Command-Line Interface)\nThe TCL Interface Spec\nFrequently Asked Questions\nSQLite is made possible in part by sponsors and\nSQLite Consortium members, including:\nThis page was last updated on 2026-10-16 14:50:04Z",
+    "content_hash": "647f146bc214f76624c9401fb96c1bd4cef27346d6d2e3a37d6391e8101db34f",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:32:20.683398+08:00",
+    "created_at": "2026-11-04T01:32:18.897647+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "510e688c-1823-4a70-830e-eb5e6012b8e1",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "search_1",
+    "url": "https://www.postgresql.org",
+    "normalized_url": "https://www.postgresql.org",
+    "title": "PostgreSQL: The world's most advanced open source database",
+    "site": "postgresql.org",
+    "provider": "bing",
+    "snippet": "The PostgreSQL Global Development Group announces that the 1st rc release of PostgreSQL 19 is now available for download. …",
+    "excerpt": "PostgreSQL: The world's most advanced open source database October 15, 2026: PostgreSQL 19 RC 1 Released! PostgreSQL: The World's Most Advanced Open Source Relational Database PostgreSQL is a powerful, open source object-relational database system with over 35 years of active development that has earned it a strong reputation for reliability, feature robustness, and performance. There is a wealth of information to be found describing how to install and use PostgreSQL through the official documentation . The open source community provides many helpful places to become familiar with PostgreSQL, discover how it works, and find career opportunities. Learn more on how to engage with the community . PostgreSQL 19 Rc 1 Released! The PostgreSQL Global Development Group announces that the 1st rc release of PostgreSQL 19 is now available for download . This release contains PostgreSQL 19 feature previews ahead of general availability, though some details of the release can change during the testing period. You can find information about all of the PostgreSQL 19 features and changes in the release notes . In the spirit of the open source PostgreSQL community, we strongly encourage you to test the new features of PostgreSQL 19 on your systems to help us eliminate bugs and other issues. While we do not advise you to run rc versions in production environments, we encourage you to find ways to run your typical application workloads against this rc release. Your testing and feedback help the community ensure that PostgreSQL 19 upholds our standards of delivering a stable, reliable release of the world's most advanced open source relational database. Please read more about and how you can contribute. PostgreSQL 14 will stop receiving fixes on November 12, 2026. If you are running PostgreSQL 14 in a production environment, we suggest that you make plans to upgrade to a newer, supported version of PostgreSQL. Please see our versioning policy for more information. 2026-11-24 · PostgreSQL Conference Poland – PGConf.PL 2026 2026-11-27 · PostgreSQL Conference Japan 2026 indicates that an event is recognised under the community event guidelines and is directly helping the PostgreSQL community. The PostgreSQL mailing lists enable you to interact with active community participants on subjects related to the development of PostgreSQL, discovering how to use PostgreSQL, or learning about upcoming events and product releases. In order to manage your mailing list subscription, you need a PostgreSQL community account . Signing up is easy and gives you direct access to the global PostgreSQL community . Learning Opportunities Ahead Want to learn more about PostgreSQL and help build the community? Come to one of the many events, local user groups, & training sessions where you can meet experienced PostgreSQL users and enhance your database skills. PostgreSQL 19 Rc 1 Released! The PostgreSQL Global Development Group announces that the 1st rc release of PostgreSQL 19 is now available for download . This release contains PostgreSQL 19 feature previews ahead of general availability, though some details of the release can change during the testing period. You can find information about all of the PostgreSQL 19 features and changes in the release notes . In the spirit of the open source PostgreSQL community, we strongly encourage you to test the new features of PostgreSQL 19 on your systems to help us eliminate bugs and other issues. While we do not advise you to run rc versions in production environments, we encourage you to find ways to run your typical application workloads against this rc release. Your testing and feedback help the community ensure that PostgreSQL 19 upholds our standards of delivering a stable, reliable release of the world's most advanced open source relational database. Please read more about and how you can contribute. PostgreSQL 14 will stop receiving fixes on November 12, 2026. …",
+    "content_hash": "1bc80b44906918561cdf44f2746d06e21e03794348a348797e181fce5877edde",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:32:20.479621+08:00",
+    "created_at": "2026-11-04T01:32:18.899048+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "d8ee90fc-8ba2-4386-ae03-4bedc13f9f13",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "search_1",
+    "url": "https://www.runoob.com/postgresql/postgresql-tutorial.html",
+    "normalized_url": "https://www.runoob.com/postgresql/postgresql-tutorial.html",
+    "title": "PostgreSQL 教程 | 菜鸟教程",
+    "site": "runoob.com",
+    "provider": "bing",
+    "snippet": "PostgreSQL 教程 PostgreSQL 是一个免费的对象-关系数据库服务器 (ORDBMS)，在灵活的BSD许可证下发行。 Post greSQL 开发者 …",
+    "excerpt": "PostgreSQL 教程 | 菜鸟教程\n菜鸟教程 -- 学的不仅是技术，更是梦想！\nLinux 上安装 PostgreSQL\nWindows 上安装 PostgreSQL\nMac OS 上安装 PostgreSQL\nPostgreSQL INSERT INTO\nPostgreSQL ALTER TABLE 命令\nPostgreSQL TRUNCATE TABLE\nPostgreSQL AUTO INCREMENT\nLinux 上安装 PostgreSQL\nPostgreSQL 是一个免费的对象-关系数据库服务器(ORDBMS)，在灵活的BSD许可证下发行。\nPostgreSQL 开发者把它念作 post-gress-Q-L 。\nPostgreSQL 的 Slogan 是 \"世界上最先进的开源关系型数据库\"。\n参考内容： PostgreSQL 10.1 手册\n数据库（Database）是按照数据结构来组织、存储和管理数据的仓库。\n每个数据库都有一个或多个不同的 API 用于创建，访问，管理，搜索和复制所保存的数据。\n我们也可以将数据存储在文件中，但是在文件中读写数据速度相对较慢。\n所以，现在我们使用关系型数据库管理系统（RDBMS）来存储和管理的大数据量。所谓的关系型数据库，是建立在关系模型基础上的数据库，借助于集合代数等数学概念和方法来处理数据库中的数据。\nORDBMS（对象关系数据库系统）是面向对象技术与传统的关系数据库相结合的产物，查询处理是 ORDBMS 的重要组成部分，它的性能优劣将直接影响到 DBMS 的性能。\nORDBMS 在原来关系数据库的基础上，增加了一些新的特性。\nRDBMS 是关系数据库管理系统，是建立实体之间的联系，最后得到的是关系表。\nOODBMS（object-oriented database management system） 面向对象数据库管理系统，将所有实体都看成对象，并将这些对象类进行封装，对象之间的通信通过消息 OODBMS 对象关系数据库在实质上还是关系数据库 。\n在我们开始学习 PostgreSQL 数据库前，让我们先了解下 ORDBMS 的一些术语：\n数据表: 表是数据的矩阵。在一个数据库中的表看起来像一个简单的电子表格。\n列: 一列(数据元素) 包含了相同的数据, 例如邮政编码的数据。\n行： 一行（=元组，或记录）是一组相关的数据，例如一条用户订阅的数据。\n冗余 ：存储两倍数据，冗余降低了性能，但提高了数据的安全性。\n主键 ：主键是唯一的。一个数据表中只能包含一个主键。你可以使用主键来查询数据。\n复合键 ：复合键（组合键）将多个列作为一个索引键，一般用于复合索引。\n索引： 使用索引可快速访问数据库表中的特定信息。索引是对数据库表中一列或多列的值进行排序的一种结构。类似于书籍的目录。\n参照完整性: 参照的完整性要求关系中不允许引用不存在的实体。与实体完整性是关系模型必须满足的完整性约束条件，目的是保证数据的一致性。\n函数 ：通过函数，可以在数据库服务器端执行指令程序。\n索引 ：用户可以自定义索引方法，或使用内置的 B 树，哈希表与 GiST 索引。\n触发器 ：触发器是由SQL语句查询所触发的事件。如：一个INSERT语句可能触发一个检查数据完整性的触发器。触发器通常由INSERT或UPDATE语句触发。\n多版本并发控制： PostgreSQL使用多版本并发控制（MVCC，Multiversion concurrency control）系统进行并发控制，该系统向每个用户提供了一个数据库的\"快照\"，用户在事务内所作的每个修改，对于其他的用户都不可见，直到该事务成功提交。\n规则 ：规则（RULE）允许一个查询能被重写，通常用来实现对视图（VIEW）的操作，如插入（INSERT）、更新（UPDATE）、删除（DELETE）。\n数据类型 ：包括文本、任意精度的数值数组、JSON 数据、枚举类型、XML 数据\n全文检索 ：通过 Tsearch2 或 OpenFTS，8.3版本中内嵌 Tsearch2。\nNoSQL ：JSON，JSONB，XML，HStore 原生支持，至 NoSQL 数据库的外部数据包装器。\n数据仓库 ：能平滑迁移至同属 PostgreSQL 生态的 GreenPlum，DeepGreen，HAWK 等，使用 FDW 进行 ETL。\nPostgreSQL 10.1 手册 在线手册： http://www.runoob.com/manual/PostgreSQL/\n离线手册 - PDF 版本： https://pan.baidu.com/s/1h1J14i8tzJUY3p9yyeW0mA ， 提取码: xs7r 。\n离线手册 - CHM 版本： https://pan.baidu.com/s/1h1J14i8tzJUY3p9yyeW0mA ， 提取码: tq4z 。\n查看最新版： https://github.com/postgres-cn/pgdoc-cn/releases\nLinux 上安装 PostgreSQL\nPython / 数据科学 Python 教程\nAI / 智能开发 AI Agent（智能体）\nXML / Web Service XML 教程\n限时 9.9 元起 ，支持 Deepseek-V4、GLM-5.3、Doubao-Seed-Evolving、Kimi-K3。\n百度推出的一款面向个人及团队的桌面级AI智能体。\nCopyright © 2013-2026 菜鸟教程",
+    "content_hash": "6dc4f5aaf51411a256a3967a89e3ee97abc88d899bc529930f89e688f1651e2d",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:32:19.115273+08:00",
+    "created_at": "2026-11-04T01:32:18.899564+08:00",
+    "evidence_count": 1
+   },
+   {
+    "id": "27b564ad-d50f-403b-8e98-0d91a1160e43",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "search_3",
+    "url": "https://www.runoob.com/sqlite/sqlite-tutorial.html",
+    "normalized_url": "https://www.runoob.com/sqlite/sqlite-tutorial.html",
+    "title": "SQLite 教程 | 菜鸟教程",
+    "site": "runoob.com",
+    "provider": "bing",
+    "snippet": "SQLite 教程 SQLite 是一个软件库，实现了自给自足的、无服务器的、零配置的、事务性的 SQL 数据库引擎。 SQLite 是在世界上最 …",
+    "excerpt": "菜鸟教程 -- 学的不仅是技术，更是梦想！\nSQLite Truncate Table\nSQLite Autoincrement\nSQLite 是一个软件库，实现了自给自足的、无服务器的、零配置的、事务性的 SQL 数据库引擎。SQLite 是在世界上最广泛部署的 SQL 数据库引擎。SQLite 源代码不受版权限制。\n本教程将告诉您如何使用 SQLite 编程，并让你迅速上手。\n本教程有助于初学者了解 SQLite 数据库引擎相关的基础知识和先进理念。\n在开始使用本教程提供的各类实例进行练习之前，您需要了解什么是数据库，尤其是 RDBMS，以及什么是计算机编程语言。\n如果您想要通过 SQLite DBMS 编译/执行 SQL 程序，但是您没有相关设置，那么可以访问 SQLite 在线 IDE 。您只需进行简单的点击动作，即可在高端的服务器上体验真实的编程经验。这是完全免费的在线工具。\n本教程提供了所有重要的内置的 SQLite 函数的参考手册。\n本教程列出了 SQLite 数据库网站和书籍。\nSQLite Home Page - SQLite 官方网站提供了最新的 SQLite 安装版本，最新的 SQLite 资讯以及完整的 SQLite 教程。\nPHP SQLite3 - 网站提供了 SQLite 3 数据库的 PHP 支持的完整细节。\nSQLite JDBC Driver: - SQLite JDBC，由 Taro L. Saito 开发的，是一个用于 Java 中访问和创建 SQLite 数据库文件的库。\nDBD-SQLite-0.31 - SQLite Perl driver 驱动程序与 Perl DBI 模块一起使用。\nDBI-1.625 - Perl DBI 模块为包括 SQLite 在内的任何数据库提供了通用接口。\nSQLite Python - sqlite3 python 模块由 Gerhard Haring 编写的。它提供了与 DB-API 2.0 规范兼容的 SQL 接口。\nPython / 数据科学 Python 教程\nAI / 智能开发 AI Agent（智能体）\nXML / Web Service XML 教程\n限时 9.9 元起 ，支持 Deepseek-V4、GLM-5.3、Doubao-Seed-Evolving、Kimi-K3。\n百度推出的一款面向个人及团队的桌面级AI智能体。\nCopyright © 2013-2026 菜鸟教程",
+    "content_hash": "eaeaf1b8ea1a67215f551fe08d9693a97df6204b3b4800954ae137bfd0996000",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:32:19.053437+08:00",
+    "created_at": "2026-11-04T01:32:18.899643+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "cb6745b6-9798-4bed-956a-2283ce22826e",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "search_1",
+    "url": "https://www.postgresql.org/download",
+    "normalized_url": "https://www.postgresql.org/download",
+    "title": "PostgreSQL: Downloads",
+    "site": "postgresql.org",
+    "provider": "bing",
+    "snippet": "PostgreSQL is available for download as ready-to-use packages or installers for various platforms, as well as a source code archive …",
+    "excerpt": "PostgreSQL: Downloads\nOctober 15, 2026: PostgreSQL 19 RC 1 Released!\nPostgreSQL Downloads\nPostgreSQL is available for download as ready-to-use packages or installers for\nvarious platforms, as well as a source code archive if you want to build it\nPackages and Installers\nSelect your operating system family:\nSelect your Linux distribution:\nRed Hat/Rocky/AlmaLinux\nSelect your BSD operating system:\nThe source code can be found in the main file browser\nor you can access the source control repository directly\nat git.postgresql.org .\nInstructions for building from source can be found in the\nBeta/RC Releases and development snapshots (unstable)\nThere are source code and binary packages\nof beta and release candidates, and of the current development code available\nfor testing and evaluation of new features. Note that these builds should\nbe used for testing purposes only , and not for production systems.\nThere is much software available that is not bundled with PostgreSQL. The Software\nCatalogue offers a listing of many commercial and Open Source applications, interfaces and extensions to PostgreSQL\nthat you may find useful.\nIf you wish to have your product listed in the catalogue, please fill out this form .\nYou can download most of the software we publish from a mirror site using our File Browser .",
+    "content_hash": "13c478a83af156f374c8e3932b3f0a0b045793c4e74e7b0b0ea039dd70637fa9",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:32:20.557509+08:00",
+    "created_at": "2026-11-04T01:32:18.899882+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "843e2f24-2742-41be-9512-7b993afac430",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "search_3",
+    "url": "https://sqlite.org/download.html",
+    "normalized_url": "https://sqlite.org/download.html",
+    "title": "SQLite Download Page",
+    "site": "sqlite.org",
+    "provider": "bing",
+    "snippet": "6 days ago · See the How To Compile SQLite page for additional information on how to use the raw SQLite source code. Note that a …",
+    "excerpt": "SQLite Download Page Small. Fast. Reliable. Search Documentation SQLite Download Page sqlite-src-3540100.zip Complete canonical source tree for SQLite version 3.54.1, include test cases and extensions. This is a snapshot of all code under version control at the time of release. This is the urtext. All of the other source code bundles shown below are derived from this one. sqlite-amalgamation-3540100.zip C source code as an amalgamation , version 3.54.1. sqlite-autoconf-3540100.tar.gz C source code as an amalgamation . Also includes a \"configure\" script. sqlite-preprocessed-3540100.zip Preprocessed C sources for SQLite version 3.54.1. This is a legacy build product that is untested and unsupported. sqlite-doc-3540100.zip Documentation as a bundle of static HTML files. Precompiled Binaries for Android sqlite-android-3540100.aar A precompiled Android library containing the core SQLite together with appropriate Java bindings , ready to drop into any Android Studio project. Precompiled Binaries for Linux sqlite-tools-linux-x64-3540100.zip Command-line tools for Linux on x64, including (1) the command-line shell , (2) sqldiff , (3) sqlite3_analyzer , and (4) sqlite3_rsync . Precompiled Binaries for Mac OS X sqlite-tools-osx-arm64-3540100.zip Command-line tools for Mac OS-X on ARM, including (1) the command-line shell , (2) sqldiff , (3) sqlite3_analyzer , and (4) sqlite3_rsync . Note: These binaries are unsigned. After installing them on your $PATH, you will need to run a command like the following to get them to work: xattr -d com.apple.quarantine <prog> sqlite-tools-osx-x64-3540100.zip Command-line tools for Mac OS-X on x64, including (1) the command-line shell , (2) sqldiff , (3) sqlite3_analyzer , and (4) sqlite3_rsync . Note: These binaries are unsigned. After installing them on your $PATH, you will need to run a command like the following to get them to work: xattr -d com.apple.quarantine <prog> Precompiled Binaries for Windows sqlite-dll-win-arm64-3540100.zip DLL for Windows ARM64, SQLite version 3.54.1. sqlite-dll-win-x64-3540100.zip DLL for Windows x64, SQLite version 3.54.1. sqlite-dll-win-x86-3540100.zip DLL for Windows x86 (32-bit), SQLite version 3.54.1. sqlite-tools-win-arm64-3540100.zip Command-line tools for Windows ARM64, including (1) the command-line shell , (2) sqldiff.exe , (3) sqlite3_analyzer.exe , and (4) sqlite3_rsync.exe . sqlite-tools-win-x64-3540100.zip Command-line tools for Windows x64, including (1) the command-line shell , (2) sqldiff.exe , (3) sqlite3_analyzer.exe , and (4) sqlite3_rsync.exe . WebAssembly & JavaScript sqlite-wasm-3540100.zip A precompiled bundle of sqlite3.wasm and its JavaScript APIs, ready for use in web applications. Precompiled Binaries for .NET → See the System.Data.SQLite.org website Build Product Names and Info Build products are named using one of the following templates: sqlite- product - version .zip sqlite- product - version .tar.gz sqlite- product - os - cpu - version .zip sqlite- product - date .zip Templates (1) and (2) are used for source-code products. Template (1) is used for generic source-code products and template (2) is used for source-code products that are generally only useful on unix-like platforms. Template (3) is used for precompiled binaries products. Template (4) is used for unofficial pre-release \"snapshots\" of source code. The version is encoded so that filenames sort in order of increasing version number when viewed using \"ls\". For version 3.X.Y the filename encoding is 3XXYY00. For branch version 3.X.Y.Z, the encoding is The date in template (4) is of the form: YYYYMMDDHHMM For convenient, script-driven extraction of the downloadable file URLs and associated information, an HTML comment is embedded in this page's source. Its first line (sans leading tag) reads: Download product data for scripts to read Its subsequent lines comprise a CSV table with this column header: PRODUCT,VERSION,RELATIVE-URL,SIZE-IN-BYTES,SHA3-HASH …",
+    "content_hash": "a27cb5463f563b1482667486060a47a092530607cff13a4257bae144de47fffa",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:32:20.67828+08:00",
+    "created_at": "2026-11-04T01:32:18.900039+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "a3ca5b1c-4314-4e93-acfb-854e748a66a0",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "search_1",
+    "url": "https://baike.baidu.com/item/PostgreSQL/530240",
+    "normalized_url": "https://baike.baidu.com/item/PostgreSQL/530240",
+    "title": "PostgreSQL _百度百科",
+    "site": "baike.baidu.com",
+    "provider": "bing",
+    "snippet": "PostgreSQL支持大部分的SQL标准并且提供了很多其他现代特性，如复杂查询、外键、触发器、视图、事务完整性、多版本并发控制 …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "robots_blocked",
+    "error": "robots.txt 禁止抓取",
+    "created_at": "2026-11-04T01:32:18.900211+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "ff44e1db-c0cd-49a2-8828-d21e99c4c520",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "search_3",
+    "url": "https://blog.csdn.net/Javachichi/article/details/138106632",
+    "normalized_url": "https://blog.csdn.net/Javachichi/article/details/138106632",
+    "title": "SQLite 入门教程（非常详细）零基础入门到精通，收藏这一篇就够了-CSDN博客",
+    "site": "blog.csdn.net",
+    "provider": "bing",
+    "snippet": "Apr 23, 2024 · 本文介绍了 SQLite ，一个开源、轻量级的SQL数据库，适合嵌入式设备和低流量网站。 文章详细阐述了 SQLite 的安装 …",
+    "excerpt": "SQLite 入门教程（非常详细）零基础入门到精通，收藏这一篇就够了 墨衍会员 ¥399 起/年，写一次发全网 抽iPhone18Pro！赢10年VIP！ 双11超级福利限时派发：买周边/年卡送200元券包+10%返利，仅限1次，立即上车>> 不是 MySQL 用不起，而是 SQLite 更有性价比，绝大多数的应用 SQLite 都可以满足。 SQLite 是一个用 C 语言编写的开源、轻量级、快速、独立且高可靠性的 SQL 数据库引擎，它提供了功能齐全的数据库解决方案。SQLite 几乎可以在所有的手机和计算机上运行，它被嵌入到无数人每天都在使用的众多应用程序中。 此外，SQLite 还具有稳定的文件格式、跨平台能力和向后兼容性等特点。SQLite 的开发者承诺，至少在 2050 年之前保持该文件格式不变。 本文将介绍 SQLite 的基础知识和使用方法。 在 SQLite 官方页面[1](https://sqlite.org/download.html) 下载适合你目标系统的压缩包。 下载并解压后，无论是在 Windows、Linux 还是 Mac OS 系统上，你都可以得到一个 sqlite3 命令行工具。 以下是在 Mac OS 上解压后得到的命令行工具示例： ➜ sqlite-tools-osx-x64-3450100 ls -l total 14952 -rwxr-xr-x@ 1 darcy staff 1907136 1 31 00:27 sqldiff -rwxr-xr-x@ 1 darcy staff 2263792 1 31 00:25 sqlite3 -rwxr-xr-x@ 1 darcy staff 3478872 1 31 00:27 sqlite3_analyzer SQLite 与客户端/服务器类型的 SQL 数据库引擎（例如 MySQL、Oracle、PostgreSQL 或 SQL Server）不同，它们解决的问题也不同。 服务器端的 SQL 数据库引擎旨在实现企业级数据的共享存储，它们强调的是 可扩展性、并发性、集中化和控制性 。相比之下，SQLite 通常用于为个人应用程序和设备提供本地数据存储，它强调的是 经济、高效、可靠、独立和简单 。 1. 嵌入式设备和物联网SQLite 不需要额外的管理或服务启动，非常适合用在手机、电视、机顶盒、游戏机、相机、手表等智能设备上。 2. 网站多数低流量网站可以使用 SQLite 作为数据库。根据官方网站的介绍，通常每天访问量少于 10 万次的网站都可以很好地运行 SQLite。SQLite 的官方网站（https://www.sqlite.org/）自身就使用 SQLite 作为数据库引擎，每天处理大约 50 万 HTTP 请求，其中约 15-20% 的请求涉及数据库查询 3. 数据分析SQLite3 命令行工具能方便地与 CSV 和 Excel 文件进行交互操作，适合分析大数据集。同时，许多语言（如 Python）都内置了 SQLite 支持，可以轻松编写脚本进行数据操作。 4. 缓存SQLite 可以作为应用服务的缓存，减轻对中心数据库的压力。 5. 内存或者临时数据库得益于 SQLite 的简单快速，非常使用程序演示或者日常测试。 需要通过网络访问数据库 的情况。SQLite 是一个本地文件数据库，没有提供远程访问功能。 要求高可用性和可扩展性 的场合。SQLite 简单易用，但不可扩展。 数据量极大 时。尽管 SQLite 数据库大小的限制高达 281 TB，但所有数据都必须存储在单个磁盘上。 写入操作高并发 时。SQLite 在任何时刻只允许一个写入操作执行，其他写入操作需要排队。 SQLite 提供了 sqlite3 （在windows 为 sqlite3.exe）命令行工具，通过该工具可以执行 SQLite 数据库操作和 SQL 语句。 直接在命令提示符下执行 ./sqlite3 启动 sqlite3 程序，然后可以通过输入 .help 查看帮助指南，或者输入 .help 关键词 获取特定关键词的帮助信息。 sqlite> .help .databases List names and files of attached databases .dbconfig ?op? ?val? List or change sqlite3_db_config() options .dbinfo ?DB? Show status information about the database .excel Display the output of next command in spreadsheet .exit ?CODE? Exit this program with return-code CODE .expert EXPERIMENTAL. Suggest indexes for queries .explain ?on|off|auto? Change the EXPLAIN formatting mode. Default: auto .help ?-all? ?PATTERN? Show help text for PATTERN .hex-rekey OLD NEW NEW Change the encryption key using hexadecimal .indexes ?TABLE? Show names of indexes .mode MODE ?OPTIONS? Set output mode .open ?OPTIONS? ?FILE? Close existing database and reopen FILE .output ?FILE? Send output to FILE or stdout if FILE is omitted .quit Exit this program .read FILE Read input from FILE or command output .schema ?PATTERN? Show the CREATE statements matching PATTERN .show Show the current values for various settings .tables ?TABLE? List names of tables matching LIKE pattern TABLE ....... sqlite3 只是读取输入行信息，然后传递给 SQLite 库来执行，SQL 语句都要以分号 ; 结尾才会开始执行，因此你可以自由的分行输入。 在 sqlite3 中，SQL 语句需以分号 ; 结尾才会执行，允许跨行输入。特殊的点命令（如 .help 和 .tables ）以小数点 . 开头， 不需要分号 。 直接执行 sqlite3 filename 打开或创建一个 SQLite 数据库。如果文件不存在，SQLite 会自动创建它。 示例：打开或创建名为 my_sqlite.db 的 SQLite 数据库文件。 $ sqlite3 my_sqlite.db SQLite version 3.39.5 2022-10-14 20:58:05 Enter \".help\" for usage hints. sqlite> 也可以首先创建一个空白文件，然后使用 sqlite3 命令打开它。接下来使用 CREATE TABLE 命令创建一个名为 user 的表，用 .tables 命令查看现有表格，使用 .exit 退出 sqlite3 工具。 $ touch test.db $ sqlite3 test.db SQLite version 3.39.5 2022-10-14 20:58:05 Enter \".help\" for usage hints. sqlite> create table user(name text,age int); sqlite> .tables user sqlite> 使用点命令 .databases 查看当前打开的数据库。 sqlite> .databases main: /Users/darcy/develop/sqlite-tools-osx-x86-3420000/my_sqlite.db r/w sqlite> SQLite 几乎完全兼容常见的 SQL 语句规范，因此可以直接编写和执行标准的 SQL 语句。 sqlite> create table user(name text,age int); sqlite> sqlite> insert into user values('aLang',20); sqlite> insert into user values('Darcy',30); sqlite> insert into user values('XiaoMing',40); sqlite> select * from user; aLang|20 Darcy|30 XiaoMing|40 添加索引，为 user 表的 name 创建名为 user_name 的索引： sqlite> create index user_name on user(name); 在查询数据时，SQLite 默认使用 | 分割每列数据，这可能不便于阅读。实际上，sqlite3 工具支持多种输出格式，默认为 list 模式。 …",
+    "content_hash": "e47f3a6fd8986bf3a56bf1c0f3679204034d0461597fe7cebc63c872fc845f0c",
+    "http_status": 200,
+    "credibility": "unknown",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:32:19.891497+08:00",
+    "created_at": "2026-11-04T01:32:18.902265+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "2276d147-abfa-4d04-b1b4-dc6666cbcedf",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "search_1",
+    "url": "https://postgresql.ac.cn/docs/current/index.html",
+    "normalized_url": "https://postgresql.ac.cn/docs/current/index.html",
+    "title": "PostgreSQL 18.0 文档",
+    "site": "postgresql.ac.cn",
+    "provider": "bing",
+    "snippet": "版权所有 &#169; 1996–2025 PostgreSQL 全球开发组 法律声明 目录 前言 1. 什么是 PostgreSQL ？ 2. PostgreSQL 简史 3. 约定 4. 更多信 …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "fetch_failed",
+    "error": "HTTP 429",
+    "created_at": "2026-11-04T01:32:18.902457+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "7ef1ee91-61a9-40c8-8241-e6517ad26f30",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "search_1",
+    "url": "https://en.wikipedia.org/wiki/PostgreSQL",
+    "normalized_url": "https://en.wikipedia.org/wiki/PostgreSQL",
+    "title": "PostgreSQL - Wikipedia",
+    "site": "en.wikipedia.org",
+    "provider": "wikipedia",
+    "snippet": "2010. \" OSI PostgreSQL Licence\". Open Source Initiative. February 20, 2010. Retrieved February 20, 2010. \"Debian -- Details of package postgresql in sid\"",
+    "excerpt": "Srpskohrvatski / српскохрватски Free and open-source object relational database management system </ref>\\n<!-- | screenshot = PostgreSQL 13.2 screenshot.png -->\"},\"other_names\":{\"wt\":\"Postgres\"},\"developer\":{\"wt\":\"PostgreSQL Global Development Group<ref name=\\\"contributors\\\" />\"},\"released\":{\"wt\":\" <ref name=\\\"birthday\\\" />\"},\"latest release version\":{\"wt\":\" \"},\"latest release date\":{\"wt\":\" \"},\"latest preview version\":{\"wt\":\" \"},\"latest preview date\":{\"wt\":\" \"},\"programming language\":{\"wt\":\"C (and C++ for the LLVM dependency)\"},\"genre\":{\"wt\":\"RDBMS\"},\"license\":{\"wt\":\"PostgreSQL License (free and open-source, permissive)<ref name=\\\"about/licence\\\" /><ref name=\\\"approved by OSI\\\" /><ref name=\\\"OSI\\\" />\"}},\"i\":0}}]}'> PostgreSQL The World's Most Advanced Open Source Relational Database [ 1 ] Other names Postgres Developer PostgreSQL Global Development Group [ 2 ] Release 8 July 1996 ; Stable release 18.6 [ 4 ] Preview release 19 release candidate 1 [ 5 ] Written in C (and C++ for the LLVM dependency) License PostgreSQL License ( free and open-source , permissive ) [ 6 ] [ 7 ] [ 8 ] Website www .postgresql .org Repository git .postgresql .org /gitweb /?p=postgresql .git \"},\"image\":{\"wt\":\"\"},\"caption\":{\"wt\":\"PostgreSQL License\"},\"author\":{\"wt\":\"\"},\"version\":{\"wt\":\"\"},\"publisher\":{\"wt\":\"PostgreSQL Global Development Group<br />Regents of the University of California\"},\"date\":{\"wt\":\"\"},\"OSI approved\":{\"wt\":\"Yes<ref name=\\\"OSI\\\" />\"},\"Debian approved\":{\"wt\":\"Yes<ref> </ref><ref> </ref>\"},\"FSF approved\":{\"wt\":\"Yes<ref> </ref>\"},\"GPL compatible\":{\"wt\":\"Yes\"},\"copyleft\":{\"wt\":\"No\"},\"linking\":{\"wt\":\"Yes\"},\"website\":{\"wt\":\" \"}},\"i\":0}}]}'> PostgreSQL License [ 6 ] Publisher PostgreSQL Global Development Group />Regents of the University of California Debian FSG compatible Yes [ 9 ] [ 10 ] FSF approved Yes [ 11 ] OSI approved Yes [ 8 ] Linking from code with a different license Yes Website postgresql .org /about /licence This article is part of a series on the /> Structured Query Language Access Database Engine SAP Advantage Database Server Empress Embedded Database Extensible Storage Engine Microsoft Azure SQL Database Microsoft SQL Server Microsoft SQL Server Express Microsoft Visual FoxPro Virtuoso Universal Server Percona Server for MySQL Postgres Plus Advanced Server SAP Adaptive Server Enterprise Snowflake Cloud Data Warehouse Google Cloud Spanner Unisys OS 2200 databases Database administration tools Apache OpenOffice Base Oracle Enterprise Manager SQL Server Management Studio Application Development System Online Oracle SQL Developer Database drivers and ORMs Comparison of RDBMSs Comparison of object–RDBMSs DB-Engine Ranking list List of data science software List of SQL software and tools List of NoSQL software and tools Computer programming portal PostgreSQL ( / ˈ p oʊ s t ɡ r ɛ s k j u ˌ ɛ l / ⓘ POHST -gres-kew- EL ), [ 12 ] [ 13 ] also known as Postgres , is a free and open-source relational database management system (RDBMS) emphasizing extensibility and SQL compliance. PostgreSQL features transactions with atomicity , consistency , isolation , durability ( ACID ) properties, automatically updatable views , materialized views , triggers , foreign keys , and stored procedures . [ 14 ] It is supported on all major operating systems , including Windows , Linux , macOS , FreeBSD , OpenBSD and NetBSD , and handles a range of workloads from single machines to data warehouses , data lakes , [ 15 ] or web services with many concurrent users . The PostgreSQL Global Development Group focuses only on developing a database engine and closely related components. This core is, technically, what comprises PostgreSQL itself, but there is an extensive developer community and ecosystem that provides other important feature sets that might, traditionally, be provided by a proprietary software vendor. These include special-purpose database engine features, like those needed to support a geospatial [ 16 ] or temporal [ 17 ] database or features w…",
+    "content_hash": "18266a05890beec4c365ddb869cd232290b754417b0700362773e8d159a88756",
+    "http_status": 200,
+    "credibility": "high",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:32:19.808992+08:00",
+    "created_at": "2026-11-04T01:32:18.902896+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "21eaae9f-ee5e-4d50-b1dc-eb0ff7272932",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "search_3",
+    "url": "https://sqlite.ac.cn",
+    "normalized_url": "https://sqlite.ac.cn",
+    "title": "SQLite 主页 - SQLite 数据库",
+    "site": "sqlite.ac.cn",
+    "provider": "bing",
+    "snippet": "Aug 10, 2024 · 什么是 SQLite ？ SQLite 是一个用 C 语言编写的库，它实现了一个 小型 、 快速 、 自包含 、 高可靠性 、 功能齐全 的 …",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "unknown",
+    "status": "fetch_failed",
+    "error": "HTTP 429",
+    "created_at": "2026-11-04T01:32:18.902907+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "0d15a4ed-12bd-4df3-8416-0d340092d549",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "search_1",
+    "url": "https://en.wikipedia.org/wiki/Comparison_of_network_monitoring_systems",
+    "normalized_url": "https://en.wikipedia.org/wiki/Comparison_of_network_monitoring_systems",
+    "title": "Comparison of network monitoring systems - Wikipedia",
+    "site": "en.wikipedia.org",
+    "provider": "wikipedia",
+    "snippet": "method used to store the network data it monitors. License License released under (e.g. GPL , BSD license , etc.). Maps Features graphical network maps that",
+    "excerpt": "Comparison of network monitoring systems The topic of this article may not meet Wikipedia's general notability guideline . Please help demonstrate the notability of the topic by citing reliable secondary sources that are independent of the topic and provide significant coverage of it beyond a mere trivial mention. If notability cannot be shown, the article is likely to be merged , redirected , or deleted . This article contains promotional content . Please help improve it by removing promotional language and inappropriate external links , and by adding encyclopedic text written from a neutral point of view . The following tables compare general and technical information for several notable network monitoring systems . For more information, please refer to the individual product articles. Distributed monitoring Latest release version style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> Cacti RRDtool , MySQL , MariaDB style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> Checkmk style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> collectd multicast possible\"}},\"i\":0}}]}'>Push model; /> multicast possible style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> Cruz style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> FreeNATS style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> Ganglia style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> Icinga MariaDB , MySQL , PostgreSQL [ 3 ] style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> InterMapper Windows , Linux & Mac OS Limited free, Commercial style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> isyVmon Limited free, Commercial style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> Munin style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> Nagios Flat file , SQL (via ndoutils), MySql (Via Nconf) style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> Netdisco style=\\\"background-color: var(--background-color-neutral,#eaecf0);color: var(--color-base,#202122);font-weight: bold; vertical-align: middle; text-align: left; \\\" class=\\\"table-rh\\\"</span>\"},{\"html\":\"\"}]]}'> NetXMS PostgreSQL , PostgreSQL with TimescaleDB, MariaDB , MySQL , MS SQL , Oracle , SQLite …",
+    "content_hash": "8a305761214384c93e80554e97648f983eb2a90b1616786f14cc78e7845459cd",
+    "http_status": 200,
+    "credibility": "high",
+    "status": "ok",
+    "fetched_at": "2026-11-04T01:32:20.717343+08:00",
+    "created_at": "2026-11-04T01:32:18.903425+08:00",
+    "evidence_count": 0
+   }
+  ],
+  "total": 12
+ },
+ "evidence": {
+  "items": [
+   {
+    "id": "8e32eea5-5d3b-4730-a15d-7dff5dd6e6ce",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "node_id": "analyze_1",
+    "statement": "PostgreSQL 是一个免费的对象-关系数据库服务器(ORDBMS)，在灵活的BSD许可证下发行。",
+    "normalized_key": "analyze_1:e3c5e0788248",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T01:32:42.31266+08:00",
+    "evidence": [
+     {
+      "id": "0618c5b6-a57c-465c-9f82-e9d6bb912238",
+      "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+      "claim_id": "8e32eea5-5d3b-4730-a15d-7dff5dd6e6ce",
+      "source_id": "d8ee90fc-8ba2-4386-ae03-4bedc13f9f13",
+      "node_id": "analyze_1",
+      "quote": "PostgreSQL 是一个免费的对象-关系数据库服务器(ORDBMS)，在灵活的BSD许可证下发行。",
+      "stance": "support",
+      "confidence": 1,
+      "created_at": "2026-11-04T01:32:42.313068+08:00"
+     }
+    ]
+   }
+  ],
+  "total": 1
+ },
+ "report": {
+  "report": {
+   "id": "47734c5a-2cc1-4939-b9b4-b8be553de26b",
+   "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+   "version": 1,
+   "title": "对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异",
+   "summary": "本次研究围绕「对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异」执行，共采集资料 1 条，产出结论 1 条（已验证 0 条、部分支持 1 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 1 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。",
+   "markdown": "# 对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异\n\n## 摘要\n\n本次研究围绕「对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异」执行，共采集资料 1 条，产出结论 1 条（已验证 0 条、部分支持 1 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 1 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。\n\n## 目标与范围\n\n**研究目标**：对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异\n\n**研究深度**：standard　**最大并发 Agent**：4　**交叉验证**：true\n\n## 核心发现\n\n1. PostgreSQL 是一个免费的对象-关系数据库服务器(ORDBMS)，在灵活的BSD许可证下发行。（单一来源，置信度 0.50）[1]\n\n\n## 分主题分析\n\n### 主题 analyze_1\n\n- PostgreSQL 是一个免费的对象-关系数据库服务器(ORDBMS)，在灵活的BSD许可证下发行。[1]\n\n## 争议与不确定性\n\n本次执行未检测到同一指标上的来源冲突。\n\n\n\n## 信息来源\n\n1. [PostgreSQL 教程 | 菜鸟教程](https://www.runoob.com/postgresql/postgresql-tutorial.html) — runoob.com\n\n\n## 方法与局限性\n\n- 规划模式：llm；执行模型：LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）。\n- 检索与抓取均走真实外部服务；抓取遵守 robots.txt，正文经过去标签与指纹去重。\n- 结论由来源正文片段抽取，交叉验证按「独立站点数 + 数值一致性」判定，未使用模型主观判断替换证据。\n- 本次统计：资料 1 条、结论 1 条、引用 1 条。\n- 局限：检索覆盖受 Provider 配额与反爬限制；未做全文语义相似度聚类，冲突检测聚焦显式数值指标。\n\n",
+   "sections": [
+    {
+     "heading": "摘要",
+     "body": "本次研究围绕「对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异」执行，共采集资料 1 条，产出结论 1 条（已验证 0 条、部分支持 1 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 1 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。"
+    },
+    {
+     "heading": "目标与范围",
+     "body": "**研究目标**：对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异\n\n**研究深度**：standard　**最大并发 Agent**：4　**交叉验证**：true\n"
+    },
+    {
+     "heading": "核心发现",
+     "body": "1. PostgreSQL 是一个免费的对象-关系数据库服务器(ORDBMS)，在灵活的BSD许可证下发行。（单一来源，置信度 0.50）[1]\n"
+    },
+    {
+     "heading": "分主题分析",
+     "body": "### 主题 analyze_1\n\n- PostgreSQL 是一个免费的对象-关系数据库服务器(ORDBMS)，在灵活的BSD许可证下发行。[1]"
+    },
+    {
+     "heading": "争议与不确定性",
+     "body": "本次执行未检测到同一指标上的来源冲突。\n\n"
+    },
+    {
+     "heading": "信息来源",
+     "body": "1. [PostgreSQL 教程 | 菜鸟教程](https://www.runoob.com/postgresql/postgresql-tutorial.html) — runoob.com\n"
+    },
+    {
+     "heading": "方法与局限性",
+     "body": "- 规划模式：llm；执行模型：LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）。\n- 检索与抓取均走真实外部服务；抓取遵守 robots.txt，正文经过去标签与指纹去重。\n- 结论由来源正文片段抽取，交叉验证按「独立站点数 + 数值一致性」判定，未使用模型主观判断替换证据。\n- 本次统计：资料 1 条、结论 1 条、引用 1 条。\n- 局限：检索覆盖受 Provider 配额与反爬限制；未做全文语义相似度聚类，冲突检测聚焦显式数值指标。\n"
+    }
+   ],
+   "citations": [
+    {
+     "index": 1,
+     "claim_id": "8e32eea5-5d3b-4730-a15d-7dff5dd6e6ce",
+     "source_id": "d8ee90fc-8ba2-4386-ae03-4bedc13f9f13",
+     "title": "PostgreSQL 教程 | 菜鸟教程",
+     "url": "https://www.runoob.com/postgresql/postgresql-tutorial.html",
+     "site": "runoob.com",
+     "quote": "PostgreSQL 是一个免费的对象-关系数据库服务器(ORDBMS)，在灵活的BSD许可证下发行。"
+    }
+   ],
+   "citation_count": 1,
+   "word_count": 503,
+   "model": "LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）",
+   "created_at": "2026-11-04T01:33:51.907624+08:00"
+  },
+  "versions": [
+   {
+    "id": "47734c5a-2cc1-4939-b9b4-b8be553de26b",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "version": 1,
+    "title": "对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异",
+    "summary": "本次研究围绕「对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异」执行，共采集资料 1 条，产出结论 1 条（已验证 0 条、部分支持 1 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 1 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。",
+    "citation_count": 1,
+    "word_count": 503,
+    "model": "LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）",
+    "created_at": "2026-11-04T01:33:51.907624+08:00"
+   }
+  ]
+ },
+ "summary": {
+  "agents": 8,
+  "sources": 12,
+  "evidence_items": 1,
+  "dag_nodes": 8,
+  "research_questions": 3,
+  "subtasks": 8,
+  "agent_models": [
+   "cline/cline-free/solar-mini4"
+  ],
+  "agent_token_usage_total": 3670,
+  "report_md_chars": 0,
+  "report_versions": [
+   {
+    "id": "47734c5a-2cc1-4939-b9b4-b8be553de26b",
+    "task_id": "1686174c-bbe8-45eb-bbf9-6a420d8cc973",
+    "version": 1,
+    "title": "对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异",
+    "summary": "本次研究围绕「对比 PostgreSQL、MySQL、SQLite 三种开源数据库在许可证、典型应用场景与嵌入式适用性三个维度上的差异」执行，共采集资料 1 条，产出结论 1 条（已验证 0 条、部分支持 1 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 1 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。",
+    "citation_count": 1,
+    "word_count": 503,
+    "model": "LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）",
+    "created_at": "2026-11-04T01:33:51.907624+08:00"
+   }
+  ]
+ }
+}
