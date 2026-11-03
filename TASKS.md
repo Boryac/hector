@@ -69,13 +69,14 @@
   - 产物已交付；**运行验证未做**（本机无 Docker），见 T5.6
 - [x] T6.7 README 首屏 + ARCHITECTURE + DEPLOYMENT — 依赖：T6.6
   - `README.md` / `ARCHITECTURE.md` / `DEPLOYMENT.md` / `docs/DATA_MODEL.md` / `api/openapi.yaml` 全部按实际落码重写
-- [~] T6.8 演示脚本 + 真实运行截图素材 — 依赖：T6.7
+- [x] T6.8 演示脚本 + 真实运行截图素材 — 依赖：T6.7
   - 已完成：`DEMO_SCRIPT.md` 分镜、`docs/demo.md` 真实运行记录、`docs/demo/report.md|html` 真实产物、`scripts/screenshot.sh`
-  - 未完成：截图与录屏需图形界面，本机 Chrome/Edge 无头模式无输出
+  - 2026-11-03 补齐：无头 Chrome + CDP 可稳定出图，`web/scripts/ui-audit.mjs --shots=...` 生成 `docs/screenshots/` 10 张真实页面截图；录屏仍未做
 - [x] T6.9 最终交付报告 + Git 历史整理（不推远程）— 依赖：全部
   - 见 `docs/final-report.md`；两个 Git 仓库均本地提交，未推送
-- [ ] T6.10 前端浏览器 E2E（Playwright 或手工脚本化清单，需明确标注执行方式）— 依赖：T5.2
-  - 未开始：本机无 Playwright，且无头浏览器不可用；`docs/demo.md` §3 给出手工核对清单
+- [~] T6.10 前端浏览器 E2E（Playwright 或手工脚本化清单，需明确标注执行方式）— 依赖：T5.2
+  - 已完成（2026-11-03）：`web/scripts/ui-audit.mjs` 用无头 Chrome + CDP 逐页检查 7 条路由 × 桌面/移动共 14 项，控制台错误 0、横向溢出 0；可重复执行
+  - 未完成：创建 → 批准 → 暂停/恢复 → 完成 → 导出的全业务流自动 E2E；当前覆盖渲染与布局，不覆盖状态机
 
 ## 本轮迭代任务（2026-11-03，人工指派）
 - [x] T7.1 全局统一 LLM 配置变量名（`RESEARCHOS_LLM_API_KEY` / `RESEARCHOS_LLM_PROVIDER`）
@@ -147,3 +148,29 @@
 | T8.11 | `docs/USAGE.md` 重排为「认路 → 设置五页 → 优先级 → 密钥 → 建任务 → 批准 → 过程 → 报告 → API」；DECISIONS 追加 29–35 |
 
 未完成 / 待人工确认：Dashboard 与任务详情页 UI（人工在改）；真实大模型报告质量（缺可用 Key，仅验证到「链路通 + 失败如实上报」）。
+
+## 第九阶段：前端视觉系统重构（2026-11-03 人工指派）
+
+目标：以 `hector-researchos-dashboard-prototype.html` 为视觉与交互参考，把前端重做成可商业交付的统一设计系统；保留全部业务逻辑、API 契约、SSE、DAG 执行与鉴权，只改表现层。视觉关键词：Premium Enterprise、Editorial Minimalism、Swiss Typography、Quiet Luxury。
+
+### 任务清单与验收
+- [x] T9.1 设计令牌与应用框架 — 验收：一处定义颜色/字号/间距/圆角/动效；侧边栏 232px、顶栏 68px、内容最大 1440px；无 Emoji、无紫色渐变、无霓虹/粒子/装饰光斑；导航含总览/任务/来源/证据/报告/设置，移动端抽屉 + 遮罩，`⌘K` 命令面板可用
+  - 证据：`web/app/globals.css` 的 `:root` 令牌与 `components/AppShell.tsx`；`web/app/icon.svg` 替换 404 favicon；浏览器实测 6 个入口均可达，移动端菜单可开合
+- [x] T9.2 总览页重构 — 验收：指标、近 7 天活动图、运行时状态、最近任务、待处理项、最新报告全部来自真实 API；加载态为骨架而非假数据；时间显示不在服务端预渲染时被写死
+  - 证据：指标实测 `62 / 899 / 62 / 73%`；活动图 7 组真实柱；运行时读取 `/settings` 与 `/health` 快照；修复 `new Date()` 造成的 hydration 文本不一致（#425）
+- [x] T9.3 研究工作台（DAG 画布） — 验收：竖向分层 DAG、节点状态色、点击节点看详情、提纲开关、工作流/来源/证据/报告/Agents 五个页签、批准/暂停/恢复/重规划/取消/导出可用；窄屏不挤压到不可读
+  - 证据：真实任务 `aa1af51c` 8 节点、39 来源、7 证据、1 报告；192×95 节点（1440）、133×66（390）；提纲开关切换 `226/1fr/312` 与 `1fr/312`；报告正文 3363 字符、Markdown/HTML 均下载成功
+- [x] T9.4 来源 / 证据 / 报告 / 任务列表 — 验收：跨任务浏览、搜索、状态筛选、分页、详情抽屉或双栏阅读；空态/错误态/加载态齐全；不伪造数据
+  - 证据：`/sources` 1083 条真实来源、50 条/页；`/reports` 41 份、双栏阅读；`/evidence` 按任务切换；`/tasks` 搜索与状态筛选可用
+- [x] T9.5 设置中心 — 验收：按后端 schema 渲染 27 项配置，区分环境变量/界面保存/默认值/只读；枚举、数字、时长、多选校验；保存条固定在视口底部；骨架与错误提示完整
+  - 证据：`GET /api/v1/settings` 驱动；保存 `search.results` 6→7→6 实测持久化与 toast；移动端保存条 `y=780`、按钮 `还原/保存更改`、`还原` 后恢复为 6 并隐藏；无 `[object Object]`
+- [x] T9.6 响应式与动效 — 验收：1280/1024/860/720/520/390 无横向溢出；页面过渡 160–240ms；hover 克制；`prefers-reduced-motion` 下关闭动效；焦点可见
+  - 证据：1280 / 1024 / 860 / 720 / 520 / 390 六档宽度全页面审计 `doc == viewport`；`route-fade` 220ms；`@media (prefers-reduced-motion: reduce)` 关闭动画；移除 `route-fade` 的 `animation-fill-mode` 修复固定保存条错位
+- [x] T9.7 浏览器审计与截图 — 验收：可复现脚本逐页检查控制台错误与横向溢出，并输出真实截图
+  - 证据：`web/scripts/ui-audit.mjs` 14 项检查全 `ok`（7 路由 × 桌面/移动）；`docs/screenshots/` 10 张真实运行截图
+- [x] T9.8 文档与提交 — 验收：TASKS/PROGRESS/docs 与代码同步；小步提交、不推远程
+  - 证据：本文件、`PROGRESS.md`、`docs/design-system.md`；`upstream/hector` 本地提交，未 push
+
+### 收口说明
+- 未采用参考稿的青绿色 `#176d6b`，保持更克制的 `#526B7B` 作为唯一强调色；未引入任何装饰性插画或假图表。
+- 仍有开放项：PDF 导出（T6.1）、完整业务流浏览器 E2E（T6.10 仍为 `[~]`，当前脚本覆盖路由渲染与布局，不覆盖创建→批准→完成全链路）。
