@@ -1,15 +1,15 @@
 {
  "key": "A-factcheck",
- "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+ "task_id": "4ae74205-643f-44cc-8588-03820d071399",
  "goal": "核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据",
  "depth": "quick",
- "created_at": "2026-11-04 01:37:12",
+ "created_at": "2026-11-04 03:09:09",
  "model_id_expected": "cline/cline-free/solar-mini4",
- "wall_seconds": 126.2,
+ "wall_seconds": 96.3,
  "status": "completed",
  "planner_mode": "llm",
  "task_detail": {
-  "id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+  "id": "4ae74205-643f-44cc-8588-03820d071399",
   "title": "核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据",
   "goal": "核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据",
   "depth": "quick",
@@ -30,12 +30,12 @@
     },
     {
      "id": "q2",
-     "question": "Go 的官方维护组织是谁？",
+     "question": "Go 官方维护组织是谁？",
      "priority": "high"
     },
     {
      "id": "q3",
-     "question": "Go 的开源许可证类型是什么？",
+     "question": "Go 开源许可证类型是什么？",
      "priority": "high"
     }
    ],
@@ -44,23 +44,25 @@
      "id": "search_1",
      "title": "检索 Go 最新稳定大版本号",
      "agent_role": "researcher",
-     "inputs": [],
+     "inputs": [
+      "goal"
+     ],
      "outputs": [
-      "Go 官方发布的最新稳定大版本号"
+      "Go 最新稳定大版本号候选值"
      ],
      "depends_on": [],
      "node_type": "search",
-     "query": "Go programming language latest stable version"
+     "query": "Go programming language latest stable version release"
     },
     {
      "id": "analyze_1",
-     "title": "分析最新稳定大版本号来源",
+     "title": "分析 Go 最新稳定大版本号证据",
      "agent_role": "analyst",
      "inputs": [
       "search_1"
      ],
      "outputs": [
-      "确认的最新稳定大版本号及发布时间/官方来源"
+      "Go 最新稳定大版本号结论及来源"
      ],
      "depends_on": [
       "search_1"
@@ -71,23 +73,25 @@
      "id": "search_2",
      "title": "检索 Go 官方维护组织",
      "agent_role": "researcher",
-     "inputs": [],
+     "inputs": [
+      "goal"
+     ],
      "outputs": [
-      "Go 官方维护组织/治理主体"
+      "Go 官方维护组织名称与职责"
      ],
      "depends_on": [],
      "node_type": "search",
-     "query": "Go project official maintainers organization governance"
+     "query": "Go official maintainers organization governance"
     },
     {
      "id": "analyze_2",
-     "title": "分析官方维护组织依据",
+     "title": "分析 Go 官方维护组织证据",
      "agent_role": "analyst",
      "inputs": [
       "search_2"
      ],
      "outputs": [
-      "官方维护组织名称、所属实体及证据"
+      "Go 官方维护组织结论及来源"
      ],
      "depends_on": [
       "search_2"
@@ -98,23 +102,25 @@
      "id": "search_3",
      "title": "检索 Go 开源许可证类型",
      "agent_role": "researcher",
-     "inputs": [],
+     "inputs": [
+      "goal"
+     ],
      "outputs": [
-      "Go 开源许可证类型及官方许可证文件"
+      "Go 开源许可证类型与条款"
      ],
      "depends_on": [],
      "node_type": "search",
-     "query": "Go programming language license MIT Apache 2.0"
+     "query": "Go programming language license BSD"
     },
     {
      "id": "analyze_3",
-     "title": "分析开源许可证类型依据",
+     "title": "分析 Go 开源许可证证据",
      "agent_role": "analyst",
      "inputs": [
       "search_3"
      ],
      "outputs": [
-      "Go 许可证类型、许可证文件路径及证据"
+      "Go 开源许可证类型结论及来源"
      ],
      "depends_on": [
       "search_3"
@@ -122,8 +128,8 @@
      "node_type": "analyze"
     },
     {
-     "id": "verify",
-     "title": "交叉验证版本、维护组织与许可证",
+     "id": "verify_1",
+     "title": "交叉验证 Go 版本、维护组织与许可证信息",
      "agent_role": "verifier",
      "inputs": [
       "analyze_1",
@@ -131,7 +137,7 @@
       "analyze_3"
      ],
      "outputs": [
-      "交叉验证后的一致结论与证据来源"
+      "交叉验证结果与证据一致性"
      ],
      "depends_on": [
       "analyze_1",
@@ -141,17 +147,17 @@
      "node_type": "verify"
     },
     {
-     "id": "synthesize",
-     "title": "综合最终结论",
+     "id": "synthesize_1",
+     "title": "综合 Go 最新稳定大版本号、官方维护组织与开源许可证结论",
      "agent_role": "synthesizer",
      "inputs": [
-      "verify"
+      "verify_1"
      ],
      "outputs": [
-      "Go 最新稳定大版本号、官方维护组织、开源许可证类型及依据"
+      "最终结论与依据"
      ],
      "depends_on": [
-      "verify"
+      "verify_1"
      ],
      "node_type": "synthesize"
     }
@@ -161,10 +167,9 @@
     "edges": null
    },
    "risks_and_gaps": [
-    "版本号随 Go 发布周期变化，需以官方发布页/仓库最新信息为准",
-    "维护组织可能涉及多个贡献者和委员会，需区分官方治理主体与社区贡献者",
-    "许可证类型需核对最新版 LICENSE 文件，避免旧版本或附加条款误导",
-    "搜索结果可能包含第三方镜像或旧资料，需优先使用官方文档和仓库"
+    "Go 版本号可能随发布周期变化，需以最新官方发布为准",
+    "官方维护组织可能涉及多个团队或贡献者，需区分核心维护者与社区治理",
+    "许可证类型可能有不同表述，需确认 BSD 3-Clause 及相关工具链许可证的准确性"
    ]
   },
   "workflow": {
@@ -179,7 +184,7 @@
     {
      "id": "analyze_1",
      "type": "analyze",
-     "title": "分析最新稳定大版本号来源",
+     "title": "分析 Go 最新稳定大版本号证据",
      "agent_role": "analyst",
      "depends_on": [
       "search_1"
@@ -195,7 +200,7 @@
     {
      "id": "analyze_2",
      "type": "analyze",
-     "title": "分析官方维护组织依据",
+     "title": "分析 Go 官方维护组织证据",
      "agent_role": "analyst",
      "depends_on": [
       "search_2"
@@ -211,16 +216,16 @@
     {
      "id": "analyze_3",
      "type": "analyze",
-     "title": "分析开源许可证类型依据",
+     "title": "分析 Go 开源许可证证据",
      "agent_role": "analyst",
      "depends_on": [
       "search_3"
      ]
     },
     {
-     "id": "verify",
+     "id": "verify_1",
      "type": "verify",
-     "title": "交叉验证版本、维护组织与许可证",
+     "title": "交叉验证 Go 版本、维护组织与许可证信息",
      "agent_role": "verifier",
      "depends_on": [
       "analyze_1",
@@ -229,12 +234,12 @@
      ]
     },
     {
-     "id": "synthesize",
+     "id": "synthesize_1",
      "type": "synthesize",
-     "title": "综合最终结论",
+     "title": "综合 Go 最新稳定大版本号、官方维护组织与开源许可证结论",
      "agent_role": "synthesizer",
      "depends_on": [
-      "verify"
+      "verify_1"
      ]
     }
    ],
@@ -253,37 +258,37 @@
     },
     {
      "source": "analyze_1",
-     "target": "verify"
+     "target": "verify_1"
     },
     {
      "source": "analyze_2",
-     "target": "verify"
+     "target": "verify_1"
     },
     {
      "source": "analyze_3",
-     "target": "verify"
+     "target": "verify_1"
     },
     {
-     "source": "verify",
-     "target": "synthesize"
+     "source": "verify_1",
+     "target": "synthesize_1"
     }
    ]
   },
   "stats": {
-   "claims": 4,
-   "finished_at": "2026-11-03T17:39:16Z",
+   "claims": 8,
+   "finished_at": "2026-11-03T19:10:41Z",
    "nodes_done": 8,
    "nodes_total": 8,
-   "sources": 14
+   "sources": 15
   },
-  "created_at": "2026-11-04T01:37:12.522891+08:00",
-  "updated_at": "2026-11-04T01:39:16.942253+08:00",
-  "started_at": "2026-11-04T01:37:54.588166+08:00",
-  "finished_at": "2026-11-04T01:39:16.942253+08:00",
+  "created_at": "2026-11-04T03:09:09.949246+08:00",
+  "updated_at": "2026-11-04T03:10:41.734585+08:00",
+  "started_at": "2026-11-04T03:09:40.063836+08:00",
+  "finished_at": "2026-11-04T03:10:41.734585+08:00",
   "nodes": [
    {
     "id": "search_1",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
     "title": "检索 Go 最新稳定大版本号",
     "type": "search",
     "agent_role": "researcher",
@@ -295,7 +300,7 @@
     "max_attempts": 3,
     "input": {
      "fallback_query": "Go",
-     "query": "Go programming language latest stable version"
+     "query": "Go programming language latest stable version release"
     },
     "output": {
      "failed": 0,
@@ -306,54 +311,53 @@
       "wikipedia",
       "bing"
      ],
-     "query": "Go programming language latest stable version",
-     "result_count": 9,
+     "query": "Go programming language latest stable version release",
+     "result_count": 8,
      "source_ids": [
-      "6f783426-c4b8-40eb-b9c5-034ee2bfa878",
-      "26c42bb4-e2a5-49f8-aec0-ba4262a6ca89",
-      "b49117ef-10cf-4ada-9fe7-adeb7a556295",
-      "d19ab572-5a4a-4dd4-bb43-618d83ef5c08",
-      "a8d8f9fd-48e3-4798-8f36-857eb58ef270",
-      "d929ca64-6658-42a7-9c6e-c9c9e6da1d04",
-      "246e5327-1d80-4e68-8772-46c987bc8ceb",
-      "0033fab5-611b-4e94-9ce3-9534a5a1b832",
-      "8b56bf22-6f01-4cf7-9d0e-794da9677726"
+      "ecb1434a-4cd8-4fe8-bea7-0558bc9a8c35",
+      "89e7af95-040a-4b17-97b9-b860db259dc6",
+      "2ffb68aa-5a3e-4282-8bff-1b52eae7a111",
+      "fb659b8a-ac20-455c-9bb4-26b302b83421",
+      "8bf37f38-c2b5-4bee-9305-d889872f923f",
+      "51dfd7a6-d363-4f79-b2f3-e29c9f8a244b",
+      "165e494d-ebc1-4125-adc0-7fb4df8518b3",
+      "5d9597c2-58e1-4202-8a68-312dff27f92f"
      ],
      "trace": [
       {
        "count": 3,
-       "duration_ms": 510,
+       "duration_ms": 518,
        "provider": "bing"
       },
       {
-       "count": 1,
-       "duration_ms": 694,
+       "count": 0,
+       "duration_ms": 524,
        "provider": "github"
       },
       {
-       "count": 3,
-       "duration_ms": 784,
-       "provider": "wikipedia"
+       "count": 2,
+       "duration_ms": 914,
+       "provider": "hackernews"
       },
       {
-       "count": 2,
-       "duration_ms": 827,
-       "provider": "hackernews"
+       "count": 3,
+       "duration_ms": 1371,
+       "provider": "wikipedia"
       }
      ]
     },
     "progress": 100,
     "progress_text": "completed",
     "tokens_total": 0,
-    "created_at": "2026-11-04T01:37:48.999809+08:00",
-    "updated_at": "2026-11-04T01:37:57.420208+08:00",
-    "started_at": "2026-11-04T01:37:54.922453+08:00",
-    "completed_at": "2026-11-04T01:37:57.420208+08:00"
+    "created_at": "2026-11-04T03:09:34.291311+08:00",
+    "updated_at": "2026-11-04T03:09:42.665985+08:00",
+    "started_at": "2026-11-04T03:09:40.208851+08:00",
+    "completed_at": "2026-11-04T03:09:42.665985+08:00"
    },
    {
     "id": "analyze_1",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "title": "分析最新稳定大版本号来源",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "title": "分析 Go 最新稳定大版本号证据",
     "type": "analyze",
     "agent_role": "analyst",
     "agent_name": "",
@@ -365,27 +369,27 @@
     "attempts": 1,
     "max_attempts": 3,
     "input": {
-     "question": "分析最新稳定大版本号来源"
+     "question": "分析 Go 最新稳定大版本号证据"
     },
     "output": {
-     "claims": 1,
+     "claims": 2,
      "llm_used": true,
      "model": "cline/cline-free/solar-mini4",
-     "question": "分析最新稳定大版本号来源",
-     "source_n": 5,
-     "tokens": 8972
+     "question": "分析 Go 最新稳定大版本号证据",
+     "source_n": 4,
+     "tokens": 2537
     },
     "progress": 100,
     "progress_text": "completed",
-    "tokens_total": 8972,
-    "created_at": "2026-11-04T01:37:49.002129+08:00",
-    "updated_at": "2026-11-04T01:38:55.408043+08:00",
-    "started_at": "2026-11-04T01:37:57.422759+08:00",
-    "completed_at": "2026-11-04T01:38:55.408043+08:00"
+    "tokens_total": 2537,
+    "created_at": "2026-11-04T03:09:34.293377+08:00",
+    "updated_at": "2026-11-04T03:09:54.543204+08:00",
+    "started_at": "2026-11-04T03:09:42.708822+08:00",
+    "completed_at": "2026-11-04T03:09:54.543204+08:00"
    },
    {
     "id": "search_2",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
     "title": "检索 Go 官方维护组织",
     "type": "search",
     "agent_role": "researcher",
@@ -397,7 +401,7 @@
     "max_attempts": 3,
     "input": {
      "fallback_query": "Go",
-     "query": "Go project official maintainers organization governance"
+     "query": "Go official maintainers organization governance"
     },
     "output": {
      "failed": 0,
@@ -408,35 +412,35 @@
       "wikipedia",
       "bing"
      ],
-     "query": "Go project official maintainers organization governance",
+     "query": "Go official maintainers organization governance",
      "result_count": 6,
      "source_ids": [
-      "b15acc9b-924c-4f95-86f3-371111ec9759",
-      "b0e70daa-ab52-44e7-82fb-c345d5e94df4",
-      "ebcc0cc7-6187-4410-abf7-20b5ad997904",
-      "246e5327-1d80-4e68-8772-46c987bc8ceb",
-      "0033fab5-611b-4e94-9ce3-9534a5a1b832",
-      "8b56bf22-6f01-4cf7-9d0e-794da9677726"
+      "1c236e82-4f77-4275-acad-c499e2989885",
+      "9bf68833-f1b6-4f3e-83a3-127d32d3509e",
+      "e2bbe087-52ac-44ef-b0b9-3c825eda68ad",
+      "51dfd7a6-d363-4f79-b2f3-e29c9f8a244b",
+      "165e494d-ebc1-4125-adc0-7fb4df8518b3",
+      "5d9597c2-58e1-4202-8a68-312dff27f92f"
      ],
      "trace": [
       {
        "count": 3,
-       "duration_ms": 546,
+       "duration_ms": 560,
        "provider": "bing"
       },
       {
        "count": 0,
-       "duration_ms": 644,
+       "duration_ms": 570,
        "provider": "github"
       },
       {
        "count": 0,
-       "duration_ms": 716,
+       "duration_ms": 855,
        "provider": "hackernews"
       },
       {
        "count": 3,
-       "duration_ms": 812,
+       "duration_ms": 1348,
        "provider": "wikipedia"
       }
      ]
@@ -444,15 +448,15 @@
     "progress": 100,
     "progress_text": "completed",
     "tokens_total": 0,
-    "created_at": "2026-11-04T01:37:49.002541+08:00",
-    "updated_at": "2026-11-04T01:37:57.575501+08:00",
-    "started_at": "2026-11-04T01:37:54.922453+08:00",
-    "completed_at": "2026-11-04T01:37:57.575501+08:00"
+    "created_at": "2026-11-04T03:09:34.293783+08:00",
+    "updated_at": "2026-11-04T03:09:43.430857+08:00",
+    "started_at": "2026-11-04T03:09:40.208851+08:00",
+    "completed_at": "2026-11-04T03:09:43.430857+08:00"
    },
    {
     "id": "analyze_2",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "title": "分析官方维护组织依据",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "title": "分析 Go 官方维护组织证据",
     "type": "analyze",
     "agent_role": "analyst",
     "agent_name": "",
@@ -464,27 +468,27 @@
     "attempts": 1,
     "max_attempts": 3,
     "input": {
-     "question": "分析官方维护组织依据"
+     "question": "分析 Go 官方维护组织证据"
     },
     "output": {
      "claims": 3,
      "llm_used": true,
      "model": "cline/cline-free/solar-mini4",
-     "question": "分析官方维护组织依据",
-     "source_n": 5,
-     "tokens": 8941
+     "question": "分析 Go 官方维护组织证据",
+     "source_n": 3,
+     "tokens": 2094
     },
     "progress": 100,
     "progress_text": "completed",
-    "tokens_total": 8941,
-    "created_at": "2026-11-04T01:37:49.002941+08:00",
-    "updated_at": "2026-11-04T01:39:16.096041+08:00",
-    "started_at": "2026-11-04T01:37:57.922494+08:00",
-    "completed_at": "2026-11-04T01:39:16.096041+08:00"
+    "tokens_total": 2094,
+    "created_at": "2026-11-04T03:09:34.294155+08:00",
+    "updated_at": "2026-11-04T03:09:49.254761+08:00",
+    "started_at": "2026-11-04T03:09:43.708923+08:00",
+    "completed_at": "2026-11-04T03:09:49.254761+08:00"
    },
    {
     "id": "search_3",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
     "title": "检索 Go 开源许可证类型",
     "type": "search",
     "agent_role": "researcher",
@@ -496,7 +500,7 @@
     "max_attempts": 3,
     "input": {
      "fallback_query": "Go",
-     "query": "Go programming language license MIT Apache 2.0"
+     "query": "Go programming language license BSD"
     },
     "output": {
      "failed": 0,
@@ -507,35 +511,36 @@
       "wikipedia",
       "bing"
      ],
-     "query": "Go programming language license MIT Apache 2.0",
-     "result_count": 6,
+     "query": "Go programming language license BSD",
+     "result_count": 7,
      "source_ids": [
-      "b95fbcb5-e361-4a83-bdae-5a9357ba3e39",
-      "7949ed5d-63fb-49cc-8714-2d9e10d15275",
-      "b49117ef-10cf-4ada-9fe7-adeb7a556295",
-      "246e5327-1d80-4e68-8772-46c987bc8ceb",
-      "0033fab5-611b-4e94-9ce3-9534a5a1b832",
-      "8b56bf22-6f01-4cf7-9d0e-794da9677726"
+      "4fc8294c-2e80-4362-aaac-3fbbc5439ff8",
+      "3859a9ea-2202-46bf-b1d6-ef5fda597f48",
+      "2d5f7ebe-5f3f-471c-aeaa-ea2af51b6398",
+      "566b4083-1adf-4899-b331-ed33fc4323ae",
+      "51dfd7a6-d363-4f79-b2f3-e29c9f8a244b",
+      "165e494d-ebc1-4125-adc0-7fb4df8518b3",
+      "5d9597c2-58e1-4202-8a68-312dff27f92f"
      ],
      "trace": [
       {
        "count": 3,
-       "duration_ms": 645,
+       "duration_ms": 606,
        "provider": "bing"
       },
       {
        "count": 0,
-       "duration_ms": 733,
-       "provider": "hackernews"
-      },
-      {
-       "count": 0,
-       "duration_ms": 748,
+       "duration_ms": 642,
        "provider": "github"
       },
       {
+       "count": 1,
+       "duration_ms": 749,
+       "provider": "hackernews"
+      },
+      {
        "count": 3,
-       "duration_ms": 960,
+       "duration_ms": 1427,
        "provider": "wikipedia"
       }
      ]
@@ -543,15 +548,15 @@
     "progress": 100,
     "progress_text": "completed",
     "tokens_total": 0,
-    "created_at": "2026-11-04T01:37:49.003351+08:00",
-    "updated_at": "2026-11-04T01:37:56.989188+08:00",
-    "started_at": "2026-11-04T01:37:54.922453+08:00",
-    "completed_at": "2026-11-04T01:37:56.989188+08:00"
+    "created_at": "2026-11-04T03:09:34.294508+08:00",
+    "updated_at": "2026-11-04T03:09:43.758286+08:00",
+    "started_at": "2026-11-04T03:09:40.208851+08:00",
+    "completed_at": "2026-11-04T03:09:43.758286+08:00"
    },
    {
     "id": "analyze_3",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "title": "分析开源许可证类型依据",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "title": "分析 Go 开源许可证证据",
     "type": "analyze",
     "agent_role": "analyst",
     "agent_name": "",
@@ -563,26 +568,28 @@
     "attempts": 1,
     "max_attempts": 3,
     "input": {
-     "question": "分析开源许可证类型依据"
+     "question": "分析 Go 开源许可证证据"
     },
     "output": {
-     "claims": 0,
-     "reason": "资料中未抽取出可引用结论",
-     "skipped": true,
-     "source_n": 2
+     "claims": 3,
+     "llm_used": true,
+     "model": "cline/cline-free/solar-mini4",
+     "question": "分析 Go 开源许可证证据",
+     "source_n": 6,
+     "tokens": 9761
     },
     "progress": 100,
     "progress_text": "completed",
-    "tokens_total": 2431,
-    "created_at": "2026-11-04T01:37:49.003689+08:00",
-    "updated_at": "2026-11-04T01:38:07.958064+08:00",
-    "started_at": "2026-11-04T01:37:57.422759+08:00",
-    "completed_at": "2026-11-04T01:38:07.958064+08:00"
+    "tokens_total": 9761,
+    "created_at": "2026-11-04T03:09:34.294866+08:00",
+    "updated_at": "2026-11-04T03:10:40.755345+08:00",
+    "started_at": "2026-11-04T03:09:44.208857+08:00",
+    "completed_at": "2026-11-04T03:10:40.755345+08:00"
    },
    {
-    "id": "verify",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "title": "交叉验证版本、维护组织与许可证",
+    "id": "verify_1",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "title": "交叉验证 Go 版本、维护组织与许可证信息",
     "type": "verify",
     "agent_role": "verifier",
     "agent_name": "",
@@ -599,30 +606,30 @@
      "question": "核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据"
     },
     "output": {
-     "clusters": 3,
+     "clusters": 8,
      "conflicting": 0,
-     "partial": 2,
-     "supported": 2,
+     "partial": 8,
+     "supported": 0,
      "unverified": 0,
-     "verified": 4
+     "verified": 8
     },
     "progress": 100,
     "progress_text": "completed",
     "tokens_total": 0,
-    "created_at": "2026-11-04T01:37:49.003979+08:00",
-    "updated_at": "2026-11-04T01:39:16.437064+08:00",
-    "started_at": "2026-11-04T01:39:16.422494+08:00",
-    "completed_at": "2026-11-04T01:39:16.437064+08:00"
+    "created_at": "2026-11-04T03:09:34.295215+08:00",
+    "updated_at": "2026-11-04T03:10:41.230589+08:00",
+    "started_at": "2026-11-04T03:10:41.208593+08:00",
+    "completed_at": "2026-11-04T03:10:41.230589+08:00"
    },
    {
-    "id": "synthesize",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "title": "综合最终结论",
+    "id": "synthesize_1",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "title": "综合 Go 最新稳定大版本号、官方维护组织与开源许可证结论",
     "type": "synthesize",
     "agent_role": "synthesizer",
     "agent_name": "",
     "depends_on": [
-     "verify"
+     "verify_1"
     ],
     "position": 7,
     "status": "completed",
@@ -632,37 +639,37 @@
      "question": "核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据"
     },
     "output": {
-     "citation_count": 4,
-     "claims": 4,
-     "report_id": "68575235-7c69-4296-a447-ee89550fda4a",
-     "sources": 3,
+     "citation_count": 8,
+     "claims": 8,
+     "report_id": "edf300df-1745-498a-bc50-243e1d722d75",
+     "sources": 8,
      "version": 1,
-     "word_count": 713
+     "word_count": 1123
     },
     "progress": 100,
     "progress_text": "completed",
     "tokens_total": 0,
-    "created_at": "2026-11-04T01:37:49.004276+08:00",
-    "updated_at": "2026-11-04T01:39:16.937046+08:00",
-    "started_at": "2026-11-04T01:39:16.922593+08:00",
-    "completed_at": "2026-11-04T01:39:16.937046+08:00"
+    "created_at": "2026-11-04T03:09:34.295512+08:00",
+    "updated_at": "2026-11-04T03:10:41.73071+08:00",
+    "started_at": "2026-11-04T03:10:41.708829+08:00",
+    "completed_at": "2026-11-04T03:10:41.73071+08:00"
    }
   ],
-  "latest_sequence": 92
+  "latest_sequence": 102
  },
  "agents": {
   "items": [
    {
-    "id": "55f901a7-ce96-48af-a101-a2bfd7bba847",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "run_id": "36805ebd-4118-43ac-95c1-a79e7e8a06fa",
-    "node_id": "synthesize",
+    "id": "660fa126-711f-4331-8df8-8b74524f629d",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "run_id": "3cdd428a-2f18-46a8-9cd4-c108eb5427dd",
+    "node_id": "synthesize_1",
     "role": "synthesizer",
     "name": "Report Synthesizer",
     "model": "cline/cline-free/solar-mini4",
     "status": "completed",
-    "started_at": "2026-11-04T01:39:16.926365+08:00",
-    "duration_ms": 12,
+    "started_at": "2026-11-04T03:10:41.716807+08:00",
+    "duration_ms": 15,
     "token_usage": {
      "prompt_tokens": 0,
      "total_tokens": 0
@@ -670,16 +677,16 @@
     "tool_calls": []
    },
    {
-    "id": "091fde1b-0ac6-4104-86be-61474b0102da",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "run_id": "36805ebd-4118-43ac-95c1-a79e7e8a06fa",
-    "node_id": "verify",
+    "id": "e65a93a2-bb90-4e65-b3e9-5640476ff7d9",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "run_id": "3cdd428a-2f18-46a8-9cd4-c108eb5427dd",
+    "node_id": "verify_1",
     "role": "verifier",
     "name": "Cross-Validator",
     "model": "cline/cline-free/solar-mini4",
     "status": "completed",
-    "started_at": "2026-11-04T01:39:16.424307+08:00",
-    "duration_ms": 14,
+    "started_at": "2026-11-04T03:10:41.215676+08:00",
+    "duration_ms": 16,
     "token_usage": {
      "prompt_tokens": 0,
      "total_tokens": 0
@@ -687,67 +694,67 @@
     "tool_calls": []
    },
    {
-    "id": "8ed07206-4755-43be-9d1b-06129d6ff633",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "run_id": "36805ebd-4118-43ac-95c1-a79e7e8a06fa",
-    "node_id": "analyze_2",
-    "role": "analyst",
-    "name": "Evidence Analyst",
-    "model": "cline/cline-free/solar-mini4",
-    "status": "completed",
-    "started_at": "2026-11-04T01:37:57.925217+08:00",
-    "duration_ms": 78178,
-    "token_usage": {
-     "prompt_tokens": 8941,
-     "total_tokens": 8941
-    },
-    "tool_calls": []
-   },
-   {
-    "id": "1d4a88c3-6afe-4566-9ec7-e3317fb9b78e",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "run_id": "36805ebd-4118-43ac-95c1-a79e7e8a06fa",
-    "node_id": "analyze_1",
-    "role": "analyst",
-    "name": "Evidence Analyst",
-    "model": "cline/cline-free/solar-mini4",
-    "status": "completed",
-    "started_at": "2026-11-04T01:37:57.424932+08:00",
-    "duration_ms": 57984,
-    "token_usage": {
-     "prompt_tokens": 8972,
-     "total_tokens": 8972
-    },
-    "tool_calls": []
-   },
-   {
-    "id": "8a817ede-6562-4249-8f2b-545d8f16006e",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "run_id": "36805ebd-4118-43ac-95c1-a79e7e8a06fa",
+    "id": "ca947476-6526-446c-91c8-5dbfaac87249",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "run_id": "3cdd428a-2f18-46a8-9cd4-c108eb5427dd",
     "node_id": "analyze_3",
     "role": "analyst",
     "name": "Evidence Analyst",
     "model": "cline/cline-free/solar-mini4",
     "status": "completed",
-    "started_at": "2026-11-04T01:37:57.424894+08:00",
-    "duration_ms": 10539,
+    "started_at": "2026-11-04T03:09:44.211203+08:00",
+    "duration_ms": 56549,
     "token_usage": {
-     "prompt_tokens": 2431,
-     "total_tokens": 2431
+     "prompt_tokens": 9761,
+     "total_tokens": 9761
     },
     "tool_calls": []
    },
    {
-    "id": "97c8c49a-0d52-4e14-802b-f6a3c21bc14e",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "run_id": "36805ebd-4118-43ac-95c1-a79e7e8a06fa",
+    "id": "284dcdb4-5921-4e1c-bcfa-b4a483ae0b94",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "run_id": "3cdd428a-2f18-46a8-9cd4-c108eb5427dd",
+    "node_id": "analyze_2",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T03:09:43.716208+08:00",
+    "duration_ms": 5540,
+    "token_usage": {
+     "prompt_tokens": 2094,
+     "total_tokens": 2094
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "27ca12c0-37ab-41e8-954f-152de68a5257",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "run_id": "3cdd428a-2f18-46a8-9cd4-c108eb5427dd",
+    "node_id": "analyze_1",
+    "role": "analyst",
+    "name": "Evidence Analyst",
+    "model": "cline/cline-free/solar-mini4",
+    "status": "completed",
+    "started_at": "2026-11-04T03:09:42.71096+08:00",
+    "duration_ms": 11833,
+    "token_usage": {
+     "prompt_tokens": 2537,
+     "total_tokens": 2537
+    },
+    "tool_calls": []
+   },
+   {
+    "id": "95902b43-ebf2-4cc4-b064-f4fca9f91e8f",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "run_id": "3cdd428a-2f18-46a8-9cd4-c108eb5427dd",
     "node_id": "search_1",
     "role": "researcher",
     "name": "Open Source Researcher",
     "model": "cline/cline-free/solar-mini4",
     "status": "completed",
-    "started_at": "2026-11-04T01:37:55.059186+08:00",
-    "duration_ms": 2362,
+    "started_at": "2026-11-04T03:09:40.328882+08:00",
+    "duration_ms": 2342,
     "token_usage": {
      "prompt_tokens": 0,
      "total_tokens": 0
@@ -755,16 +762,16 @@
     "tool_calls": []
    },
    {
-    "id": "a4521489-ecf6-4366-bcd1-29f386ad1458",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "run_id": "36805ebd-4118-43ac-95c1-a79e7e8a06fa",
+    "id": "ee28aa25-b12d-49f4-947d-e04c8e03d58a",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "run_id": "3cdd428a-2f18-46a8-9cd4-c108eb5427dd",
     "node_id": "search_2",
     "role": "researcher",
     "name": "Open Source Researcher",
     "model": "cline/cline-free/solar-mini4",
     "status": "completed",
-    "started_at": "2026-11-04T01:37:55.022467+08:00",
-    "duration_ms": 2559,
+    "started_at": "2026-11-04T03:09:40.29678+08:00",
+    "duration_ms": 3137,
     "token_usage": {
      "prompt_tokens": 0,
      "total_tokens": 0
@@ -772,16 +779,16 @@
     "tool_calls": []
    },
    {
-    "id": "61ac0b16-8435-4411-a0af-ac19a5c7b07f",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "run_id": "36805ebd-4118-43ac-95c1-a79e7e8a06fa",
+    "id": "3d6773a9-8058-4b69-a28a-ea6680c9f548",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "run_id": "3cdd428a-2f18-46a8-9cd4-c108eb5427dd",
     "node_id": "search_3",
     "role": "researcher",
     "name": "Open Source Researcher",
     "model": "cline/cline-free/solar-mini4",
     "status": "completed",
-    "started_at": "2026-11-04T01:37:54.936698+08:00",
-    "duration_ms": 2058,
+    "started_at": "2026-11-04T03:09:40.218937+08:00",
+    "duration_ms": 3540,
     "token_usage": {
      "prompt_tokens": 0,
      "total_tokens": 0
@@ -794,9 +801,9 @@
  "sources": {
   "items": [
    {
-    "id": "246e5327-1d80-4e68-8772-46c987bc8ceb",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "node_id": "search_2",
+    "id": "51dfd7a6-d363-4f79-b2f3-e29c9f8a244b",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "search_3",
     "url": "https://golang.google.cn",
     "normalized_url": "https://golang.google.cn",
     "title": "The Go Programming Language",
@@ -808,14 +815,14 @@
     "http_status": 200,
     "credibility": "unknown",
     "status": "ok",
-    "fetched_at": "2026-11-04T01:37:56.822711+08:00",
-    "created_at": "2026-11-04T01:37:55.856345+08:00",
+    "fetched_at": "2026-11-04T03:09:42.399775+08:00",
+    "created_at": "2026-11-04T03:09:41.660056+08:00",
     "evidence_count": 1
    },
    {
-    "id": "0033fab5-611b-4e94-9ce3-9534a5a1b832",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "node_id": "search_2",
+    "id": "165e494d-ebc1-4125-adc0-7fb4df8518b3",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "search_3",
     "url": "https://www.runoob.com/go/go-tutorial.html",
     "normalized_url": "https://www.runoob.com/go/go-tutorial.html",
     "title": "Go 语言教程 | 菜鸟教程",
@@ -827,14 +834,14 @@
     "http_status": 200,
     "credibility": "unknown",
     "status": "ok",
-    "fetched_at": "2026-11-04T01:37:55.973276+08:00",
-    "created_at": "2026-11-04T01:37:55.859449+08:00",
-    "evidence_count": 2
+    "fetched_at": "2026-11-04T03:09:41.75968+08:00",
+    "created_at": "2026-11-04T03:09:41.663787+08:00",
+    "evidence_count": 1
    },
    {
-    "id": "8b56bf22-6f01-4cf7-9d0e-794da9677726",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "node_id": "search_2",
+    "id": "5d9597c2-58e1-4202-8a68-312dff27f92f",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "search_3",
     "url": "https://golang.smalljerry.cn",
     "normalized_url": "https://golang.smalljerry.cn",
     "title": "Golang 学习教程",
@@ -846,12 +853,32 @@
     "http_status": 0,
     "credibility": "unknown",
     "status": "discovered",
-    "created_at": "2026-11-04T01:37:55.859861+08:00",
+    "created_at": "2026-11-04T03:09:41.664347+08:00",
     "evidence_count": 0
    },
    {
-    "id": "b15acc9b-924c-4f95-86f3-371111ec9759",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+    "id": "566b4083-1adf-4899-b331-ed33fc4323ae",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "search_3",
+    "url": "https://news.ycombinator.com/item?id=4136816",
+    "normalized_url": "https://news.ycombinator.com/item?id=4136816",
+    "title": "Pythonect 0.3 released | Hacker News",
+    "site": "news.ycombinator.com",
+    "provider": "hackernews",
+    "snippet": "Hacker News 讨论 · 2 分 · 0 评论 · 2012-06-20",
+    "excerpt": "Pythonect 0.3 released | Hacker News Hacker News new | past | comments | ask | show | jobs | submit login\nPythonect 0.3 released\n2 points by ikotler on June 20, 2012 | hide | past | favorite\nI just released Pythonect 0.3.0 ! Pythonect is a new, experimental, general-purpose dataflow programming language based on Python. It aims to combine the intuitive feel of shell scripting (and all of its perks like implicit parallelism) with the flexibility and agility of Python. Pythonect interpreter (and reference implementation) is written in Python, and is available under the BSD license. This release includes Multiprocessing support, improved interpreter, improved autoloader, and lots more. Go to http://pythonect.org/ !\nGuidelines | FAQ | Lists | API | Security | Legal | Apply to YC | Contact",
+    "content_hash": "65c5b0eca287ef1b207c25c11cd1d300804bda2021537ccf849d6b95f6854bc1",
+    "http_status": 200,
+    "credibility": "low",
+    "status": "ok",
+    "published_at": "2012-06-20T21:25:27+08:00",
+    "fetched_at": "2026-11-04T03:09:42.613891+08:00",
+    "created_at": "2026-11-04T03:09:41.664732+08:00",
+    "evidence_count": 0
+   },
+   {
+    "id": "1c236e82-4f77-4275-acad-c499e2989885",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
     "node_id": "search_2",
     "url": "https://en.wikipedia.org/wiki/Multistakeholder_governance",
     "normalized_url": "https://en.wikipedia.org/wiki/Multistakeholder_governance",
@@ -864,125 +891,106 @@
     "http_status": 200,
     "credibility": "high",
     "status": "ok",
-    "fetched_at": "2026-11-04T01:37:56.690729+08:00",
-    "created_at": "2026-11-04T01:37:55.860217+08:00",
-    "evidence_count": 0
+    "fetched_at": "2026-11-04T03:09:43.359487+08:00",
+    "created_at": "2026-11-04T03:09:41.664866+08:00",
+    "evidence_count": 1
    },
    {
-    "id": "b0e70daa-ab52-44e7-82fb-c345d5e94df4",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+    "id": "4fc8294c-2e80-4362-aaac-3fbbc5439ff8",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "search_3",
+    "url": "https://en.wikipedia.org/wiki/Go_%28programming_language%29",
+    "normalized_url": "https://en.wikipedia.org/wiki/Go_%28programming_language%29",
+    "title": "Go (programming language) - Wikipedia",
+    "site": "en.wikipedia.org",
+    "provider": "wikipedia",
+    "snippet": "Go (often referred to as Golang) is a high-level, general-purpose programming language that is statically typed and compiled. Originally designed in 2007",
+    "excerpt": "Go (programming language) Programming language For the 2003 agent-based programming language, see Go! (programming language) . This article relies excessively on references to primary sources . Please improve this article by adding secondary or tertiary sources . </ref> object-oriented<ref> </ref><ref> </ref>\"},\"year\":{\"wt\":\" <ref> </ref>\"},\"designer\":{\"wt\":\"Robert Griesemer<br />Rob Pike<br />Ken Thompson<ref name=\\\"langfaq\\\" />\"},\"developer\":{\"wt\":\"Google<ref name=\\\"Claburn-2022\\\" /> and contributors\"},\"latest release version\":{\"wt\":\" \"},\"latest release date\":{\"wt\":\" \"},\"latest_test_version\":{\"wt\":\"\"},\"latest_test_date\":{\"wt\":\"<!-- <ref name=\\\"preview_page\\\"> </ref>-->\"},\"typing\":{\"wt\":\"Inferred, static, strong,<ref name=\\\"go-introduction\\\"> </ref> structural,<ref name=\\\"structural_typing\\\"> </ref><ref name=\\\"pike-20141222\\\"> </ref> nominal\"},\"memory management\":{\"wt\":\"Garbage collection\"},\"implementations\":{\"wt\":\"gc, gofrontend, gold\"},\"programming language\":{\"wt\":\"Go, Assembly language (gc); C++ (gofrontend)\"},\"website\":{\"wt\":\" \"},\"influenced_by\":{\"wt\":\" \"},\"influenced\":{\"wt\":\"Crystal, V\"},\"operating_system\":{\"wt\":\"DragonFly BSD, FreeBSD, Linux, macOS, NetBSD, OpenBSD,<ref name=\\\"openbsd\\\"> </ref> Plan 9,<ref> </ref> Solaris, Windows\"},\"license\":{\"wt\":\"3-clause BSD<ref name=\\\"license\\\"> </ref> + patent grant<ref name=\\\"gopatens\\\"> </ref>\"},\"file_ext\":{\"wt\":\".go\"}},\"i\":0}}]}'> Go Paradigm Multi-paradigm : concurrent , imperative , functional , [ 1 ] object-oriented [ 2 ] [ 3 ] Designed by Robert Griesemer /> Ken Thompson [ 4 ] Developer Google [ 5 ] and contributors Stable release 1.27.3 [ 7 ] Typing discipline Inferred , static , strong , [ 8 ] structural , [ 9 ] [ 10 ] nominal Memory management Garbage collection Implementation language Go, Assembly language (gc); C++ (gofrontend) OS DragonFly BSD , FreeBSD , Linux , macOS , NetBSD , OpenBSD , [ 11 ] Plan 9 , [ 12 ] Solaris , Windows License 3-clause BSD [ 13 ] + patent grant [ 14 ] Filename extensions .go Major implementations gc, gofrontend, gold C , Oberon-2 , Limbo , Active Oberon , communicating sequential processes , Pascal , Oberon , Smalltalk , Newsqueak , Modula-2 , Alef , APL , BCPL , Modula , occam Go (often referred to as Golang ) [ 15 ] :   2   is a high-level , general-purpose programming language that is statically typed and compiled . Originally designed in 2007 by Robert Griesemer , Rob Pike , and Ken Thompson , Go was publicly announced in November 2009, [ 16 ] [ 4 ] and is developed by Google [ 5 ] and community contributors. Go has a simple syntax similar to C++ , [ 17 ] as well as garbage collection , structural typing , [ 9 ] CSP -style concurrency , [ 18 ] and a broad standard library . [ 15 ] :   i,   4,   12 There are two major implementations: The original, self-hosting [ 19 ] compiler toolchain , initially developed inside Google; [ 20 ] A frontend written in C++ , called gofrontend, [ 21 ] originally a GCC frontend, providing gccgo, a GCC-based Go compiler; [ 22 ] later extended to also support LLVM , providing an LLVM-based Go compiler called gollvm. [ 23 ] Go was designed at Google in 2007 to improve programming productivity in an era of multicore , networked machines and large codebases . [ 24 ] The designers wanted to address criticisms of other languages in use at Google, but keep their useful characteristics: [ 25 ] Static typing and run-time efficiency (like C ) Readability and usability (like Python ) [ 26 ] High-performance networking and multiprocessing Its designers were primarily motivated by their shared dislike of C++ . [ 27 ] [ 28 ] [ 29 ] Go was publicly announced in November 2009, [ 30 ] and version 1.0 was released in March 2012. [ 31 ] [ 32 ] Go is widely used in production at Google [ 33 ] and in many other organizations and open-source projects. Go developers implemented runtime support for concurrency in response to the availability of multicore systems: …",
+    "content_hash": "9c1f1729c1b6c2b4ca92979eb08629a3c8cd98f29114d766692892d9e441719a",
+    "http_status": 200,
+    "credibility": "high",
+    "status": "ok",
+    "fetched_at": "2026-11-04T03:09:42.648121+08:00",
+    "created_at": "2026-11-04T03:09:41.665101+08:00",
+    "evidence_count": 1
+   },
+   {
+    "id": "9bf68833-f1b6-4f3e-83a3-127d32d3509e",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
     "node_id": "search_2",
     "url": "https://en.wikipedia.org/wiki/Qt_Project",
     "normalized_url": "https://en.wikipedia.org/wiki/Qt_Project",
     "title": "Qt Project - Wikipedia",
     "site": "en.wikipedia.org",
     "provider": "wikipedia",
-    "snippet": "within the Qt Project . The Qt Project is not a separate legal entity or organization ; Digia retains all trademarks around Qt. Qt&#039;s Open Governance is modelled",
-    "excerpt": "Collaborative effort to develop the Qt software framework Purpose Free software Products Qt , Qt Creator Method Development and documentation Website The Qt Project The Qt Project is an open collaboration effort to coordinate the development of the Qt software framework . Initially founded by Nokia in 2011, [ 1 ] the project is now led by Qt Group . [ 2 ] KDE mascot Konqi showing his Qt heart. Haavard Nord and Eirik Chambe-Eng (the original developers of Qt and the CEO and President, respectively, of Trolltech ) began development of \"Qt\" in 1991, three years before the company was incorporated as Quasar Technologies, then changed the name to Troll Tech and then to Trolltech. [ 3 ] Until version 1.45 the source code of Qt was released under the Qt Free Edition License . [ 4 ] This was viewed as not compliant with the open source principle by the Open Source Initiative and the free software definition by Free Software Foundation because, while the source was available, it did not allow the redistribution of modified versions. Controversy arose around 1998 when it became clear that KDE 's K Desktop Environment was going to become one of the leading desktop environments for Linux . As it was based on Qt, many people in the free software movement worried that an essential piece of one of their major operating systems would be proprietary. With the release of Qt 2.0, the license was changed to the Q Public License (QPL), a free software license but one regarded by the Free Software Foundation as incompatible with the GPL. A compromise was found between KDE and Trolltech whereby Qt would not be able to fall under a more restrictive license than the QPL, even if Trolltech was bought out or went bankrupt. This led to the creation of the KDE Free Qt Foundation which guarantees that Qt would fall under a BSD-style license should no free/open source version of Qt be released during a period of 12 months. [ 5 ] In 2000, Qt 2.2 was released under the GPL v2, ending all controversy regarding GPL compatibility. [ 6 ] On 28 January 2008 Nokia announced that it would acquire Trolltech. [ 7 ] [ 8 ] On 14 January 2009 Qt version 4.5 was relicensed , adding LGPL as licensing option. [ 9 ] The Qt Project was founded on 21 October 2011. [ 1 ] [ 10 ] In August 2012 Digia announced that it would acquire all rights to Qt and take Nokia's role within the Qt Project. [ 2 ] The Qt Project is not a separate legal entity or organization; Digia retains all trademarks around Qt. [ 11 ] [ 12 ] Qt's Open Governance is modelled after WebKit 's. [ 13 ] [ 14 ] Decision-making takes place in a process the project describes as \"lazy consensus\". [ 15 ] The project facilitates online communication among its developers and community members through public forums, [ 16 ] mailing lists, [ 17 ] and wiki pages. [ 18 ] Participating organizations Distribution of non-Digia Qt contributors (2013, Week 18) Aside from the project leader Digia and various individuals, a number of other organizations participate in the Qt Project. [ 19 ] Second-largest Qt contributor is KDAB , a Swedish Qt consulting company. [ 20 ] KDAB is involved in many areas, including maintenance of several components. [ 21 ] [ 22 ] KDAB together with RIM/BlackBerry are maintaining the QNX and BlackBerry 10 ports of Qt. [ 19 ] [ 23 ] Another big participator is Intel , contributing for example Wayland support. [ 24 ] AudioCodes maintains IBM ClearCase support in Qt Creator . [ 25 ] Many contributions also come from the KDE community, which is oftentimes adding features from their KDE Frameworks upstream into Qt. [ 26 ] 1 2 Lydia Pintscher (21 October 2011). \"KDE Applauds Qt's Move to Open Governance\" . KDE.News . Retrieved 8 May 2013 . 1 2 \"Digia to acquire Qt from Nokia\" . Digia.com. Archived from the original on 5 March 2013 . Retrieved 19 March 2013 . ↑ \"A Brief History of Qt\" . Archived from the original on 30 June 2008 . Retrieved 20 December 2007 . ↑ \"Qt Free Edition License\" . Trolltech. 1992.…",
+    "snippet": "Project is not a separate legal entity or organization ; Digia retains all trademarks around Qt. Qt&#039;s Open Governance is modelled after WebKit&#039;s. Decision-making",
+    "excerpt": "…Website The Qt Project The Qt Project is an open collaboration effort to coordinate the development of the Qt software framework . Initially founded by Nokia in 2011, [ 1 ] the project is now led by Qt Group . [ 2 ] KDE mascot Konqi showing his Qt heart. Haavard Nord and Eirik Chambe-Eng (the original developers of Qt and the CEO and President, respectively, of Trolltech ) began development of \"Qt\" in 1991, three years before the company was incorporated as Quasar Technologies, then changed the name to Troll Tech and then to Trolltech. [ 3 ] Until version 1.45 the source code of Qt was released under the Qt Free Edition License . [ 4 ] This was viewed as not compliant with the open source principle by the Open Source Initiative and the free software definition by Free Software Foundation because, while the source was available, it did not allow the redistribution of modified versions. Controversy arose around 1998 when it became clear that KDE 's K Desktop Environment was going to become one of the leading desktop environments for Linux . As it was based on Qt, many people in the free software movement worried that an essential piece of one of their major operating systems would be proprietary. With the release of Qt 2.0, the license was changed to the Q Public License (QPL), a free software license but one regarded by the Free Software Foundation as incompatible with the GPL. A compromise was found between KDE and Trolltech whereby Qt would not be able to fall under a more restrictive license than the QPL, even if Trolltech was bought out or went bankrupt. This led to the creation of the KDE Free Qt Foundation which guarantees that Qt would fall under a BSD-style license should no free/open source version of Qt be released during a period of 12 months. [ 5 ] In 2000, Qt 2.2 was released under the GPL v2, ending all controversy regarding GPL compatibility. [ 6 ] On 28 January 2008 Nokia announced that it would acquire Trolltech. [ 7 ] [ 8 ] On 14 January 2009 Qt version 4.5 was relicensed , adding LGPL as licensing option. [ 9 ] The Qt Project was founded on 21 October 2011. [ 1 ] [ 10 ] In August 2012 Digia announced that it would acquire all rights to Qt and take Nokia's role within the Qt Project. [ 2 ] The Qt Project is not a separate legal entity or organization; Digia retains all trademarks around Qt. [ 11 ] [ 12 ] Qt's Open Governance is modelled after WebKit 's. [ 13 ] [ 14 ] Decision-making takes place in a process the project describes as \"lazy consensus\". [ 15 ] The project facilitates online communication among its developers and community members through public forums, [ 16 ] mailing lists, [ 17 ] and wiki pages. [ 18 ] Participating organizations Distribution of non-Digia Qt contributors (2013, Week 18) Aside from the project leader Digia and various individuals, a number of other organizations participate in the Qt Project. [ 19 ] Second-largest Qt contributor is KDAB , a Swedish Qt consulting company. [ 20 ] KDAB is involved in many areas, including maintenance of several components. [ 21 ] [ 22 ] KDAB together with RIM/BlackBerry are maintaining the QNX and BlackBerry 10 ports of Qt. [ 19 ] [ 23 ] Another big participator is Intel , contributing for example Wayland support. [ 24 ] AudioCodes maintains IBM ClearCase support in Qt Creator . [ 25 ] Many contributions also come from the KDE community, which is oftentimes adding features from their KDE Frameworks upstream into Qt. [ 26 ] 1 2 Lydia Pintscher (21 October 2011). \"KDE Applauds Qt's Move to Open Governance\" . KDE.News . Retrieved 8 May 2013 . 1 2 \"Digia to acquire Qt from Nokia\" . Digia.com. Archived from the original on 5 March 2013 . Retrieved 19 March 2013 . ↑ \"A Brief History of Qt\" . Archived from the original on 30 June 2008 . Retrieved 20 December 2007 . ↑ \"Qt Free Edition License\" . Trolltech. 1992. Archived from the original on 14 October 2016 . Retrieved 14 October 2016 . ↑ \"Free Qt Foundation\" . KDE . Retrieved 8 May 2013 . …",
     "content_hash": "97dc74cbf9d9452934d1b5b23b6d1cddcc5a0829e6ee504f132ec1e2c6192679",
     "http_status": 200,
     "credibility": "high",
     "status": "ok",
-    "fetched_at": "2026-11-04T01:37:57.561655+08:00",
-    "created_at": "2026-11-04T01:37:55.860608+08:00",
-    "evidence_count": 0
-   },
-   {
-    "id": "ebcc0cc7-6187-4410-abf7-20b5ad997904",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "node_id": "search_2",
-    "url": "https://en.wikipedia.org/wiki/Project_2025",
-    "normalized_url": "https://en.wikipedia.org/wiki/Project_2025",
-    "title": "Project 2025",
-    "site": "en.wikipedia.org",
-    "provider": "wikipedia",
-    "snippet": "the organization is full of the former president&#039;s staff, and the person leading Project 2025, Paul Dans, is a former Trump administration official who",
-    "excerpt": "",
-    "content_hash": "",
-    "http_status": 0,
-    "credibility": "high",
-    "status": "discovered",
-    "created_at": "2026-11-04T01:37:55.860987+08:00",
-    "evidence_count": 0
-   },
-   {
-    "id": "d19ab572-5a4a-4dd4-bb43-618d83ef5c08",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "node_id": "search_1",
-    "url": "https://github.com/estevaosaleme/dependency-mcp-server",
-    "normalized_url": "https://github.com/estevaosaleme/dependency-mcp-server",
-    "title": "GitHub - estevaosaleme/dependency-mcp-server: This project provides MCP tools to fetch the latest stable version of libraries and modules from various programming language package registries (Java, Python, Go, Rust, PHP, C/C++, Ruby, Dart, Swift, and JavaScript/Node.js). · GitHub",
-    "site": "github.com",
-    "provider": "github",
-    "snippet": "This project provides MCP tools to fetch the latest stable version of libraries and modules from various programming language package registries (Java, Python, Go, Rust, PHP, C/C++, Ruby, Dart, Swift, and JavaScript/Node.js). · ★0 · fork 0 · Python · 最近推送 2025-05-21 · MIT",
-    "excerpt": "dependency-mcp-server\nNotifications You must be signed in to change notification settings\nStar 0 ( 0 ) You must be signed in to star a repository\nThis project provides MCP tools to fetch the latest stable version of libraries and modules from various programming language package registries (Java, Python, Go, Rust, PHP, C/C++, Ruby, Dart, Swift, and JavaScript/Node.js).\nCode Open more actions menu\nName Name Last commit message\nRepository files navigation\nDependency MCP Server (dependency-latest-version-finder)\nThis project provides MCP tools to fetch the latest stable version of libraries and modules from various programming language package registries (Java, Python, Go, Rust, PHP, C/C++, Ruby, Dart, Swift, and JavaScript/Node.js).\nFetches the latest stable version for a given package from the main registry of each supported language.\nAsynchronous HTTP requests for fast responses.\nEasily extensible and maintainable.\nClone the repository.\nInstall dependencies:\npip install -r requirements.txt\nThe Dependency MCP Server provides the following tools to fetch the latest stable version of libraries and modules from various package registries:\nget_latest_java_version\nGet latest version of a Java library from Maven Central\ngroup_id, artifact_id\nget_latest_nuget_version\nGet latest version of a .NET/NuGet package\nget_latest_npm_version\nGet latest version of an npm package\nget_latest_python_version\nGet latest version of a Python package from PyPI\nget_latest_go_version\nGet latest version of a Go module\nget_latest_rust_version\nGet latest version of a Rust crate from crates.io\nget_latest_php_version\nGet latest version of a PHP package from Packagist\nget_latest_cpp_version\nGet latest version of a C/C++ package from Conan Center\nget_latest_ruby_version\nGet latest version of a Ruby gem from RubyGems\nget_latest_dart_version\nGet latest version of a Dart package from pub.dev\nget_latest_swift_version\nGet latest version of a Swift package from Swift Index\nSee main.py for function signatures and usage details.\nIntegration with Claude Desktop and Cursor\nTo configure the Dependency MCP Server with Cursor or Claude Desktop, you have two options:\n1. Run as a Local Process\nAdd the following to your configuration (e.g., in your .cursor/config.json or equivalent):\n\"Dependency Version Server\" : {\n\"command\" : \" python3 \" ,\n\"args\" : [ \" <path>/dependency-mcp-server/main.py \" ],\n\"PYTHONUNBUFFERED\" : \" 1 \"\nReplace <path> with the actual path to your dependency-mcp-server directory.\nThis configuration will allow Cursor or Claude Desktop to launch and communicate with your Dependency MCP Server automatically.\nPull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.\nThis project provides MCP tools to fetch the latest stable version of libraries and modules from various programming language package registries (Java, Python, Go, Rust, PHP, C/C++, Ruby, Dart, Swift, and JavaScript/Node.js).",
-    "content_hash": "d6c097e5ff6b64bf2abcb62ae3591d5b29ef98f6bfbb6f314cce6e21c19a7dd9",
-    "http_status": 200,
-    "credibility": "medium",
-    "status": "ok",
-    "published_at": "2025-05-21T20:30:15+08:00",
-    "fetched_at": "2026-11-04T01:37:57.403438+08:00",
-    "created_at": "2026-11-04T01:37:55.905048+08:00",
+    "fetched_at": "2026-11-04T03:09:43.417486+08:00",
+    "created_at": "2026-11-04T03:09:41.665495+08:00",
     "evidence_count": 1
    },
    {
-    "id": "6f783426-c4b8-40eb-b9c5-034ee2bfa878",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "node_id": "search_1",
-    "url": "https://en.wikipedia.org/wiki/Python_%28programming_language%29",
-    "normalized_url": "https://en.wikipedia.org/wiki/Python_%28programming_language%29",
-    "title": "Python (programming language) - Wikipedia",
+    "id": "3859a9ea-2202-46bf-b1d6-ef5fda597f48",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "search_3",
+    "url": "https://en.wikipedia.org/wiki/V_%28programming_language%29",
+    "normalized_url": "https://en.wikipedia.org/wiki/V_%28programming_language%29",
+    "title": "V (programming language) - Wikipedia",
     "site": "en.wikipedia.org",
     "provider": "wikipedia",
-    "snippet": "support policy. Python 3.15 the latest stable release defaults to UTF-8, unlike previous versions . Earlier versions in the 3.x series have reached end-of-life",
-    "excerpt": "Python (programming language) Srpskohrvatski / српскохрватски ئۇيغۇرچە / Uyghurche General-purpose programming language </ref> procedural (imperative), functional, structured, reflective\"},\"released\":{\"wt\":\" <ref name=\\\"alt-sources-history\\\"> </ref>\"},\"designer\":{\"wt\":\"Guido van Rossum\"},\"developer\":{\"wt\":\"Python Software Foundation\"},\"latest release version\":{\"wt\":\" \"},\"latest release date\":{\"wt\":\" \"},\"latest preview version\":{\"wt\":\"3.16.0a1\"},\"latest preview date\":{\"wt\":\" \"},\"typing\":{\"wt\":\"Duck, dynamic, strong;<ref> </ref> optional type annotations \"},\"memory management\":{\"wt\":\"Garbage-collected\"},\"implementations\":{\"wt\":\"CPython, PyPy, MicroPython, CircuitPython, IronPython, Jython, Stackless Python\"},\"platform\":{\"wt\":\"64-bit Linux, macOS; 64- and 32-bit Windows 10 <small> and later</small> and more \\n\\n<!--\\nhttps://mail.python.org/archives/list/python-committers@python.org/thread/K757345KX6W5ZLTWYBUXOXQTJJTL7GW5/\\n* Alpine / musl is not supported, because our test suite is failing due to bugs and missing features in musl libc.\\n* NetBSD and OpenBSD are in a similar state as Alpine: no stable buildbot and AFAIK tests are failing\\n* [outdated]\\n* Cygwin and MinGW are officially unsupported, see bpo-45537 and bpo-45538\\n\\n..\\n\\nThe policy Brett is proposing just makes that explicit and gives us something to point to when someone comes up with a patch to support PDP-11, or when someone's patch for Android breaks Windows. I don't think we'll wind up with tier-support police; if a core dev wants to take responsibility for a patch for a platform that is not tier 3 or above, they can still do that. But if it breaks things for a supported platform, it will be reverted.\\n\\n..\\n\\nE.g. Android support was even funded by the PSF recently.[outdated]\\nAlso, note that the stdlib does in fact support other Python implementations reusing (parts of) it, e.g. Jython, PyPy and IronPython. Again, without core devs backing these.\\n-->\"},\"operating system\":{\"wt\":\"\"},\"license\":{\"wt\":\"Python Software Foundation License\"},\"file ext\":{\"wt\":\".py,<ref name=\\\"venners-interview-pt-1\\\" /> .pyc,<ref name=pep488> </ref> .pyd,<ref name=\\\"pep273\\\"> </ref> .pyi,<ref name=\\\"pep561\\\"> </ref><!-- too much trivia: .pyo (before 3.5),<ref>File extension .pyo was removed in Python 3.5. See [https://www.python.org/dev/peps/pep-0488/ PEP 0488] </ref> --> .pyw,<ref name=\\\"pep397\\\"> </ref> .pyz<!-- Too much trivia?: (since 3.5), since 3.8 latest supported and Python 3.5.10 Sept. 5, 2020--><ref name=\\\"pep0441\\\"> </ref>\"},\"website\":{\"wt\":\" \"},\"dialects\":{\"wt\":\"Cython, RPython, Starlark<ref> </ref>\"},\"influenced by\":{\"wt\":\"ABC,<ref name=\\\"faq-created\\\" /> Ada,<ref> </ref> ,<ref name=\\\"98-interview\\\" /> APL,<ref name=\\\"python.org\\\"> </ref> C,<ref name=\\\"AutoNT-1\\\" /> C++,<ref name=\\\"classmix\\\" /> CLU,<ref name=\\\"effbot-call-by-object\\\" /> Dylan,<ref name=\\\"AutoNT-2\\\" /> Haskell,<ref name=\\\"AutoNT-3\\\" /><ref name=\\\"python.org\\\" /> Icon,<ref name=\\\"AutoNT-4\\\" /> Lisp,<ref name=\\\"AutoNT-6\\\" /> , <ref name=\\\"classmix\\\" /> Perl,<ref> </ref> Standard ML<ref name=\\\"python.org\\\" />\"},\"influenced\":{\"wt\":\"Apache Groovy, Boo, Cobra, CoffeeScript,<ref> </ref> D, F#, GDScript, Go, JavaScript,<ref> </ref><ref> </ref> Julia,<ref name=\\\"Julia\\\"> </ref> Mojo,<ref name=\\\"Mojo\\\"/> Nim, Ruby,<ref name=\\\"bini\\\" /> Swift,<ref name=\\\"lattner2014\\\"/> V<ref name=\\\"vpeople\\\"/>\\n<!-- Do not put in as there's a pure Java implementation (Jython): | programming language = C -->\"},\"wikibooks\":{\"wt\":\"Python Programming\"}},\"i\":0}}]}'> Python Paradigm Multi-paradigm : object-oriented , [ 1 ] procedural ( imperative ), functional , structured , reflective Designed by Guido van Rossum Developer Python Software Foundation Stable release 3.15.2 [ 3 ] Preview release 3.16.0a1 Typing discipline Duck , dynamic , strong ; [ 4 ] optional type annotations [ a ] Memory management Garbage-collected Platform 64-bit Linux , macOS ; 64- and 32-bit Windows 10 and later and more [ b ] …",
-    "content_hash": "695b82fcc79f17f8a3d8ac84d90ab78b0d495a39dedf6ccb21d3fd5064943ae2",
+    "snippet": "typed, compiled programming language created by Alexander Medvednikov in early 2019. It was inspired by Go , and other programming languages including Oberon",
+    "excerpt": "V (programming language) General-purpose programming language </ref>\"},\"released\":{\"wt\":\" <ref> </ref>\"},\"latest release version\":{\"wt\":\" \"},\"latest release date\":{\"wt\":\" \"},\"programming language\":{\"wt\":\"V\"},\"typing\":{\"wt\":\"static, strong, inferred\"},\"memory management\":{\"wt\":\"optional (automatic or manual)\"},\"operating system\":{\"wt\":\"Windows; Unix-like: Linux, macOS, FreeBSD, OpenBSD, NetBSD, DragonflyBSD, Solaris\"},\"license\":{\"wt\":\"MIT\"},\"file ext\":{\"wt\":\"<code>.v</code>, <code>.vsh</code>\"},\"website\":{\"wt\":\" \"},\"influenced by\":{\"wt\":\"Go, Kotlin, Oberon, Python, Rust, Swift\"}},\"i\":0}}]}'> V Paradigms Multi-paradigm : functional , imperative , structured , concurrent Designed by Alexander Medvednikov [ 1 ] Stable release 0.5.2 [ 3 ] Typing discipline static , strong , inferred Memory management optional ( automatic or manual ) Implementation language V OS Windows ; Unix-like : Linux , macOS , FreeBSD , OpenBSD , NetBSD , DragonflyBSD , Solaris Filename extensions .v , .vsh Go , Kotlin , Oberon , Python , Rust , Swift V , also known as vlang , is an in-development statically typed , compiled programming language created by Alexander Medvednikov in early 2019. [ 4 ] It was inspired by Go , and other programming languages including Oberon , Swift , and Rust . [ 5 ] [ 6 ] [ 7 ] It is free and open-source software released under the MIT License , and currently in beta . [ 8 ] The goals of V include ease of use, readability , and maintainability . [ 9 ] [ 10 ] [ 11 ] The new language was created as a result of frustration with existing languages being used for personal projects. [ 12 ] It was originally intended for personal use, [ 12 ] but after being mentioned publicly and increasing interest, it was decided to make it public. [ 13 ] V was initially created to develop a desktop messaging client named Volt. [ 6 ] On public release, the compiler was written in V, and could compile itself . [ 4 ] [ 12 ] Key design goals in creating V were being easy to learn and use, higher readability, fast compiling, increased safety, efficient development, cross-platform usability, improved C interoperability , better error handling , modern features, and more maintainable software. [ 14 ] [ 15 ] [ 10 ] [ 16 ] V is developed, maintained, and released through GitHub [ 17 ] [ 6 ] by developers and contributors internationally. [ 4 ] In 2025, V started being ranked on the TIOBE index . [ 18 ] Veasel is the official mascot of the V programming language [ 19 ] V has policies to facilitate memory-safety, speed, and secure code, [ 14 ] [ 20 ] [ 6 ] including various default features for greater program safety. [ 7 ] [ 14 ] [ 12 ] It employs bounds checking , to guard against out of bounds use of variables . Option/result types are used, where the option data type ( ? ) can be represented by none (among possible choices) and the result type ( ! ) can handle any returned errors. To ensure greater safety, error checking is mandatory. By default, the following are immutable : variables, structs, and function arguments . This includes string values are immutable, so elements cannot be mutated. Other protections, which are the default for the language, are: no use of undefined values , variable shadowing , null pointers (unless marked as unsafe), or global variables (unless enabled via flag). V uses value types and string buffers to reduce memory allocations. [ 21 ] [ 22 ] [ 14 ] The language can be compiled to human-readable C , [ 7 ] [ 4 ] and in executing and compiling, is considered as fast. [ 14 ] [ 15 ] [ 12 ] V supports four memory management options: [ 23 ] [ 6 ] [ 12 ] [ 4 ] A garbage collector . This is the default. Manual memory management via disabling the garbage collector. Autofree, which is experimental, for invoking the necessary calls to automatically release objects while compiling. Source code translators V supports a source-to-source compiler (transpiler) and can translate C code into V. [ 15 ] [ 24 ] [ 10 ] …",
+    "content_hash": "0da323a7c345ebc9e9bf78c00aafe68506400022e1e659a22a786a11f75a4f2f",
     "http_status": 200,
     "credibility": "high",
     "status": "ok",
-    "fetched_at": "2026-11-04T01:37:56.546693+08:00",
-    "created_at": "2026-11-04T01:37:55.905346+08:00",
+    "fetched_at": "2026-11-04T03:09:43.740558+08:00",
+    "created_at": "2026-11-04T03:09:41.665544+08:00",
     "evidence_count": 0
    },
    {
-    "id": "26c42bb4-e2a5-49f8-aec0-ba4262a6ca89",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "node_id": "search_1",
-    "url": "https://en.wikipedia.org/wiki/Nim_%28programming_language%29",
-    "normalized_url": "https://en.wikipedia.org/wiki/Nim_%28programming_language%29",
-    "title": "Nim (programming language)",
+    "id": "e2bbe087-52ac-44ef-b0b9-3c825eda68ad",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "search_2",
+    "url": "https://en.wikipedia.org/wiki/Packet_Clearing_House",
+    "normalized_url": "https://en.wikipedia.org/wiki/Packet_Clearing_House",
+    "title": "Packet Clearing House",
     "site": "en.wikipedia.org",
     "provider": "wikipedia",
-    "snippet": "general-purpose, multi-paradigm, statically typed, compiled, high-level system programming language . It was designed and developed by a team led by Andreas Rumpf. Nim",
+    "snippet": "Domain Name System. The organization also works in the areas of cybersecurity coordination, regulatory policy and Internet governance . Packet Clearing House",
     "excerpt": "",
     "content_hash": "",
     "http_status": 0,
     "credibility": "high",
     "status": "discovered",
-    "created_at": "2026-11-04T01:37:55.905636+08:00",
-    "evidence_count": 0
+    "created_at": "2026-11-04T03:09:41.665878+08:00",
+    "evidence_count": 1
    },
    {
-    "id": "b49117ef-10cf-4ada-9fe7-adeb7a556295",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "node_id": "search_1",
-    "url": "https://en.wikipedia.org/wiki/Rust_%28programming_language%29",
-    "normalized_url": "https://en.wikipedia.org/wiki/Rust_%28programming_language%29",
-    "title": "Rust (programming language)",
+    "id": "2d5f7ebe-5f3f-471c-aeaa-ea2af51b6398",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "search_3",
+    "url": "https://en.wikipedia.org/wiki/Pony_%28programming_language%29",
+    "normalized_url": "https://en.wikipedia.org/wiki/Pony_%28programming_language%29",
+    "title": "Pony (programming language)",
     "site": "en.wikipedia.org",
     "provider": "wikipedia",
-    "snippet": "Rust Programming Language . 2022-10-19. Archived from the original on 2023-07-22. Retrieved 2022-10-19. \" Licenses \". The Rust Programming Language . Archived",
+    "snippet": "the Pony team. It is free and open-source software with a BSD 2-clause license . The language was created by Sylvan Clebsch, while a PhD student at Imperial",
     "excerpt": "",
     "content_hash": "",
     "http_status": 0,
     "credibility": "high",
     "status": "discovered",
-    "created_at": "2026-11-04T01:37:55.908405+08:00",
+    "created_at": "2026-11-04T03:09:41.665926+08:00",
     "evidence_count": 0
    },
    {
-    "id": "a8d8f9fd-48e3-4798-8f36-857eb58ef270",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+    "id": "fb659b8a-ac20-455c-9bb4-26b302b83421",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
     "node_id": "search_1",
     "url": "https://news.ycombinator.com/item?id=3875836",
     "normalized_url": "https://news.ycombinator.com/item?id=3875836",
@@ -996,13 +1004,13 @@
     "credibility": "low",
     "status": "ok",
     "published_at": "2012-04-23T03:46:16+08:00",
-    "fetched_at": "2026-11-04T01:37:56.948742+08:00",
-    "created_at": "2026-11-04T01:37:55.908792+08:00",
-    "evidence_count": 0
+    "fetched_at": "2026-11-04T03:09:42.610217+08:00",
+    "created_at": "2026-11-04T03:09:41.726416+08:00",
+    "evidence_count": 1
    },
    {
-    "id": "d929ca64-6658-42a7-9c6e-c9c9e6da1d04",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+    "id": "8bf37f38-c2b5-4bee-9305-d889872f923f",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
     "node_id": "search_1",
     "url": "https://news.ycombinator.com/item?id=3875540",
     "normalized_url": "https://news.ycombinator.com/item?id=3875540",
@@ -1016,164 +1024,279 @@
     "credibility": "low",
     "status": "discovered",
     "published_at": "2012-04-23T02:01:41+08:00",
-    "created_at": "2026-11-04T01:37:55.90911+08:00",
+    "created_at": "2026-11-04T03:09:41.726847+08:00",
     "evidence_count": 0
    },
    {
-    "id": "b95fbcb5-e361-4a83-bdae-5a9357ba3e39",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "node_id": "search_3",
-    "url": "https://en.wikipedia.org/wiki/Rust_compiler",
-    "normalized_url": "https://en.wikipedia.org/wiki/Rust_compiler",
-    "title": "Rust compiler - Wikipedia",
+    "id": "ecb1434a-4cd8-4fe8-bea7-0558bc9a8c35",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "search_1",
+    "url": "https://en.wikipedia.org/wiki/Python_%28programming_language%29",
+    "normalized_url": "https://en.wikipedia.org/wiki/Python_%28programming_language%29",
+    "title": "Python (programming language) - Wikipedia",
     "site": "en.wikipedia.org",
     "provider": "wikipedia",
-    "snippet": "compiler for the Rust programming language . It is developed by the Rust Project and released under a dual Apache 2 . 0 and MIT License . rustc translates Rust",
-    "excerpt": "Official compiler for the Rust programming language </ref>\"},\"programming language\":{\"wt\":\"Rust\"},\"operating system\":{\"wt\":\"Cross-platform\"},\"genre\":{\"wt\":\"Compiler\"},\"license\":{\"wt\":\"Apache 2.0 / MIT License\"},\"website\":{\"wt\":\" \"},\"repo\":{\"wt\":\" \"}},\"i\":0}}]}'> rustc Developer Rust Project Stable release 1.98.1 Operating system Cross-platform License Apache 2.0 / MIT License Website www .rust-lang .org Repository github .com /rust-lang /rust The Rust compiler , usually invoked as rustc , is the official compiler for the Rust programming language . It is developed by the Rust Project and released under a dual Apache 2.0 and MIT License . [ 2 ] rustc translates Rust source code into native machine code . It is itself written in Rust and is self-hosting : each new version is built using the previous stable release. [ 3 ] Most developers do not call rustc directly. They use Cargo , Rust's standard build tool and package manager, which invokes the compiler with the right options for a given project. [ 4 ] rustc is best known for two features: a type system that enforces memory and thread safety at compile time, and error messages that point at the offending source span and often suggest a fix. [ 2 ] Rust began in 2006 as a personal project of Graydon Hoare, then an engineer at Mozilla . Mozilla began sponsoring the project shortly before its public announcement in 2010. The earliest compiler was written in OCaml . A version of rustc written in Rust replaced it in 2011, after which the compiler has built itself. The first stable release, Rust 1.0, shipped on 15 May 2015. From that point on, the project committed to backward compatibility: code that compiled on a given stable release would continue to compile on later ones, and new language features were added through opt-in editions rather than breaking changes. In August 2020, Mozilla laid off a number of staff who had been working on Rust, as part of broader layoffs at the company. The Rust Foundation was established in February 2021 to host the trademarks and infrastructure that had previously sat with Mozilla, with several large technology companies as founding members. Day-to-day work on the compiler continued under the existing volunteer-led teams. Usage and basic invocation rustc can compile a single Rust source file without Cargo. A minimal source file named hello.rs contains a main function: println! ( \"Hello, world!\" ); The file can be compiled directly from a shell: This produces an executable named hello on Unix-like systems, or hello.exe on Windows, using the default edition and optimisation settings. [ 2 ] Direct invocation is useful for small experiments, compiler tests and build systems that call rustc themselves. For ordinary projects, Cargo is the usual entry point. A typical workflow creates a package, builds it, runs it, and then executes its tests: Cargo stores build output under target/ , resolves dependencies from crates.io , and forwards the appropriate command-line options to rustc. [ 4 ] An edition is an opt-in revision of the Rust language that is implemented by rustc. Each crate declares which edition it targets in its manifest, and rustc applies the corresponding parsing, name-resolution and lint rules for that crate. Crates on different editions can still be linked together in the same program, which lets the ecosystem move forward without splitting in two. [ 5 ] Four editions have been released: 2015 — the baseline edition from Rust 1.0. In rustc this is effectively the compatibility mode for older crates and tools. 2018 — introduced the first large migration wave, including module-system path changes and non-lexical lifetimes (NLL). rustc provides edition lints and automated suggestions to help migrate 2015 code. 2021 — changed several defaults and trait-resolution edges, including array IntoIterator behaviour and closure-capture adjustments. rustc applies these changes only when a crate opts into 2021. …",
-    "content_hash": "a833c499913bf13218c14c4c126a64d26ff9b84e677fb288a59b2ff488e53dd6",
+    "snippet": "the ABC programming language . Python 3.0, released in 2008, was a major revision and not completely backward-compatible with earlier versions . Beginning",
+    "excerpt": "Python (programming language) Srpskohrvatski / српскохрватски ئۇيغۇرچە / Uyghurche General-purpose programming language </ref> procedural (imperative), functional, structured, reflective\"},\"released\":{\"wt\":\" <ref name=\\\"alt-sources-history\\\"> </ref>\"},\"designer\":{\"wt\":\"Guido van Rossum\"},\"developer\":{\"wt\":\"Python Software Foundation\"},\"latest release version\":{\"wt\":\" \"},\"latest release date\":{\"wt\":\" \"},\"latest preview version\":{\"wt\":\"3.16.0a1\"},\"latest preview date\":{\"wt\":\" \"},\"typing\":{\"wt\":\"Duck, dynamic, strong;<ref> </ref> optional type annotations \"},\"memory management\":{\"wt\":\"Garbage-collected\"},\"implementations\":{\"wt\":\"CPython, PyPy, MicroPython, CircuitPython, IronPython, Jython, Stackless Python\"},\"platform\":{\"wt\":\"64-bit Linux, macOS; 64- and 32-bit Windows 10 <small> and later</small> and more \\n\\n<!--\\nhttps://mail.python.org/archives/list/python-committers@python.org/thread/K757345KX6W5ZLTWYBUXOXQTJJTL7GW5/\\n* Alpine / musl is not supported, because our test suite is failing due to bugs and missing features in musl libc.\\n* NetBSD and OpenBSD are in a similar state as Alpine: no stable buildbot and AFAIK tests are failing\\n* [outdated]\\n* Cygwin and MinGW are officially unsupported, see bpo-45537 and bpo-45538\\n\\n..\\n\\nThe policy Brett is proposing just makes that explicit and gives us something to point to when someone comes up with a patch to support PDP-11, or when someone's patch for Android breaks Windows. I don't think we'll wind up with tier-support police; if a core dev wants to take responsibility for a patch for a platform that is not tier 3 or above, they can still do that. But if it breaks things for a supported platform, it will be reverted.\\n\\n..\\n\\nE.g. Android support was even funded by the PSF recently.[outdated]\\nAlso, note that the stdlib does in fact support other Python implementations reusing (parts of) it, e.g. Jython, PyPy and IronPython. Again, without core devs backing these.\\n-->\"},\"operating system\":{\"wt\":\"\"},\"license\":{\"wt\":\"Python Software Foundation License\"},\"file ext\":{\"wt\":\".py,<ref name=\\\"venners-interview-pt-1\\\" /> .pyc,<ref name=pep488> </ref> .pyd,<ref name=\\\"pep273\\\"> </ref> .pyi,<ref name=\\\"pep561\\\"> </ref><!-- too much trivia: .pyo (before 3.5),<ref>File extension .pyo was removed in Python 3.5. See [https://www.python.org/dev/peps/pep-0488/ PEP 0488] </ref> --> .pyw,<ref name=\\\"pep397\\\"> </ref> .pyz<!-- Too much trivia?: (since 3.5), since 3.8 latest supported and Python 3.5.10 Sept. 5, 2020--><ref name=\\\"pep0441\\\"> </ref>\"},\"website\":{\"wt\":\" \"},\"dialects\":{\"wt\":\"Cython, RPython, Starlark<ref> </ref>\"},\"influenced by\":{\"wt\":\"ABC,<ref name=\\\"faq-created\\\" /> Ada,<ref> </ref> ,<ref name=\\\"98-interview\\\" /> APL,<ref name=\\\"python.org\\\"> </ref> C,<ref name=\\\"AutoNT-1\\\" /> C++,<ref name=\\\"classmix\\\" /> CLU,<ref name=\\\"effbot-call-by-object\\\" /> Dylan,<ref name=\\\"AutoNT-2\\\" /> Haskell,<ref name=\\\"AutoNT-3\\\" /><ref name=\\\"python.org\\\" /> Icon,<ref name=\\\"AutoNT-4\\\" /> Lisp,<ref name=\\\"AutoNT-6\\\" /> , <ref name=\\\"classmix\\\" /> Perl,<ref> </ref> Standard ML<ref name=\\\"python.org\\\" />\"},\"influenced\":{\"wt\":\"Apache Groovy, Boo, Cobra, CoffeeScript,<ref> </ref> D, F#, GDScript, Go, JavaScript,<ref> </ref><ref> </ref> Julia,<ref name=\\\"Julia\\\"> </ref> Mojo,<ref name=\\\"Mojo\\\"/> Nim, Ruby,<ref name=\\\"bini\\\" /> Swift,<ref name=\\\"lattner2014\\\"/> V<ref name=\\\"vpeople\\\"/>\\n<!-- Do not put in as there's a pure Java implementation (Jython): | programming language = C -->\"},\"wikibooks\":{\"wt\":\"Python Programming\"}},\"i\":0}}]}'> Python Paradigm Multi-paradigm : object-oriented , [ 1 ] procedural ( imperative ), functional , structured , reflective Designed by Guido van Rossum Developer Python Software Foundation Stable release 3.15.2 [ 3 ] Preview release 3.16.0a1 Typing discipline Duck , dynamic , strong ; [ 4 ] optional type annotations [ a ] Memory management Garbage-collected Platform 64-bit Linux , macOS ; 64- and 32-bit Windows 10 and later and more [ b ] …",
+    "content_hash": "695b82fcc79f17f8a3d8ac84d90ab78b0d495a39dedf6ccb21d3fd5064943ae2",
     "http_status": 200,
     "credibility": "high",
     "status": "ok",
-    "fetched_at": "2026-11-04T01:37:56.969121+08:00",
-    "created_at": "2026-11-04T01:37:55.909241+08:00",
+    "fetched_at": "2026-11-04T03:09:42.594512+08:00",
+    "created_at": "2026-11-04T03:09:41.729864+08:00",
     "evidence_count": 0
    },
    {
-    "id": "7949ed5d-63fb-49cc-8714-2d9e10d15275",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "node_id": "search_3",
-    "url": "https://en.wikipedia.org/wiki/MIT_App_Inventor",
-    "normalized_url": "https://en.wikipedia.org/wiki/MIT_App_Inventor",
-    "title": "MIT App Inventor - Wikipedia",
+    "id": "89e7af95-040a-4b17-97b9-b860db259dc6",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "search_1",
+    "url": "https://en.wikipedia.org/wiki/Software_release_life_cycle",
+    "normalized_url": "https://en.wikipedia.org/wiki/Software_release_life_cycle",
+    "title": "Software release life cycle",
     "site": "en.wikipedia.org",
     "provider": "wikipedia",
-    "snippet": "MIT App Inventor (App Inventor or MIT AI2) is a high-level block-based visual programming language , originally built by Google and now maintained by the",
-    "excerpt": "Web application development environment </ref>\"},\"latest preview version\":{\"wt\":\"\"},\"latest preview date\":{\"wt\":\"<!-- -->\"},\"repo\":{\"wt\":\" \"},\"programming language\":{\"wt\":\"Java, Swift, Objective-C, Kawa, Scheme, JavaScript, HTML\"},\"operating system\":{\"wt\":\"Android, iOS\"},\"language\":{\"wt\":\"English, Spanish, French, Italian, Korean, Dutch, Portuguese, Brazilian Portuguese, Russian, Swedish, Simplified Chinese, Traditional Chinese, Polish\"},\"language count\":{\"wt\":\"19\"},\"genre\":{\"wt\":\"Application software development IDE\"},\"license\":{\"wt\":\"Creative Commons Attribution ShareAlike 4.0 Unported, Apache 2.0\"},\"website\":{\"wt\":\" \"}},\"i\":0}}]}'> MIT App Inventor Original authors Hal Abelson , Mark Friedman Developers Google , MIT Media Lab , MIT Computer Science and Artificial Intelligence Laboratory Stable release nb207 Written in Java , Swift , Objective-C , Kawa , Scheme , JavaScript , HTML Operating system Android , iOS Available in 19 languages English, Spanish, French, Italian, Korean, Dutch, Portuguese, Brazilian Portuguese, Russian, Swedish, Simplified Chinese, Traditional Chinese, Polish Type Application software development IDE License Creative Commons Attribution ShareAlike 4.0 Unported, Apache 2.0 Website appinventor .mit .edu Repository github .com /mit-cml /appinventor-sources MIT App Inventor ( App Inventor or MIT AI2 ) is a high-level block-based visual programming language , originally built by Google and now maintained by the Massachusetts Institute of Technology (MIT). It allows newcomers to create computer applications for two operating systems: Android and iOS , which, as of 25 September 2023 [ update ] , was in beta testing. It is free and open-source released under dual licensing : a Creative Commons Attribution ShareAlike 3.0 Unported license and an Apache License 2.0 for the source code . Its target is primarily children and students studying computer programming , similar to Scratch . The web interface consists of a graphical user interface (GUI) very similar to Scratch and StarLogo , allowing users to drag-and-drop visual objects (blocks) to create an application that can be tested on Android and iOS devices and compiled to run as an Android app. It uses a companion mobile app named MIT AI2 Companion providing live testing and debugging. App Inventor provides integration with different online services, such as Google Sheets and Firebase . When creating App Inventor, Google drew upon significant prior research in educational computing, and work done within Google on online development environments. [ 2 ] The application was made available through request on July 12, 2010, and released publicly on December 15, 2010. The App Inventor team was led by Hal Abelson [ 2 ] and Mark Friedman. [ 3 ] In the second half of 2011, Google released the source code, terminated its server, and provided funding to create The MIT Center for Mobile Learning , led by App Inventor creator Hal Abelson and fellow MIT professors Eric Klopfer and Mitchel Resnick. [ 4 ] The MIT version was launched in March 2012. [ 5 ] On December 6, 2013 (the start of the Hour of Code ), [ 5 ] MIT released App Inventor 2, renaming the original version \"App Inventor Classic\" [ 6 ] Major differences are: The blocks editor in the original version ran in a separate Java process, using the Open Blocks Java library for creating visual blocks programming languages and programming App Inventor Classic Blocks Editor Open Blocks is distributed by MIT's Scheller Teacher Education Program (STEP) and is derived from master's thesis research by Ricarose Roque. Professor Eric Klopfer and Daniel Wendel of the Scheller Program supported the distribution of Open Blocks under an MIT License . [ 7 ] Open Blocks visual programming is closely related to StarLogo TNG, a project of STEP, and Scratch , a project of the MIT Media Lab 's Lifelong Kindergarten Group led by Mitchel Resnick . App Inventor 2 [ 6 ] replaced Open Blocks with Blockly , a blocks editor that runs within a…",
-    "content_hash": "7f6c6ede0c2612c1b27da3bda9f787b305ffbdaf1aab75d6e0ca264ae4af7865",
-    "http_status": 200,
+    "snippet": "word beta. A release candidate (RC), also known as gamma testing or \" going silver\", is a beta version with the potential to be a stable product, which",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
     "credibility": "high",
-    "status": "ok",
-    "fetched_at": "2026-11-04T01:37:56.438654+08:00",
-    "created_at": "2026-11-04T01:37:55.912672+08:00",
+    "status": "discovered",
+    "created_at": "2026-11-04T03:09:41.730231+08:00",
+    "evidence_count": 1
+   },
+   {
+    "id": "2ffb68aa-5a3e-4282-8bff-1b52eae7a111",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "search_1",
+    "url": "https://en.wikipedia.org/wiki/Java_version_history",
+    "normalized_url": "https://en.wikipedia.org/wiki/Java_version_history",
+    "title": "Java version history",
+    "site": "en.wikipedia.org",
+    "provider": "wikipedia",
+    "snippet": "proposal took effect for all following versions , and is still the current release schedule. In addition to the language changes, other changes have been made",
+    "excerpt": "",
+    "content_hash": "",
+    "http_status": 0,
+    "credibility": "high",
+    "status": "discovered",
+    "created_at": "2026-11-04T03:09:41.730505+08:00",
     "evidence_count": 0
    }
   ],
-  "total": 14
+  "total": 15
  },
  "evidence": {
   "items": [
    {
-    "id": "793f9aef-e5e7-4439-ae08-ec334af52775",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+    "id": "52ffc141-cebb-4d3d-8bdb-32e740f884fb",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
     "node_id": "analyze_2",
-    "statement": "The Go Programming Language page describes Go as an open-source programming language supported by Google.",
-    "normalized_key": "analyze_2:492dc3c8ccba",
-    "status": "supported",
-    "confidence": 0.699999988079071,
-    "source_count": 2,
-    "created_at": "2026-11-04T01:39:16.082211+08:00",
+    "statement": "Multistakeholder governance Collaborative management for governance Fiscal sustainability Government effectiveness index World Governance Index Sustainable Governance Indicators Bertelsmann Transformation Index Chief governance officer Governance, risk management Environmental, s",
+    "normalized_key": "analyze_2:d57af780f1bc",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T03:09:49.240793+08:00",
     "evidence": [
      {
-      "id": "5c75463e-c375-4553-b67c-447faf7326be",
-      "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-      "claim_id": "793f9aef-e5e7-4439-ae08-ec334af52775",
-      "source_id": "246e5327-1d80-4e68-8772-46c987bc8ceb",
+      "id": "e75732d9-ae26-4bf7-b109-ee0abf72cb21",
+      "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+      "claim_id": "52ffc141-cebb-4d3d-8bdb-32e740f884fb",
+      "source_id": "1c236e82-4f77-4275-acad-c499e2989885",
       "node_id": "analyze_2",
-      "quote": "An open-source programming language supported by Google",
+      "quote": "Multistakeholder governance Collaborative management for governance Fiscal sustainability Government effectiveness index World Governance Index Sustainable Governance Indicators Bertelsmann Transformation Index Chief governance officer Governance, risk management Environmental, s",
       "stance": "support",
-      "confidence": 1,
-      "created_at": "2026-11-04T01:39:16.085743+08:00"
+      "confidence": 0.699999988079071,
+      "created_at": "2026-11-04T03:09:49.244152+08:00"
      }
     ]
    },
    {
-    "id": "a666eee3-c606-4255-8110-f5c3bba8db85",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+    "id": "4f9a23e1-6ebc-4ea4-ae29-56e6effc0ee2",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
     "node_id": "analyze_2",
-    "statement": "The Go tutorial describes Go as an open-source programming language.",
-    "normalized_key": "analyze_2:1b65572fdf81",
-    "status": "supported",
-    "confidence": 0.699999988079071,
-    "source_count": 2,
-    "created_at": "2026-11-04T01:39:16.093927+08:00",
+    "statement": "Controversy arose around 1998 when it became clear that KDE 's K Desktop Environment was going to become one of the leading desktop environments for Linux .",
+    "normalized_key": "analyze_2:b53ca426f840",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "numeric_value": 1998,
+    "created_at": "2026-11-04T03:09:49.250836+08:00",
     "evidence": [
      {
-      "id": "da3724fd-805a-49aa-bd5a-f4fa8c540b47",
-      "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-      "claim_id": "a666eee3-c606-4255-8110-f5c3bba8db85",
-      "source_id": "0033fab5-611b-4e94-9ce3-9534a5a1b832",
+      "id": "fa7c9b3d-a6d1-4c6b-aa54-7718b60e5838",
+      "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+      "claim_id": "4f9a23e1-6ebc-4ea4-ae29-56e6effc0ee2",
+      "source_id": "9bf68833-f1b6-4f3e-83a3-127d32d3509e",
       "node_id": "analyze_2",
-      "quote": "Go 是一个开源的编程语言",
+      "quote": "Controversy arose around 1998 when it became clear that KDE 's K Desktop Environment was going to become one of the leading desktop environments for Linux .",
       "stance": "support",
-      "confidence": 1,
-      "created_at": "2026-11-04T01:39:16.094288+08:00"
+      "confidence": 0.699999988079071,
+      "created_at": "2026-11-04T03:09:49.251225+08:00"
      }
     ]
    },
    {
-    "id": "cff72c67-0dff-4dab-bf89-e4dc82c8325c",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+    "id": "ee48e729-62a1-4bdc-aca8-da53995e8ee2",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "analyze_2",
+    "statement": "The organization also works in the areas of cybersecurity coordination, regulatory policy and Internet governance .",
+    "normalized_key": "analyze_2:39f4cf7e7c8f",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T03:09:49.252394+08:00",
+    "evidence": [
+     {
+      "id": "30f502e0-d3e3-4a16-a259-bc5e6b0832ae",
+      "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+      "claim_id": "ee48e729-62a1-4bdc-aca8-da53995e8ee2",
+      "source_id": "e2bbe087-52ac-44ef-b0b9-3c825eda68ad",
+      "node_id": "analyze_2",
+      "quote": "The organization also works in the areas of cybersecurity coordination, regulatory policy and Internet governance .",
+      "stance": "support",
+      "confidence": 0.6000000238418579,
+      "created_at": "2026-11-04T03:09:49.252705+08:00"
+     }
+    ]
+   },
+   {
+    "id": "9a281b26-37fe-4209-a812-b0d339ac64ce",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
     "node_id": "analyze_1",
-    "statement": "该仓库提供 get_latest_go_version 工具，用于获取 Go module 的最新版本。",
-    "normalized_key": "analyze_1:6ea851d93fcd",
+    "statement": "A release candidate (RC), also known as gamma testing or \" going silver\", is a beta version with the potential to be a stable product, which",
+    "normalized_key": "analyze_1:4767f697aaf3",
     "status": "partially_supported",
     "confidence": 0.5,
     "source_count": 1,
-    "created_at": "2026-11-04T01:38:55.397329+08:00",
+    "created_at": "2026-11-04T03:09:54.539376+08:00",
     "evidence": [
      {
-      "id": "04c357a9-8dab-45b0-a780-1a37cc2a724b",
-      "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-      "claim_id": "cff72c67-0dff-4dab-bf89-e4dc82c8325c",
-      "source_id": "d19ab572-5a4a-4dd4-bb43-618d83ef5c08",
+      "id": "242188b3-1ea1-44e0-a7cb-08df0affa41f",
+      "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+      "claim_id": "9a281b26-37fe-4209-a812-b0d339ac64ce",
+      "source_id": "89e7af95-040a-4b17-97b9-b860db259dc6",
       "node_id": "analyze_1",
-      "quote": "get_latest_go_version Get latest version of a Go module",
+      "quote": "A release candidate (RC), also known as gamma testing or \" going silver\", is a beta version with the potential to be a stable product, which",
       "stance": "support",
-      "confidence": 1,
-      "created_at": "2026-11-04T01:38:55.400483+08:00"
+      "confidence": 0.6000000238418579,
+      "created_at": "2026-11-04T03:09:54.539799+08:00"
      }
     ]
    },
    {
-    "id": "970d07cf-31e2-4033-9da1-74143eeccf7f",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-    "node_id": "analyze_2",
-    "statement": "The Go tutorial states that Go was open-sourced in November 2009 and Go 1 stable version was released in early 2012.",
-    "normalized_key": "analyze_2:2c9589fae176",
+    "id": "35c76560-f13d-454d-94a3-ed43abbc7254",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "analyze_1",
+    "statement": "The Situation ------------- Every time I get a new computer, I go through the same song and dance: 1.",
+    "normalized_key": "analyze_1:1c0b3fdb408e",
     "status": "partially_supported",
     "confidence": 0.5,
     "source_count": 1,
-    "numeric_value": 2009,
-    "created_at": "2026-11-04T01:39:16.092509+08:00",
+    "numeric_value": 1,
+    "created_at": "2026-11-04T03:09:54.54082+08:00",
     "evidence": [
      {
-      "id": "e80776ce-915b-4851-bc6c-61d182870036",
-      "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
-      "claim_id": "970d07cf-31e2-4033-9da1-74143eeccf7f",
-      "source_id": "0033fab5-611b-4e94-9ce3-9534a5a1b832",
-      "node_id": "analyze_2",
-      "quote": "最终于2009年11月开源，在2012年早些时候发布了Go 1稳定版本",
+      "id": "7303f891-20c7-45b3-986c-51c715afd749",
+      "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+      "claim_id": "35c76560-f13d-454d-94a3-ed43abbc7254",
+      "source_id": "fb659b8a-ac20-455c-9bb4-26b302b83421",
+      "node_id": "analyze_1",
+      "quote": "The Situation ------------- Every time I get a new computer, I go through the same song and dance: 1.",
       "stance": "support",
-      "confidence": 1,
-      "created_at": "2026-11-04T01:39:16.09287+08:00"
+      "confidence": 0.44999998807907104,
+      "created_at": "2026-11-04T03:09:54.541156+08:00"
+     }
+    ]
+   },
+   {
+    "id": "dc29224e-7ea6-4b53-bf39-cee0f037d114",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "analyze_3",
+    "statement": "Go (programming language) Programming language For the 2003 agent-based programming language, see Go!",
+    "normalized_key": "analyze_3:200993e33de8",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "numeric_value": 2003,
+    "created_at": "2026-11-04T03:10:40.738292+08:00",
+    "evidence": [
+     {
+      "id": "ddfe284b-d52d-4b00-9cfc-b60b00e2f43d",
+      "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+      "claim_id": "dc29224e-7ea6-4b53-bf39-cee0f037d114",
+      "source_id": "4fc8294c-2e80-4362-aaac-3fbbc5439ff8",
+      "node_id": "analyze_3",
+      "quote": "Go (programming language) Programming language For the 2003 agent-based programming language, see Go!",
+      "stance": "support",
+      "confidence": 0.699999988079071,
+      "created_at": "2026-11-04T03:10:40.741451+08:00"
+     }
+    ]
+   },
+   {
+    "id": "d954e804-1e09-406d-9091-1281f66a52f9",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "analyze_3",
+    "statement": "Build simple, secure, scalable systems with Go An open-source programming language supported by Google Easy to learn and great for teams Built-in concurrency and a robust standard library Large ecosystem of partners, communities, and tools Opens a new window with the Get Started ",
+    "normalized_key": "analyze_3:a4b83d0bb814",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T03:10:40.749852+08:00",
+    "evidence": [
+     {
+      "id": "0cfa398c-e0c4-49a6-826d-a4519394ee99",
+      "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+      "claim_id": "d954e804-1e09-406d-9091-1281f66a52f9",
+      "source_id": "51dfd7a6-d363-4f79-b2f3-e29c9f8a244b",
+      "node_id": "analyze_3",
+      "quote": "Build simple, secure, scalable systems with Go An open-source programming language supported by Google Easy to learn and great for teams Built-in concurrency and a robust standard library Large ecosystem of partners, communities, and tools Opens a new window with the Get Started ",
+      "stance": "support",
+      "confidence": 0.44999998807907104,
+      "created_at": "2026-11-04T03:10:40.750228+08:00"
+     }
+    ]
+   },
+   {
+    "id": "3e53ea7f-a953-4329-b8da-0c41df646ae3",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+    "node_id": "analyze_3",
+    "statement": "Go 是一个开源的编程语言，它能让构造简单、可靠且高效的软件变得容易。",
+    "normalized_key": "analyze_3:4a557bb948bb",
+    "status": "partially_supported",
+    "confidence": 0.5,
+    "source_count": 1,
+    "created_at": "2026-11-04T03:10:40.751328+08:00",
+    "evidence": [
+     {
+      "id": "911d8f5f-fc56-44e0-a62d-ef9789aa536e",
+      "task_id": "4ae74205-643f-44cc-8588-03820d071399",
+      "claim_id": "3e53ea7f-a953-4329-b8da-0c41df646ae3",
+      "source_id": "165e494d-ebc1-4125-adc0-7fb4df8518b3",
+      "node_id": "analyze_3",
+      "quote": "Go 是一个开源的编程语言，它能让构造简单、可靠且高效的软件变得容易。",
+      "stance": "support",
+      "confidence": 0.44999998807907104,
+      "created_at": "2026-11-04T03:10:40.751674+08:00"
      }
     ]
    }
   ],
-  "total": 4
+  "total": 8
  },
  "report": {
   "report": {
-   "id": "68575235-7c69-4296-a447-ee89550fda4a",
-   "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+   "id": "edf300df-1745-498a-bc50-243e1d722d75",
+   "task_id": "4ae74205-643f-44cc-8588-03820d071399",
    "version": 1,
    "title": "核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据",
-   "summary": "本次研究围绕「核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据」执行，共采集资料 3 条，产出结论 4 条（已验证 2 条、部分支持 2 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 4 条。\n\n最重要的已验证结论：The Go Programming Language page describes Go as an open-source programming language supported by Google.[1]。",
-   "markdown": "# 核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据\n\n## 摘要\n\n本次研究围绕「核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据」执行，共采集资料 3 条，产出结论 4 条（已验证 2 条、部分支持 2 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 4 条。\n\n最重要的已验证结论：The Go Programming Language page describes Go as an open-source programming language supported by Google.[1]。\n\n## 目标与范围\n\n**研究目标**：核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据\n\n**研究深度**：quick　**最大并发 Agent**：4　**交叉验证**：true\n\n## 核心发现\n\n1. The Go Programming Language page describes Go as an open-source programming language supported by Google.（多来源支持，置信度 0.70）[1]\n2. The Go tutorial describes Go as an open-source programming language.（多来源支持，置信度 0.70）[2]\n3. 该仓库提供 get_latest_go_version 工具，用于获取 Go module 的最新版本。（单一来源，置信度 0.50）[3]\n4. The Go tutorial states that Go was open-sourced in November 2009 and Go 1 stable version was released in early 2012.（单一来源，置信度 0.50）[4]\n\n\n## 分主题分析\n\n### 主题 analyze_1\n\n- 该仓库提供 get_latest_go_version 工具，用于获取 Go module 的最新版本。[3]\n\n### 主题 analyze_2\n\n- The Go Programming Language page describes Go as an open-source programming language supported by Google.[1]\n- The Go tutorial describes Go as an open-source programming language.[2]\n- The Go tutorial states that Go was open-sourced in November 2009 and Go 1 stable version was released in early 2012.[4]\n\n## 争议与不确定性\n\n本次执行未检测到同一指标上的来源冲突。\n\n\n\n## 信息来源\n\n1. [The Go Programming Language](https://golang.google.cn) — golang.google.cn\n2. [Go 语言教程 | 菜鸟教程](https://www.runoob.com/go/go-tutorial.html) — runoob.com\n3. [GitHub - estevaosaleme/dependency-mcp-server: This project provides MCP tools to fetch the latest stable version of libraries and modules from various programming language package registries (Java, Python, Go, Rust, PHP, C/C++, Ruby, Dart, Swift, and JavaScript/Node.js). · GitHub](https://github.com/estevaosaleme/dependency-mcp-server) — github.com\n4. [Go 语言教程 | 菜鸟教程](https://www.runoob.com/go/go-tutorial.html) — runoob.com\n\n\n## 方法与局限性\n\n- 规划模式：llm；执行模型：LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）。\n- 检索与抓取均走真实外部服务；抓取遵守 robots.txt，正文经过去标签与指纹去重。\n- 结论由来源正文片段抽取，交叉验证按「独立站点数 + 数值一致性」判定，未使用模型主观判断替换证据。\n- 本次统计：资料 3 条、结论 4 条、引用 4 条。\n- 局限：检索覆盖受 Provider 配额与反爬限制；未做全文语义相似度聚类，冲突检测聚焦显式数值指标。\n\n",
+   "summary": "本次研究围绕「核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据」执行，共采集资料 8 条，产出结论 8 条（已验证 0 条、部分支持 8 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 8 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。",
+   "markdown": "# 核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据\n\n## 摘要\n\n本次研究围绕「核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据」执行，共采集资料 8 条，产出结论 8 条（已验证 0 条、部分支持 8 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 8 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。\n\n## 目标与范围\n\n**研究目标**：核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据\n\n**研究深度**：quick　**最大并发 Agent**：4　**交叉验证**：true\n\n## 核心发现\n\n1. Multistakeholder governance Collaborative management for governance Fiscal sustainability Government effectiveness index World Governance Index Sustainable Governance Indicators Bertelsmann Transformation Index Chief governance officer Governance, risk management Environmental, s（单一来源，置信度 0.50）[1]\n2. Controversy arose around 1998 when it became clear that KDE 's K Desktop Environment was going to become one of the leading desktop environments for Linux .（单一来源，置信度 0.50）[2]\n3. The organization also works in the areas of cybersecurity coordination, regulatory policy and Internet governance .（单一来源，置信度 0.50）[3]\n4. A release candidate (RC), also known as gamma testing or \" going silver\", is a beta version with the potential to be a stable product, which（单一来源，置信度 0.50）[4]\n5. The Situation ------------- Every time I get a new computer, I go through the same song and dance: 1.（单一来源，置信度 0.50）[5]\n6. Go (programming language) Programming language For the 2003 agent-based programming language, see Go!（单一来源，置信度 0.50）[6]\n7. Build simple, secure, scalable systems with Go An open-source programming language supported by Google Easy to learn and great for teams Built-in concurrency and a robust standard library Large ecosystem of partners, communities, and tools Opens a new window with the Get Started （单一来源，置信度 0.50）[7]\n8. Go 是一个开源的编程语言，它能让构造简单、可靠且高效的软件变得容易。（单一来源，置信度 0.50）[8]\n\n\n## 分主题分析\n\n### 主题 analyze_1\n\n- A release candidate (RC), also known as gamma testing or \" going silver\", is a beta version with the potential to be a stable product, which[4]\n- The Situation ------------- Every time I get a new computer, I go through the same song and dance: 1.[5]\n\n### 主题 analyze_2\n\n- Multistakeholder governance Collaborative management for governance Fiscal sustainability Government effectiveness index World Governance Index Sustainable Governance Indicators Bertelsmann Transformation Index Chief governance officer Governance, risk management Environmental, s[1]\n- Controversy arose around 1998 when it became clear that KDE 's K Desktop Environment was going to become one of the leading desktop environments for Linux .[2]\n- The organization also works in the areas of cybersecurity coordination, regulatory policy and Internet governance .[3]\n\n### 主题 analyze_3\n\n- Go (programming language) Programming language For the 2003 agent-based programming language, see Go![6]\n- Build simple, secure, scalable systems with Go An open-source programming language supported by Google Easy to learn and great for teams Built-in concurrency and a robust standard library Large ecosystem of partners, communities, and tools Opens a new window with the Get Started [7]\n- Go 是一个开源的编程语言，它能让构造简单、可靠且高效的软件变得容易。[8]\n\n## 关键数据对比\n\n| 结论 | 数值 | 状态 |\n|---|---:|---|\n| Go (programming language) Programming language For the 2003 agent-based programm… | 2003 | 见来源 4fc8294c-2e80-4362-aaac-3fbbc5439ff8 |\n| Controversy arose around 1998 when it became clear that KDE 's K Desktop Environ… | 1998 | 见来源 9bf68833-f1b6-4f3e-83a3-127d32d3509e |\n| The Situation ------------- Every time I get a new computer, I go through the sa… | 1 | 见来源 fb659b8a-ac20-455c-9bb4-26b302b83421 |\n\n\n## 争议与不确定性\n\n本次执行未检测到同一指标上的来源冲突。\n\n\n\n## 信息来源\n\n1. [Multistakeholder governance - Wikipedia](https://en.wikipedia.org/wiki/Multistakeholder_governance) — en.wikipedia.org\n2. [Qt Project - Wikipedia](https://en.wikipedia.org/wiki/Qt_Project) — en.wikipedia.org\n3. [Packet Clearing House](https://en.wikipedia.org/wiki/Packet_Clearing_House) — en.wikipedia.org\n4. [Software release life cycle](https://en.wikipedia.org/wiki/Software_release_life_cycle) — en.wikipedia.org\n5. [Volatile Software | Hacker News](https://news.ycombinator.com/item?id=3875836) — news.ycombinator.com\n6. [Go (programming language) - Wikipedia](https://en.wikipedia.org/wiki/Go_%28programming_language%29) — en.wikipedia.org\n7. [The Go Programming Language](https://golang.google.cn) — golang.google.cn\n8. [Go 语言教程 | 菜鸟教程](https://www.runoob.com/go/go-tutorial.html) — runoob.com\n\n\n## 方法与局限性\n\n- 规划模式：llm；执行模型：LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）。\n- 检索与抓取均走真实外部服务；抓取遵守 robots.txt，正文经过去标签与指纹去重。\n- 结论由来源正文片段抽取，交叉验证按「独立站点数 + 数值一致性」判定，未使用模型主观判断替换证据。\n- 本次统计：资料 8 条、结论 8 条、引用 8 条。\n- 局限：检索覆盖受 Provider 配额与反爬限制；未做全文语义相似度聚类，冲突检测聚焦显式数值指标。\n\n",
    "sections": [
     {
      "heading": "摘要",
-     "body": "本次研究围绕「核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据」执行，共采集资料 3 条，产出结论 4 条（已验证 2 条、部分支持 2 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 4 条。\n\n最重要的已验证结论：The Go Programming Language page describes Go as an open-source programming language supported by Google.[1]。"
+     "body": "本次研究围绕「核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据」执行，共采集资料 8 条，产出结论 8 条（已验证 0 条、部分支持 8 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 8 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。"
     },
     {
      "heading": "目标与范围",
@@ -1181,11 +1304,15 @@
     },
     {
      "heading": "核心发现",
-     "body": "1. The Go Programming Language page describes Go as an open-source programming language supported by Google.（多来源支持，置信度 0.70）[1]\n2. The Go tutorial describes Go as an open-source programming language.（多来源支持，置信度 0.70）[2]\n3. 该仓库提供 get_latest_go_version 工具，用于获取 Go module 的最新版本。（单一来源，置信度 0.50）[3]\n4. The Go tutorial states that Go was open-sourced in November 2009 and Go 1 stable version was released in early 2012.（单一来源，置信度 0.50）[4]\n"
+     "body": "1. Multistakeholder governance Collaborative management for governance Fiscal sustainability Government effectiveness index World Governance Index Sustainable Governance Indicators Bertelsmann Transformation Index Chief governance officer Governance, risk management Environmental, s（单一来源，置信度 0.50）[1]\n2. Controversy arose around 1998 when it became clear that KDE 's K Desktop Environment was going to become one of the leading desktop environments for Linux .（单一来源，置信度 0.50）[2]\n3. The organization also works in the areas of cybersecurity coordination, regulatory policy and Internet governance .（单一来源，置信度 0.50）[3]\n4. A release candidate (RC), also known as gamma testing or \" going silver\", is a beta version with the potential to be a stable product, which（单一来源，置信度 0.50）[4]\n5. The Situation ------------- Every time I get a new computer, I go through the same song and dance: 1.（单一来源，置信度 0.50）[5]\n6. Go (programming language) Programming language For the 2003 agent-based programming language, see Go!（单一来源，置信度 0.50）[6]\n7. Build simple, secure, scalable systems with Go An open-source programming language supported by Google Easy to learn and great for teams Built-in concurrency and a robust standard library Large ecosystem of partners, communities, and tools Opens a new window with the Get Started （单一来源，置信度 0.50）[7]\n8. Go 是一个开源的编程语言，它能让构造简单、可靠且高效的软件变得容易。（单一来源，置信度 0.50）[8]\n"
     },
     {
      "heading": "分主题分析",
-     "body": "### 主题 analyze_1\n\n- 该仓库提供 get_latest_go_version 工具，用于获取 Go module 的最新版本。[3]\n\n### 主题 analyze_2\n\n- The Go Programming Language page describes Go as an open-source programming language supported by Google.[1]\n- The Go tutorial describes Go as an open-source programming language.[2]\n- The Go tutorial states that Go was open-sourced in November 2009 and Go 1 stable version was released in early 2012.[4]"
+     "body": "### 主题 analyze_1\n\n- A release candidate (RC), also known as gamma testing or \" going silver\", is a beta version with the potential to be a stable product, which[4]\n- The Situation ------------- Every time I get a new computer, I go through the same song and dance: 1.[5]\n\n### 主题 analyze_2\n\n- Multistakeholder governance Collaborative management for governance Fiscal sustainability Government effectiveness index World Governance Index Sustainable Governance Indicators Bertelsmann Transformation Index Chief governance officer Governance, risk management Environmental, s[1]\n- Controversy arose around 1998 when it became clear that KDE 's K Desktop Environment was going to become one of the leading desktop environments for Linux .[2]\n- The organization also works in the areas of cybersecurity coordination, regulatory policy and Internet governance .[3]\n\n### 主题 analyze_3\n\n- Go (programming language) Programming language For the 2003 agent-based programming language, see Go![6]\n- Build simple, secure, scalable systems with Go An open-source programming language supported by Google Easy to learn and great for teams Built-in concurrency and a robust standard library Large ecosystem of partners, communities, and tools Opens a new window with the Get Started [7]\n- Go 是一个开源的编程语言，它能让构造简单、可靠且高效的软件变得容易。[8]"
+    },
+    {
+     "heading": "关键数据对比",
+     "body": "| 结论 | 数值 | 状态 |\n|---|---:|---|\n| Go (programming language) Programming language For the 2003 agent-based programm… | 2003 | 见来源 4fc8294c-2e80-4362-aaac-3fbbc5439ff8 |\n| Controversy arose around 1998 when it became clear that KDE 's K Desktop Environ… | 1998 | 见来源 9bf68833-f1b6-4f3e-83a3-127d32d3509e |\n| The Situation ------------- Every time I get a new computer, I go through the sa… | 1 | 见来源 fb659b8a-ac20-455c-9bb4-26b302b83421 |\n"
     },
     {
      "heading": "争议与不确定性",
@@ -1193,93 +1320,129 @@
     },
     {
      "heading": "信息来源",
-     "body": "1. [The Go Programming Language](https://golang.google.cn) — golang.google.cn\n2. [Go 语言教程 | 菜鸟教程](https://www.runoob.com/go/go-tutorial.html) — runoob.com\n3. [GitHub - estevaosaleme/dependency-mcp-server: This project provides MCP tools to fetch the latest stable version of libraries and modules from various programming language package registries (Java, Python, Go, Rust, PHP, C/C++, Ruby, Dart, Swift, and JavaScript/Node.js). · GitHub](https://github.com/estevaosaleme/dependency-mcp-server) — github.com\n4. [Go 语言教程 | 菜鸟教程](https://www.runoob.com/go/go-tutorial.html) — runoob.com\n"
+     "body": "1. [Multistakeholder governance - Wikipedia](https://en.wikipedia.org/wiki/Multistakeholder_governance) — en.wikipedia.org\n2. [Qt Project - Wikipedia](https://en.wikipedia.org/wiki/Qt_Project) — en.wikipedia.org\n3. [Packet Clearing House](https://en.wikipedia.org/wiki/Packet_Clearing_House) — en.wikipedia.org\n4. [Software release life cycle](https://en.wikipedia.org/wiki/Software_release_life_cycle) — en.wikipedia.org\n5. [Volatile Software | Hacker News](https://news.ycombinator.com/item?id=3875836) — news.ycombinator.com\n6. [Go (programming language) - Wikipedia](https://en.wikipedia.org/wiki/Go_%28programming_language%29) — en.wikipedia.org\n7. [The Go Programming Language](https://golang.google.cn) — golang.google.cn\n8. [Go 语言教程 | 菜鸟教程](https://www.runoob.com/go/go-tutorial.html) — runoob.com\n"
     },
     {
      "heading": "方法与局限性",
-     "body": "- 规划模式：llm；执行模型：LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）。\n- 检索与抓取均走真实外部服务；抓取遵守 robots.txt，正文经过去标签与指纹去重。\n- 结论由来源正文片段抽取，交叉验证按「独立站点数 + 数值一致性」判定，未使用模型主观判断替换证据。\n- 本次统计：资料 3 条、结论 4 条、引用 4 条。\n- 局限：检索覆盖受 Provider 配额与反爬限制；未做全文语义相似度聚类，冲突检测聚焦显式数值指标。\n"
+     "body": "- 规划模式：llm；执行模型：LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）。\n- 检索与抓取均走真实外部服务；抓取遵守 robots.txt，正文经过去标签与指纹去重。\n- 结论由来源正文片段抽取，交叉验证按「独立站点数 + 数值一致性」判定，未使用模型主观判断替换证据。\n- 本次统计：资料 8 条、结论 8 条、引用 8 条。\n- 局限：检索覆盖受 Provider 配额与反爬限制；未做全文语义相似度聚类，冲突检测聚焦显式数值指标。\n"
     }
    ],
    "citations": [
     {
      "index": 1,
-     "claim_id": "793f9aef-e5e7-4439-ae08-ec334af52775",
-     "source_id": "246e5327-1d80-4e68-8772-46c987bc8ceb",
-     "title": "The Go Programming Language",
-     "url": "https://golang.google.cn",
-     "site": "golang.google.cn",
-     "quote": "An open-source programming language supported by Google"
+     "claim_id": "52ffc141-cebb-4d3d-8bdb-32e740f884fb",
+     "source_id": "1c236e82-4f77-4275-acad-c499e2989885",
+     "title": "Multistakeholder governance - Wikipedia",
+     "url": "https://en.wikipedia.org/wiki/Multistakeholder_governance",
+     "site": "en.wikipedia.org",
+     "quote": "Multistakeholder governance Collaborative management for governance Fiscal sustainability Government effectiveness index World Governance Index Sustainable Governance Indicators Bertelsmann Transformation Index Chief governance officer Governance, risk management Environmental, s"
     },
     {
      "index": 2,
-     "claim_id": "a666eee3-c606-4255-8110-f5c3bba8db85",
-     "source_id": "0033fab5-611b-4e94-9ce3-9534a5a1b832",
-     "title": "Go 语言教程 | 菜鸟教程",
-     "url": "https://www.runoob.com/go/go-tutorial.html",
-     "site": "runoob.com",
-     "quote": "Go 是一个开源的编程语言"
+     "claim_id": "4f9a23e1-6ebc-4ea4-ae29-56e6effc0ee2",
+     "source_id": "9bf68833-f1b6-4f3e-83a3-127d32d3509e",
+     "title": "Qt Project - Wikipedia",
+     "url": "https://en.wikipedia.org/wiki/Qt_Project",
+     "site": "en.wikipedia.org",
+     "quote": "Controversy arose around 1998 when it became clear that KDE 's K Desktop Environment was going to become one of the leading desktop environments for Linux ."
     },
     {
      "index": 3,
-     "claim_id": "cff72c67-0dff-4dab-bf89-e4dc82c8325c",
-     "source_id": "d19ab572-5a4a-4dd4-bb43-618d83ef5c08",
-     "title": "GitHub - estevaosaleme/dependency-mcp-server: This project provides MCP tools to fetch the latest stable version of libraries and modules from various programming language package registries (Java, Python, Go, Rust, PHP, C/C++, Ruby, Dart, Swift, and JavaScript/Node.js). · GitHub",
-     "url": "https://github.com/estevaosaleme/dependency-mcp-server",
-     "site": "github.com",
-     "quote": "get_latest_go_version Get latest version of a Go module"
+     "claim_id": "ee48e729-62a1-4bdc-aca8-da53995e8ee2",
+     "source_id": "e2bbe087-52ac-44ef-b0b9-3c825eda68ad",
+     "title": "Packet Clearing House",
+     "url": "https://en.wikipedia.org/wiki/Packet_Clearing_House",
+     "site": "en.wikipedia.org",
+     "quote": "The organization also works in the areas of cybersecurity coordination, regulatory policy and Internet governance ."
     },
     {
      "index": 4,
-     "claim_id": "970d07cf-31e2-4033-9da1-74143eeccf7f",
-     "source_id": "0033fab5-611b-4e94-9ce3-9534a5a1b832",
+     "claim_id": "9a281b26-37fe-4209-a812-b0d339ac64ce",
+     "source_id": "89e7af95-040a-4b17-97b9-b860db259dc6",
+     "title": "Software release life cycle",
+     "url": "https://en.wikipedia.org/wiki/Software_release_life_cycle",
+     "site": "en.wikipedia.org",
+     "quote": "A release candidate (RC), also known as gamma testing or \" going silver\", is a beta version with the potential to be a stable product, which"
+    },
+    {
+     "index": 5,
+     "claim_id": "35c76560-f13d-454d-94a3-ed43abbc7254",
+     "source_id": "fb659b8a-ac20-455c-9bb4-26b302b83421",
+     "title": "Volatile Software | Hacker News",
+     "url": "https://news.ycombinator.com/item?id=3875836",
+     "site": "news.ycombinator.com",
+     "quote": "The Situation ------------- Every time I get a new computer, I go through the same song and dance: 1."
+    },
+    {
+     "index": 6,
+     "claim_id": "dc29224e-7ea6-4b53-bf39-cee0f037d114",
+     "source_id": "4fc8294c-2e80-4362-aaac-3fbbc5439ff8",
+     "title": "Go (programming language) - Wikipedia",
+     "url": "https://en.wikipedia.org/wiki/Go_%28programming_language%29",
+     "site": "en.wikipedia.org",
+     "quote": "Go (programming language) Programming language For the 2003 agent-based programming language, see Go!"
+    },
+    {
+     "index": 7,
+     "claim_id": "d954e804-1e09-406d-9091-1281f66a52f9",
+     "source_id": "51dfd7a6-d363-4f79-b2f3-e29c9f8a244b",
+     "title": "The Go Programming Language",
+     "url": "https://golang.google.cn",
+     "site": "golang.google.cn",
+     "quote": "Build simple, secure, scalable systems with Go An open-source programming language supported by Google Easy to learn and great for teams Built-in concurrency and a robust standard library Large ecosystem of partners, communities, and tools Opens a new window with the Get Started "
+    },
+    {
+     "index": 8,
+     "claim_id": "3e53ea7f-a953-4329-b8da-0c41df646ae3",
+     "source_id": "165e494d-ebc1-4125-adc0-7fb4df8518b3",
      "title": "Go 语言教程 | 菜鸟教程",
      "url": "https://www.runoob.com/go/go-tutorial.html",
      "site": "runoob.com",
-     "quote": "最终于2009年11月开源，在2012年早些时候发布了Go 1稳定版本"
+     "quote": "Go 是一个开源的编程语言，它能让构造简单、可靠且高效的软件变得容易。"
     }
    ],
-   "citation_count": 4,
-   "word_count": 713,
+   "citation_count": 8,
+   "word_count": 1123,
    "model": "LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）",
-   "created_at": "2026-11-04T01:39:16.931445+08:00"
+   "created_at": "2026-11-04T03:10:41.725159+08:00"
   },
   "versions": [
    {
-    "id": "68575235-7c69-4296-a447-ee89550fda4a",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+    "id": "edf300df-1745-498a-bc50-243e1d722d75",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
     "version": 1,
     "title": "核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据",
-    "summary": "本次研究围绕「核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据」执行，共采集资料 3 条，产出结论 4 条（已验证 2 条、部分支持 2 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 4 条。\n\n最重要的已验证结论：The Go Programming Language page describes Go as an open-source programming language supported by Google.[1]。",
-    "citation_count": 4,
-    "word_count": 713,
+    "summary": "本次研究围绕「核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据」执行，共采集资料 8 条，产出结论 8 条（已验证 0 条、部分支持 8 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 8 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。",
+    "citation_count": 8,
+    "word_count": 1123,
     "model": "LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）",
-    "created_at": "2026-11-04T01:39:16.931445+08:00"
+    "created_at": "2026-11-04T03:10:41.725159+08:00"
    }
   ]
  },
  "summary": {
   "agents": 8,
-  "sources": 14,
-  "evidence_items": 4,
+  "sources": 15,
+  "evidence_items": 8,
   "dag_nodes": 8,
   "research_questions": 3,
   "subtasks": 8,
   "agent_models": [
    "cline/cline-free/solar-mini4"
   ],
-  "agent_token_usage_total": 20344,
+  "agent_token_usage_total": 14392,
   "report_md_chars": 0,
   "report_versions": [
    {
-    "id": "68575235-7c69-4296-a447-ee89550fda4a",
-    "task_id": "dd7543fe-23e1-48c9-a813-65645e2174c2",
+    "id": "edf300df-1745-498a-bc50-243e1d722d75",
+    "task_id": "4ae74205-643f-44cc-8588-03820d071399",
     "version": 1,
     "title": "核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据",
-    "summary": "本次研究围绕「核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据」执行，共采集资料 3 条，产出结论 4 条（已验证 2 条、部分支持 2 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 4 条。\n\n最重要的已验证结论：The Go Programming Language page describes Go as an open-source programming language supported by Google.[1]。",
-    "citation_count": 4,
-    "word_count": 713,
+    "summary": "本次研究围绕「核实 Go 编程语言当前最新的稳定大版本号、官方维护组织与开源许可证类型，并给出依据」执行，共采集资料 8 条，产出结论 8 条（已验证 0 条、部分支持 8 条、存在冲突 0 条、未验证 0 条），生成可追溯引用 8 条。\n\n**注意**：本次执行未产出多来源交叉验证通过的结论，结论强度有限。",
+    "citation_count": 8,
+    "word_count": 1123,
     "model": "LLM 规划 + 规则/LLM 混合抽取（cline/cline-free/solar-mini4）",
-    "created_at": "2026-11-04T01:39:16.931445+08:00"
+    "created_at": "2026-11-04T03:10:41.725159+08:00"
    }
   ]
  }

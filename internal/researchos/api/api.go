@@ -46,6 +46,10 @@ type Server struct {
 	// 为 nil 时回退到构造时注入的静态值（便于单测直接构造 Server）。
 	Settings *settings.Manager
 
+	// Shutdown 非 nil 时注册 POST /api/v1/admin/shutdown（鉴权保护），
+	// 供托盘管理程序等受控方优雅停止服务；nil 时该端点返回 501。
+	Shutdown func()
+
 	// tickets 存放 SSE 一次性 ticket（短时、绑定任务、用完即销毁）。
 	tickets    *ticketStore
 	ticketOnce sync.Once
@@ -62,6 +66,7 @@ type Options struct {
 	RequireApproval bool
 	Version         string
 	Settings        *settings.Manager
+	Shutdown        func()
 }
 
 // NewServer 创建服务。
@@ -70,7 +75,7 @@ func NewServer(opts Options) *Server {
 		Cfg: opts.Cfg, Store: opts.Store, Planner: opts.Planner, LLM: opts.LLM,
 		Search: opts.Search, Pool: opts.Pool, StartedAt: time.Now(),
 		Version: opts.Version, requireApproval: opts.RequireApproval,
-		Settings: opts.Settings,
+		Settings: opts.Settings, Shutdown: opts.Shutdown,
 	}
 }
 
@@ -137,6 +142,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /api/v1/settings/search/test", s.handleTestSearch)
 	mux.HandleFunc("GET /api/v1/system", s.handleSystemInfo)
 	mux.HandleFunc("GET /api/v1/stats", s.handleStats)
+	mux.HandleFunc("POST /api/v1/admin/shutdown", s.handleAdminShutdown)
 
 	mux.HandleFunc("POST /api/v1/research", s.handleCreateResearch)
 	mux.HandleFunc("GET /api/v1/research", s.handleListResearch)

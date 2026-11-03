@@ -1,5 +1,55 @@
 # CHANGELOG — Hector ResearchOS
 
+## v1.0.0-rc.1（2026-11-04）— 仓库整合 · RC1 冻结 · Windows 发行
+
+### 仓库整合
+
+- **双仓合一**：开发包仓库（16 commits）经纯移动重构提交 c867229 并入
+  verikod/hector（main 快进自 feature/hector-researchos），merge `7d8c432`
+  保留两条完整历史；冲突仅 README/Makefile/.gitignore 三处并按语义解决。
+- 双仓完整 bundle 备份（克隆验证通过）于仓库外；方案与验证记录：
+  docs/architecture/REPOSITORY_CONSOLIDATION.md、docs/audit/GIT_CONSOLIDATION_REPORT.md。
+
+### 新增（Windows 发行）
+
+- **托盘管理程序**（desktop/traymanager，独立 Go 模块）：Wails + WebView2 窗口
+  + 自研 win32 Shell_NotifyIcon 托盘（wails v2.17.1 无 SystemTray API，决策 42）。
+  首次启动向导（数据目录选择/外置 PG 配置/自启动）、服务启停/状态/日志/数据目录、
+  退出三选确认（停服退出/仅退托盘/取消）；单实例锁；服务与托盘生命周期严格分离。
+- **受控优雅停止**：新增 `POST /api/v1/admin/shutdown`（鉴权保护，与 Ctrl+C 同路径），
+  托盘/脚本经其停止服务，超时且身份三重校验后才允许强制终止。
+- **首次启动与数据目录**：程序目录与用户数据严格分离（默认
+  %LOCALAPPDATA%\Hector ResearchOS）；敏感配置（DSN/Token/SECRET_KEY）
+  Windows DPAPI（当前用户）加密存储，原子写入，解密失败回退向导。
+- **外置 PostgreSQL 16**：不捆绑不自动安装；连接检测 + 幂等迁移集成于向导与脚本。
+- **发行脚本**：install/start/stop/restart/health-check/diagnostics.ps1
+  （PS 5.1 兼容、UTF-8 BOM、诊断输出脱敏、进程级环境去重）。
+- **便携 ZIP**：`Hector-ResearchOS-v1.0.0-rc.1-windows-x64.zip`（bin/web/fonts/
+  licenses/migrations/scripts/docs），附 SHA256SUMS 与 BUILD_INFO。
+- **GitHub Actions**：`.github/workflows/release-windows.yml`——tag 触发、
+  最小 GITHUB_TOKEN 权限、构建+测试+打包+Smoke+Artifact 上传，不自动建 Release。
+
+### 修复
+
+- [P1] 整合路径：verify.sh/compose 指向旧双仓布局；`.gitattributes` 统一 LF
+  （修复 autocrlf 导致的 gofmt 全量误报）。
+- [P1] 托盘 HWND_MESSAGE 64 位截断导致 message-only 窗口创建失败。
+- [P2] 托盘 SzTip 定长拷贝越界 panic；ps1 无 BOM 在 PS 5.1 下解析错误。
+- [P3] 大小写重复环境变量导致 .NET Start-Process 异常（脚本内进程级去重）。
+
+### 验证（整合后全部重测）
+
+verify.sh 14/14 · Go 14 包全绿 · tsc/build 通过 · 安全探测 13/13 ·
+浏览器审计 27/27 · 真实 LLM 任务 A（96s/14.4k tokens/8 结论 8 引用）·
+托盘 DPAPI/生命周期集成测试 · 发行脚本链实跑 · shutdown 端点 202。
+
+### 已知限制
+
+见 docs/release/KNOWN_LIMITATIONS.md（K1 任务 B 质量不达标 … K13 Actions 远程未实跑）。
+
+---
+
+
 ## RC1（2026-11-04）
 
 RC1 候选版本：真实模型接入、LLM 能力验证、研究质量验收与安全复查。

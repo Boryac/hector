@@ -227,3 +227,17 @@ BLOCKED（外部条件，非代码问题）：
 RC1 后仍 BLOCKED：
 - Docker 实机部署（本机无 Docker；解除步骤见 RC1_DEPLOYMENT_REPORT §4）
 - 真实模型质量上限（本地免费中继延迟高、偶发 502、无 SLA；付费 Provider 可改善）
+
+## 第十二阶段：仓库整合 · RC1 冻结 · Windows 发行（2026-11-04）
+
+- [x] R2.1 双仓审计与备份：历史敏感扫描（0 命中）、双 bundle 备份+克隆验证、最终仓库选定 verikod/hector
+- [x] R2.2 历史整合：--allow-unrelated-histories merge `7d8c432`，双历史可溯、fsck 0 error、无嵌套 .git
+- [x] R2.3 整合后全量重测：verify.sh 14/14（修复 3 项路径缺陷）、Go 14 包、tsc/build、安全 13/13、浏览器 27/27、真实任务 A（14.4k tokens）
+- [x] R2.4 托盘程序：Wails 窗口 + 自研 win32 托盘（决策 42），集成冒烟（DPAPI/迁移/启动/健康/优雅停止）
+- [x] R2.5 shutdown 端点：鉴权 + 单测 + 实测 202
+- [x] R2.6 发行包：便携 ZIP + SHA256 + BUILD_INFO + 6 个 ps1 脚本（PS 5.1 实跑通过）
+- [x] R2.7 Actions 工作流：release-windows.yml（tag 触发/最小权限/不自动 Release），YAML 本地校验
+- [x] R2.8 RC1 冻结：tag v1.0.0-rc.1（本地）、CHANGELOG、KNOWN_LIMITATIONS、Release Notes
+- [x] R2.9 文档：ENVIRONMENT/GIT_CONSOLIDATION/POST_MERGE/QUALITY/SECURITY/ACCEPTANCE 六份审计 + 安装四件套 + DEVELOPER_GUIDE
+
+BLOCKED / PARTIAL（如实）：Docker 实机（无 Docker）；后台进程跨工具会话持久性（沙箱回收，单会话全链已验证）；Actions 远程实跑（无推送授权）；任务 B 质量（历史基线 30.5/50，未重跑）。

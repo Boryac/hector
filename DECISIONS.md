@@ -60,3 +60,11 @@
 40. **CORS 只对同源回显，不做任意反射**（2026-11-04，RC1 安全修复）。旧实现把请求 Origin 原样写进 `Access-Control-Allow-Origin`，等于对全网开放跨域读取。实际可利用性低（鉴权走 Authorization 头且未开 Allow-Credentials），但 V1 本地单用户工具的合法用法只有「前端与 API 同源」一种，直接把放行条件收紧为 Origin host 与请求 Host 一致，解析失败一律视为跨源。判断依据是「这个头为谁而存在」：没有跨端消费方时，宽松 CORS 只是习惯性代码。
 
 41. **LLM 超时按「真实模型处理真实 prompt」标定，降级必须留痕**（2026-11-04，RC1 质量根因之二）。90s 默认超时对 reasoning 模型的 6 来源大 prompt 不够，4/5 analyst 静默降级为规则抽取，报告看起来「成功」实际内容跑题。两层修复：运维层经设置中心把 `model.timeout` 调到 4m（热生效，不重启）；机制层确认降级必发 `agent.failed` 事件且 fallback 字段如实标注——SSE 事件流复盘时一眼定位。原则：降级是诚实的应急，不是可以装作没发生的后备路径。
+
+### 仓库整合与 Windows 发行（R2 系列）
+
+42. **托盘 = Wails 窗口 + 自研 win32 Shell_NotifyIcon，不用 Electron**（2026-11-04）。评估结论：wails v2.17.1 的 options.App 无 SystemTray 字段（全模块检索 0 命中），v3 未达 RC1 稳定标准。按任务允许的降级路径自研约 300 行托盘桥（独立消息循环线程 + TrackPopupMenu 动态菜单 + 命令 channel 派发），窗口仍由 Wails/WebView2 承担。被放弃：energye/systray 与 Wails 双消息循环混跑（脆弱）、Electron（违背零新框架原则）。教训：选型前直接读模块源码确认 API 存在性，文档口碑不等于当前版本事实。
+
+43. **后台服务与托盘是两个进程，优雅关闭走 API 而不是控制台信号**（2026-11-04）。托盘崩溃/退出不得终止研究任务，因此后端绝不进托盘的 Job Object；停止顺序 = shutdown 端点（鉴权，与 Ctrl+C 同一条 signal 路径）→ 最多等 15s → 三重身份校验（PID+镜像名+创建时间）通过后才 taskkill。避免的坑：PID 复用误杀、GenerateConsoleCtrlEvent 需要共享控制台的不可移植性。
+
+44. **SECRET_KEY 的稳定性高于其来源的灵活性**（2026-11-04，整合后实测发现）。settings 主钥解析优先级为 文件(`data\secret.key`) > 环境变量；工作目录变化导致落到新文件时，库内已加密 API Key 解密失败并被防御性清除，LLM 静默禁用。接受"清除而非崩溃"的防御行为，但把它写进 CONFIGURATION/TROUBLESHOOTING：更换密钥 = 已存 API Key 全部失效需重配；文档必须解释清优先级，否则运维会以为"配置还在"。

@@ -20,7 +20,9 @@
 | SSE 实时事件 | ✅ 通过 | 一次性 ticket 通道，13 条 ticket 测试；浏览器审计确认事件流建立 |
 | 设置中心 | ✅ 通过 | 27 项配置入库持久化、热/需重启/部署三层、密钥 AES-256-GCM 加密、GET 只回掩码 |
 | 前端（7 页） | ✅ 通过 | `ui-audit.mjs` 双视口 14 项 + `ui-functional.mjs` 37 项断言（真实 API 调用、UI 创建任务落库）；截图见 `docs/screenshots/` |
-| LLM 链路（客户端 → 规划 → 抽取 → 报告） | ✅ 已验证（用本地测试替身） | `planner_mode=llm`、编造引文与伪造 `source_id` 被丢弃 |
+| Windows 便携发行 | ✅ v1.0.0-rc.1 ZIP（托盘+脚本+SHA256） | `scripts/package-release.ps1`、docs/audit/RC1_FINAL_ACCEPTANCE_REPORT.md |
+| 仓库形态 | ✅ 单一 Git 仓库（双历史合并） | docs/architecture/REPOSITORY_CONSOLIDATION.md |
+| LLM 链路（客户端 → 规划 → 抽取 → 报告） | ✅ 已验证（真实本地模型 + 本地测试替身） | `planner_mode=llm`、编造引文与伪造 `source_id` 被丢弃 |
 | 真实大模型接入（Solar Mini 4） | ✅ 已接入并验证 | 设置中心真实 UI 接入 14/14；加密落库 + 重启持久化；能力探测 16/18（`docs/RC1_MODEL_CAPABILITY_REPORT.md`） |
 | 真实大模型研究质量 | ✅ 部分达标（如实标注） | A/B/C 三任务真实执行；C 40/50、A 36.5/50、B 30.5/50；独立事实核查 8/8、0 编造（`docs/RC1_RESEARCH_QUALITY_REPORT.md`） |
 | 安全复查 | ✅ 13/13 | CORS 反射缺陷已修复 + 回归测试；`docs/RC1_SECURITY_REPORT.md` |

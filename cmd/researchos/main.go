@@ -337,6 +337,7 @@ func runAll(args []string) error {
 	srv := api.NewServer(api.Options{
 		Cfg: a.cfg, Store: a.store, Planner: a.planner, LLM: a.llm, Search: a.search,
 		Pool: a.pool, RequireApproval: a.cfg.RequireApproval, Version: Version, Settings: a.settings,
+		Shutdown: cancel, // 受控优雅关闭：托盘管理程序经 POST /api/v1/admin/shutdown 触发，与 Ctrl+C 走同一条路径
 	})
 	httpSrv := &http.Server{
 		Addr:              a.cfg.Addr,

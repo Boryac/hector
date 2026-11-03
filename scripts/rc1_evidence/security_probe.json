@@ -1,5 +1,5 @@
 {
- "probed_at": "2026-11-04 01:46:22",
+ "probed_at": "2026-11-04 03:05:47",
  "summary": {
   "total": 13,
   "pass": 13,
@@ -49,12 +49,12 @@
   {
    "check": "MCP 探测登记已清理",
    "pass": true,
-   "detail": "server 4f231d23-361c-484a-a7b7-8cd8a12dee57 已删除"
+   "detail": "server 247cf791-b5d7-4aab-b3a5-ca5cb7a34ec7 已删除"
   },
   {
    "check": "settings 响应无 LLM Key 明文",
    "pass": true,
-   "detail": "泄漏检查=False，掩码存在=True"
+   "detail": "泄漏检查=False，掩码存在=False"
   },
   {
    "check": "无权限读任务返回 404/401（不泄露存在性）",

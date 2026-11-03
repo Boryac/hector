@@ -9,7 +9,28 @@ const DEFAULT_TOKEN = 'local-dev-token';
 
 export function getToken(): string {
   if (typeof window === 'undefined') return DEFAULT_TOKEN;
-  return window.localStorage.getItem(TOKEN_KEY) || DEFAULT_TOKEN;
+  const stored = window.localStorage.getItem(TOKEN_KEY);
+  if (stored) return stored;
+  // 发行/托盘场景：首次经 URL 注入 Token（优先 #fragment，不发给服务端、不进访问日志；
+  // ?query 兼容旧入口）。持久化到 localStorage 后地址栏凭据即失效性消失，后续请求不再依赖 URL。
+  try {
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const fromHash = hash.get('token');
+    if (fromHash) {
+      setToken(fromHash);
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+      return fromHash;
+    }
+    const fromQuery = new URLSearchParams(window.location.search).get('token');
+    if (fromQuery) {
+      setToken(fromQuery);
+      history.replaceState(null, '', window.location.pathname + window.location.hash);
+      return fromQuery;
+    }
+  } catch {
+    /* 非 http(s) 环境忽略 */
+  }
+  return DEFAULT_TOKEN;
 }
 
 export function setToken(token: string): void {

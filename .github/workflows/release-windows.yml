@@ -1,0 +1,91 @@
+name: release-windows
+
+# RC1 策略：tag 触发 → 构建/测试/打包 → 上传 Workflow Artifacts。
+# 不自动创建 GitHub Release；公开发布需用户手动操作（见 KNOWN_LIMITATIONS K13）。
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch: {} # 手动触发用于演练
+
+permissions:
+  contents: read # 最小权限：只读源码；不授 release/packages 写权限
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  build-windows-x64:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache: true
+          cache-dependency-path: |
+            go.sum
+            desktop/traymanager/go.sum
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Setup Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Go 单元测试（ResearchOS 全包）
+        run: go test -count=1 ./internal/researchos/...
+
+      - name: 前端类型检查
+        run: npx tsc --noEmit
+        working-directory: web
+
+      - name: 打包（前端构建 + 后端 + 托盘 + ZIP + SHA256 + BUILD_INFO）
+        run: pwsh -File scripts/package-release.ps1 -Version "${{ github.ref_name }}"
+        env:
+          NO_COLOR: "1"
+
+      - name: Smoke Test（解压后健康检查 prepare）
+        run: |
+          $zip = Get-ChildItem "$env:TEMP\Hector-ResearchOS-*.zip" | Select-Object -First 1
+          if (-not $zip) { throw "未找到 ZIP 产物" }
+          $dest = Join-Path $env:TEMP "smoke-rc"
+          if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
+          Expand-Archive $zip.FullName $dest
+          $root = (Get-ChildItem $dest | Select-Object -First 1).FullName
+          if (-not (Test-Path (Join-Path $root "bin\researchos.exe"))) { throw "ZIP 缺少后端二进制" }
+          if (-not (Test-Path (Join-Path $root "researchos-tray.exe"))) { throw "ZIP 缺少托盘程序" }
+          Write-Output "smoke: 解压与关键文件检查通过"
+
+      - name: 收集产物
+        id: collect
+        run: |
+          $zip = Get-ChildItem "$env:TEMP\Hector-ResearchOS-*.zip" | Select-Object -First 1
+          $out = Join-Path $env:GITHUB_WORKSPACE "dist-artifacts"
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          Copy-Item $zip.FullName $out
+          Copy-Item (Join-Path $env:TEMP "BUILD_INFO.txt") $out
+          $hash = (Get-FileHash $zip.FullName -Algorithm SHA256).Hash
+          "$($zip.Name)  $hash" | Out-File (Join-Path $out "SHA256SUMS.txt") -Encoding ascii
+          Write-Output "zip=$($zip.Name)" >> $env:GITHUB_OUTPUT
+
+      - name: Upload Workflow Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.collect.outputs.zip }}
+          path: dist-artifacts/*
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: 构建摘要
+        run: Get-Content (Join-Path (Join-Path $env:GITHUB_WORKSPACE "dist-artifacts") "BUILD_INFO.txt")

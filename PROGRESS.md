@@ -303,3 +303,7 @@
 ### 2026-11-04 — [R1.6-R1.10] PDF 压测、安全复查与最终回归
 - 做了什么：PDF 5 条压力用例（24 页大报告、空表格/单列、8 路并发字节级一致、缺字替换、非法外部字体拒绝）。安全探测 13 项抓到 1 个真缺陷——CORS 任意 Origin 反射（可利用性低但违反最小暴露），修为仅同源回显并补 `cors_test.go` 6 断言。最终回归：verify.sh 14/14（其间 verify_pdf_content.py 抓到表格行误报——PDF 表格按列宽重排导致整句无法 flat 匹配，修脚本比对第一列单元格）；浏览器审计因 Chrome 回归改用 Playwright，27/27。
 - 结论：RC1 候选达成。剩余 BLOCKED：Docker 实机（无 Docker）、真实模型质量上限（免费中继无 SLA）。
+
+### 2026-11-04 — [R2] 仓库整合 · RC1 冻结 · Windows 发行
+- 做了什么：双 bundle 备份（克隆验证）→ 开发包 16 commits 纯移动重构 → `--allow-unrelated-histories` 合入 verikod/hector（merge `7d8c432`，冲突仅 3 文件）→ 整合后全量重测（verify.sh 修复 3 项路径缺陷后 14/14；安全 13/13；浏览器 27/27；真实任务 A 96s/14.4k tokens）→ 托盘程序（Wails 窗口 + 自研 win32 托盘，三轮冒烟修 2 缺陷）→ shutdown 端点（鉴权+单测+实测 202）→ 发行脚本链（修 BOM/环境去重两坑后 PS 5.1 全过）→ package-release.ps1 产出 ZIP+SHA256 → Actions 工作流 → 文档 16 份 → 本地 tag v1.0.0-rc.1。
+- 关键判定：wails v2.17.1 无 SystemTray（读源码确认）→ 决策 42 自研托盘桥；SECRET_KEY file>env 优先级与"解密失败即清除"防御行为实测确认（决策 44）。`&` 会把整条 `&&` 链放进后台子 shell——本次验证两次假失败的根因。
