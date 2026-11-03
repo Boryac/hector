@@ -485,34 +485,6 @@ paths:
                   items: { type: array, items: { $ref: '#/components/schemas/ToolInvocation' } }
                   total: { type: integer }
 
-  /api/v1/tools/servers:
-    post:
-      tags: [tools]
-      summary: 注册 MCP Server（高风险工具默认需审批）
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [name, command]
-              properties:
-                name: { type: string }
-                command: { type: string }
-                args: { type: array, items: { type: string } }
-                require_approval: { type: boolean, default: true }
-      responses:
-        '201':
-          description: 已注册
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id: { type: string }
-                  status: { type: string }
-        '422': { $ref: '#/components/responses/Unprocessable' }
-
   /api/v1/tools/servers/{id}/{action}:
     post:
       tags: [tools]
@@ -535,28 +507,309 @@ paths:
   /api/v1/settings:
     get:
       tags: [settings]
-      summary: 运行配置（密钥一律掩码）
+      summary: 全部设置分组（敏感项只返回掩码）
+      description: |
+        返回 schema 驱动的配置：每个字段带 `kind`（控件类型）、`scope`
+        （`hot` 即时生效 / `restart` 需重启 / `deploy` 部署级只读）、
+        `source`（`web` / `env` / `default`）与生效值。
+
+        优先级：**Web 保存值 > 环境变量 > 内置默认**。部署级参数只认环境变量。
+        密钥类字段只返回形如 `sk-a****z` 的掩码与 `configured` 标记，绝不返回明文。
       responses:
         '200':
-          description: 配置
+          description: 配置快照
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Settings' }
+              schema: { $ref: '#/components/schemas/SettingsSnapshot' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+
+  /api/v1/settings/{section}:
     put:
       tags: [settings]
-      summary: 更新运行配置
+      summary: 保存某个分组的配置
+      description: |
+        请求体是 `{ "字段key": 值 }` 的扁平对象（也接受 `{"values": {...}}`）。
+
+        - 整批校验后才落库，任一项非法则整批不生效；
+        - 敏感项传空串、`***` 或含 `****` 的掩码表示「不修改」；传 `__clear__` 表示清除；
+        - 响应里的 `applied` 对敏感项同样只回掩码；
+        - `requires_restart` 列出需要重启才生效的项。
+      parameters:
+        - name: section
+          in: path
+          required: true
+          schema: { type: string, enum: [model, search, execution, system] }
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/Settings' }
+            schema:
+              type: object
+              additionalProperties: true
+              example:
+                model.provider: openai
+                model.api_key: sk-...
+                model.model: gpt-4o-mini
+      responses:
+        '200':
+          description: 保存结果 + 最新快照
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SettingsPatchResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403':
+          description: 试图修改部署级参数（只能改环境变量）
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+
+  /api/v1/settings/{section}/{key}:
+    delete:
+      tags: [settings]
+      summary: 清除某项 Web 覆盖，回落到环境变量或默认值
+      parameters:
+        - name: section
+          in: path
+          required: true
+          schema: { type: string }
+        - name: key
+          in: path
+          required: true
+          schema: { type: string, example: execution.max_agents }
+      responses:
+        '200':
+          description: 已清除
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SettingsPatchResponse' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+
+  /api/v1/settings/llm/test:
+    post:
+      tags: [settings]
+      summary: 用当前配置打一次最小补全，验证模型连通性
+      description: |
+        不写入任何设置。`api_key` 可省略（沿用已保存值），传掩码视为未修改。
+        失败时返回 `ok=false` 与可读原因（`provider_none` / `missing_credentials` / `request_failed`）。
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                provider: { type: string }
+                api_key: { type: string }
+                base_url: { type: string }
+                model: { type: string }
+      responses:
+        '200':
+          description: 测试结果（含 latency_ms、model、message）
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LLMTestResult' }
+
+  /api/v1/settings/search/test:
+    post:
+      tags: [settings]
+      summary: 用真实关键词打一次检索，逐 Provider 返回结果
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                provider: { type: string, description: 留空则测试全部已启用项 }
+                query: { type: string }
+      responses:
+        '200':
+          description: 测试结果（total、providers[]、latency_ms）
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SearchTestResult' }
+
+  /api/v1/system:
+    get:
+      tags: [system]
+      summary: 运行环境与依赖状态
+      description: 与 `/health` 的区别：health 面向探活，这里面向「设置页要知道自己在什么环境里跑」，包含平台、Go 版本、迁移版本、连接池与主密钥来源。
+      responses:
+        '200':
+          description: 系统信息
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SystemInfo' }
+
+  /api/v1/stats:
+    get:
+      tags: [system]
+      summary: Dashboard 统计（任务 / 节点 / Agent / 来源 / 结论 / 报告）
+      responses:
+        '200':
+          description: 汇总统计
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatsResponse' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+
+  /api/v1/sources:
+    get:
+      tags: [assets]
+      summary: 跨任务查询来源
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: site
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: task_id
+          in: query
+          schema: { type: string }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: 来源列表
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SourceList' }
+
+  /api/v1/reports:
+    get:
+      tags: [assets]
+      summary: 跨任务查询报告
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: 报告列表
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportList' }
+
+  /api/v1/agents:
+    get:
+      tags: [assets]
+      summary: 最近 Agent 执行记录
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Agent 执行列表
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AgentList' }
+
+  /api/v1/tools/servers:
+    get:
+      tags: [mcp]
+      summary: 列出已登记的 MCP Server（含工具缓存）
+      responses:
+        '200':
+          description: 列表
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MCPServerList' }
+    post:
+      tags: [mcp]
+      summary: 登记 MCP Server（不启动进程）
+      description: |
+        仅登记元数据，`approved=false`。要执行外部命令（工具发现）必须先调用
+        `/tools/servers/{id}/approve`，这是本产品对「运行任意外部程序」的显式闸门。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, command]
+              properties:
+                name: { type: string }
+                command: { type: string, description: 可执行文件路径或名称 }
+                args:
+                  type: array
+                  items: { type: string }
+                env:
+                  type: object
+                  description: 只传这里显式声明的变量，不继承服务进程环境
+                  additionalProperties: { type: string }
+      responses:
+        '201':
+          description: 已登记，`approved=false`
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  server: { $ref: '#/components/schemas/MCPServer' }
+                  note: { type: string }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+
+  /api/v1/tools/servers/{id}/discover:
+    post:
+      tags: [mcp]
+      summary: 启动 Server 并通过 stdio 取回工具清单
+      description: 唯一会执行外部命令的接口。未批准的 Server 返回 409。
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: 发现结果（失败时 `ok=false` 且带 message）
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MCPDiscoverResult' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: 未批准，不能启动进程
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/tools/servers/{id}/approve:
+    post:
+      tags: [mcp]
+      summary: 批准 / 撤销批准
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [approved]
+              properties:
+                approved: { type: boolean }
       responses:
         '200':
           description: 已更新
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Settings' }
         '422': { $ref: '#/components/responses/Unprocessable' }
+
+  /api/v1/tools/servers/{id}:
+    delete:
+      tags: [mcp]
+      summary: 删除 MCP Server 登记
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: 已删除 }
 
 components:
   securitySchemes:
@@ -571,6 +824,15 @@ components:
       in: path
       required: true
       schema: { type: string }
+    Limit:
+      name: limit
+      in: query
+      description: 单页条数，服务端上限 200
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+    Offset:
+      name: offset
+      in: query
+      schema: { type: integer, minimum: 0, default: 0 }
 
   responses:
     BadRequest:
@@ -590,6 +852,16 @@ components:
           schema: { $ref: '#/components/schemas/Error' }
     Conflict:
       description: 状态机拒绝或并发冲突
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: 拒绝执行（部署级参数只读，或未批准就要求运行外部命令）
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ServiceUnavailable:
+      description: 依赖不可用（数据库未连上，或设置中心未启用）
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
@@ -834,24 +1106,392 @@ components:
         name: { type: string }
         command: { type: string }
         args: { type: array, items: { type: string } }
-        enabled: { type: boolean }
-        require_approval: { type: boolean }
-        health: { type: string, enum: [unknown, healthy, unhealthy] }
-        last_checked_at: { type: string, format: date-time, nullable: true }
+        status:
+          type: string
+          enum: [registered, stopped, running, ready, error]
+          description: ready 表示已成功取到工具清单
+        approved:
+          type: boolean
+          description: 只有 true 才允许执行外部命令做工具发现
+        tools:
+          type: array
+          items: { $ref: '#/components/schemas/MCPTool' }
+        tool_count: { type: integer }
+        last_error: { type: string }
+        created_at: { type: string, format: date-time }
 
-    Settings:
+    MCPServerList:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/MCPServer' }
+        total: { type: integer }
+
+    MCPTool:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        input_schema:
+          type: object
+          additionalProperties: true
+          description: 兼容 inputSchema / input_schema 两种命名
+
+    MCPDiscoverResult:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+        tools:
+          type: array
+          items: { $ref: '#/components/schemas/MCPTool' }
+        tool_count: { type: integer }
+        protocol_version: { type: string }
+        server_info: { type: object, additionalProperties: true }
+        duration_ms: { type: integer }
+        reason:
+          type: string
+          description: 失败时给出，如 discover_failed
+        message: { type: string }
+
+    SourceList:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              task_id: { type: string }
+              task_title: { type: string }
+              url: { type: string, format: uri }
+              title: { type: string }
+              site: { type: string }
+              provider: { type: string }
+              status: { type: string }
+              credibility: { type: number }
+              http_status: { type: integer }
+              snippet: { type: string }
+              created_at: { type: string, format: date-time }
+        total: { type: integer }
+        limit: { type: integer }
+        offset: { type: integer }
+
+    ReportList:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              task_id: { type: string }
+              task_title: { type: string }
+              version: { type: integer }
+              title: { type: string }
+              citation_count: { type: integer }
+              word_count: { type: integer }
+              model: { type: string }
+              created_at: { type: string, format: date-time }
+        total: { type: integer }
+        limit: { type: integer }
+        offset: { type: integer }
+
+    AgentList:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              task_id: { type: string }
+              task_title: { type: string }
+              role: { type: string }
+              name: { type: string }
+              model: { type: string }
+              status: { type: string }
+              started_at: { type: string, format: date-time }
+              duration_ms: { type: integer }
+        total: { type: integer }
+
+    SystemInfo:
       type: object
       properties:
-        addr: { type: string }
-        database: { type: string, description: 密码已脱敏 }
-        llm_provider: { type: string }
-        llm_model: { type: string }
-        llm_api_key: { type: string, description: 掩码值 }
-        search_providers: { type: array, items: { type: string } }
-        tavily_api_key: { type: string, description: 掩码值 }
-        serpapi_key: { type: string, description: 掩码值 }
-        github_token: { type: string, description: 掩码值 }
-        workers: { type: integer }
-        max_agents: { type: integer }
-        node_timeout: { type: string }
-        respect_robots: { type: boolean }
+        version: { type: string }
+        uptime_s: { type: integer }
+        started_at: { type: string, format: date-time }
+        time: { type: string, format: date-time }
+        runtime:
+          type: object
+          properties:
+            go: { type: string }
+            os: { type: string }
+            arch: { type: string }
+            cpus: { type: integer }
+            goroutines: { type: integer }
+        service:
+          type: object
+          properties:
+            addr: { type: string }
+            web_dir: { type: string }
+            data_dir: { type: string }
+            auth: { type: string }
+            user: { type: string }
+        database:
+          type: object
+          properties:
+            ok: { type: boolean }
+            latency_ms: { type: integer }
+            dsn: { type: string, description: 密码已脱敏 }
+            migrations:
+              type: array
+              items: { type: string }
+            pool:
+              type: object
+              properties:
+                total: { type: integer }
+                idle: { type: integer }
+                acquired: { type: integer }
+                max: { type: integer }
+            error: { type: string }
+        llm:
+          type: object
+          properties:
+            enabled: { type: boolean }
+            provider: { type: string }
+            model: { type: string }
+            base_url: { type: string }
+            key_set: { type: boolean, description: 只报「有没有」，不报值 }
+        search:
+          type: object
+          properties:
+            configured:
+              type: array
+              items: { type: string }
+            available:
+              type: array
+              nullable: true
+              items: { type: string }
+        settings:
+          type: object
+          properties:
+            enabled: { type: boolean }
+            key_source: { type: string, description: 'env 或 file' }
+            revision: { type: integer }
+            restart_needed:
+              type: array
+              items: { type: string }
+
+    StatsResponse:
+      type: object
+      properties:
+        tasks:
+          type: object
+          properties:
+            by_status:
+              type: object
+              additionalProperties: { type: integer }
+            total: { type: integer }
+        nodes:
+          type: object
+          properties:
+            by_status:
+              type: object
+              additionalProperties: { type: integer }
+            total: { type: integer }
+        agents:
+          type: object
+          properties:
+            by_role:
+              type: object
+              additionalProperties: { type: integer }
+        sources: { type: integer }
+        claims: { type: integer }
+        reports: { type: integer }
+        recent:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              title: { type: string }
+              status: { type: string }
+              depth: { type: string }
+              planner_mode: { type: string }
+              created_at: { type: string, format: date-time }
+              finished_at: { type: string, format: date-time }
+        llm:
+          type: object
+          properties:
+            enabled: { type: boolean }
+            provider: { type: string }
+            model: { type: string }
+
+    LLMTestResult:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+        provider: { type: string }
+        model: { type: string }
+        base_url: { type: string }
+        latency_ms: { type: integer }
+        reply: { type: string, description: 模型回复前 80 字 }
+        usage: { type: object, additionalProperties: true }
+        reason:
+          type: string
+          enum: [provider_none, missing_credentials, request_failed]
+        message: { type: string }
+
+    SearchTestResult:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+        query: { type: string }
+        total: { type: integer }
+        latency_ms: { type: integer }
+        message: { type: string }
+        unknown:
+          type: array
+          items: { type: string }
+          description: 未识别的 Provider 名
+        providers:
+          type: array
+          items:
+            type: object
+            properties:
+              provider: { type: string }
+              ok: { type: boolean }
+              count: { type: integer }
+              latency_ms: { type: integer }
+              error: { type: string }
+
+    # --- 设置中心 ---------------------------------------------------------
+    SettingsSnapshot:
+      type: object
+      description: |
+        全部配置分组的快照。字段是 schema 驱动的：前端按 `kind` 渲染控件、
+        按 `scope` 决定是否显示「需重启」提示、按 `source` 显示值从哪来。
+      required: [sections, secrets, revision, precedence]
+      properties:
+        sections:
+          type: array
+          items: { $ref: '#/components/schemas/SettingsSection' }
+        secrets:
+          $ref: '#/components/schemas/SettingsSecretsInfo'
+        revision:
+          type: integer
+          description: 每次成功保存后 +1
+        precedence:
+          type: string
+          example: Web 保存值 > 环境变量 > 内置默认
+        restart_needed:
+          type: boolean
+          description: 是否有已保存但还没生效的 restart 级配置
+        pending_restart:
+          type: array
+          items: { type: string }
+        last_error: { type: string }
+
+    SettingsSection:
+      type: object
+      required: [id, title, fields]
+      properties:
+        id: { type: string, enum: [model, search, execution, system] }
+        title: { type: string }
+        description: { type: string }
+        fields:
+          type: array
+          items: { $ref: '#/components/schemas/SettingsField' }
+
+    SettingsField:
+      type: object
+      required: [key, label, kind, scope, value, source, editable]
+      properties:
+        key: { type: string, example: model.api_key }
+        label: { type: string }
+        help: { type: string }
+        kind:
+          type: string
+          enum: [string, secret, int, bool, duration, enum, list, readonly]
+          description: 前端据此选控件
+        scope:
+          type: string
+          enum: [hot, restart, deploy]
+          description: hot 即时生效；restart 需重启；deploy 只能改环境变量
+        env: { type: string, description: 对应的环境变量名 }
+        value:
+          description: 生效值；secret 类型是掩码
+          oneOf:
+            - type: string
+            - type: integer
+            - type: boolean
+            - type: number
+            - type: array
+              items: { type: string }
+            - type: 'null'
+        source:
+          type: string
+          enum: [web, env, default]
+          description: 当前值的来源，决定「清除覆盖」按钮是否可用
+        configured: { type: boolean }
+        default:
+          description: 内置默认值，类型随 value
+        min: { type: integer }
+        max: { type: integer }
+        options:
+          type: array
+          items: { type: string }
+        unit: { type: string }
+        editable:
+          type: boolean
+          description: deploy 级恒为 false
+
+    SettingsSecretsInfo:
+      type: object
+      properties:
+        available: { type: boolean, description: 主密钥是否就绪 }
+        key_source: { type: string, enum: [env, file, ''] }
+        cipher: { type: string, example: AES-256-GCM }
+
+    SettingsPatchResponse:
+      type: object
+      required: [result, settings]
+      properties:
+        result: { $ref: '#/components/schemas/SettingsPatchResult' }
+        settings: { $ref: '#/components/schemas/SettingsSnapshot' }
+
+    SettingsPatchResult:
+      type: object
+      required: [applied, hot_applied, revision, message]
+      properties:
+        applied:
+          type: object
+          additionalProperties: true
+          description: 成功写入的值；敏感项这里是掩码，不是明文
+        cleared:
+          type: array
+          items: { type: string }
+        requires_restart:
+          type: array
+          items: { type: string }
+        warnings:
+          type: array
+          items: { type: string }
+        hot_applied:
+          type: boolean
+          description: 是否已有改动在本次请求内即时生效
+        revision: { type: integer }
+        message: { type: string }
+

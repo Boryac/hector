@@ -107,3 +107,43 @@
   - `docs/USAGE.md`：ticket 用法与四条硬规则、LLM 开启后可见的三处变化、ticket 报错排查、验收脚本清单
   - `api/openapi.yaml`：新增 ticket 端点、events 鉴权说明、`401/403` 语义
   - `docs/security-review.md` §1.8、`ARCHITECTURE.md` §5、`README.md` 状态表与配置表同步
+
+## 第八阶段：完整设置中心（2026-11-03 人工指派）
+
+目标：普通用户不改源码、不编辑 `.env`、不重新编译，即可在 Web UI 管理日常运行配置。
+
+### 现状审查结论（避免重复开发）
+- 已有 `GET/PUT /api/v1/settings`，但只覆盖 4 个运行参数（`max_agents` / `require_approval` /
+  `default_depth` / `search_results`）；`default_depth` 只校验不落配置，属无效分支。
+- 凭据（LLM Key、各搜索 Key）只从环境变量读，接口仅返回掩码，**无法通过界面配置**。
+- `app_settings` 表已存在但只被上述 4 个键使用，无加密、无来源标注、无重启语义。
+- MCP 只有登记与 start/stop（start 置 `pending_approval`），无工具发现、无批准动作、无删除。
+- 前端只有 Dashboard 与 Task 两个页面，**没有任何设置页**。
+- 来源 / 报告只有「按任务」接口，缺跨任务管理视图。
+
+### 任务清单
+- [x] T8.1 设置分层与优先级定稿：deploy（env 只读）/ hot（即时生效）/ restart（需重启）；Web 值与 env 的优先级写入 DECISIONS 与手册
+- [x] T8.2 密钥保护：AES-256-GCM 加密存储，主密钥来自 `RESEARCHOS_SECRET_KEY` 或首次运行生成 `secret.key`(0600)；GET 只返回掩码 + `configured`
+- [x] T8.3 持久化与热更新：设置读写走 `app_settings`；服务启动时把 DB 值叠加到环境变量之上；LLM / 搜索客户端重建并原子换快照
+- [x] T8.4 设置 API：`GET /api/v1/settings`（分组 + 来源 + 可变性）、`PUT /api/v1/settings/{section}`（校验 + 保存 + 生效反馈 + `requires_restart`）
+- [x] T8.5 连接测试：`POST /api/v1/settings/llm/test`、`POST /api/v1/settings/search/test`（真实外呼，失败返回可读原因）
+- [x] T8.6 系统与统计 API：`GET /api/v1/system`（DB/服务/版本/运行环境）、`GET /api/v1/stats`（任务与 Agent 统计）
+- [x] T8.7 MCP Hub 补全：工具发现、启用/禁用、权限审批、删除
+- [x] T8.8 来源与报告跨任务接口：`GET /api/v1/sources`、`GET /api/v1/reports`
+- [x] T8.9 前端九页：Dashboard / Research / Sources / Reports / Model / Search / MCP Hub / Execution / System
+- [x] T8.10 测试：设置 API、持久化、密钥保护、重启行为、优先级、部署级参数拒绝
+- [x] T8.11 文档：`docs/USAGE.md` 按真实界面顺序重写配置流程；`api/openapi.yaml` 同步；DECISIONS 追加
+
+### 完成情况（2026-11-03 收口）
+
+| 任务 | 证据 |
+|---|---|
+| T8.1–T8.3 | `settings` 15 条 + `secrets` 9 条测试全绿；迁移 `0002` 实跑输出 `[0001_init.sql 0002_settings_center.sql]` |
+| T8.4–T8.5 | `api` 10 条设置用例全绿；真实外呼证据：搜索试连 4 个 Provider 全通（bing 619ms / wikipedia 1102ms / github 1463ms / hackernews 3618ms，共 11 条结果）；LLM 试连用假 Key 得到上游 `401`，证明 Key 确实被解密并发出 |
+| T8.6–T8.7 | `/system` `/stats` `/sources`(1083 条) `/reports`(41 条) `/agents` 均返回真实数据；MCP 登记 → 409 拒绝 → 批准 → 161ms 发现 2 个工具 → 状态 `ready` |
+| T8.8 | `scripts/check-openapi.py`：`37 条路径 / 40 个操作 / 30 个 schema / 107 处引用，无重复键、无悬空引用` |
+| T8.9 | `/settings/{model,search,mcp,execution,system}` + `/sources` + `/reports` 完成；`tsc --noEmit` 干净。Dashboard 与任务详情页由人工在改，未触碰 |
+| T8.10 | 端到端：保存后 GET 全文不含明文、库中 `encrypted=true` 且带 `enc:v1:` 前缀；`workers=8` 保存后 `requires_restart` 正确、重启后生效；`system.addr` → 403、`max_agents=999` → 422 |
+| T8.11 | `docs/USAGE.md` 重排为「认路 → 设置五页 → 优先级 → 密钥 → 建任务 → 批准 → 过程 → 报告 → API」；DECISIONS 追加 29–35 |
+
+未完成 / 待人工确认：Dashboard 与任务详情页 UI（人工在改）；真实大模型报告质量（缺可用 Key，仅验证到「链路通 + 失败如实上报」）。

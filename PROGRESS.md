@@ -207,3 +207,33 @@
 - 测试结果：`TestDetectConflictSingleSourceWording` / `TestRelativeSpreadEdgeCases` 新增并通过；`go test ./internal/researchos/...` 全绿，`go vet` 干净。线上三连跑（`fd08c2b0` → `082a3def` → `aad4e77b`）逐次验证措辞收敛：最后一条为「不同来源页面上的数值差异显著（最小 0 / 最大 23.6，相对差异 100%，涉及 2 个来源页面）」，配置项状态同时给出「仅 1 个来源页面，数值无跨来源可比」。`verify-citations.py` 对 `aad4e77b` 判 PASS，对篡改副本判 FAIL（`--md-file` 负向验证）。
 - 过程中的坑与修复：`b16455ba` 旧数据里 `source_count=1` 与 notes 的「多来源」自相矛盾，由此才顺线查到 ②③ 两处；`/tmp` 在 Windows Python 下不可写（Git Bash 的 `/tmp` 与 Windows Python 不互通），中间产物统一落 `.devtools/`。
 - 遗留问题 / 假设：真实大模型质量仍未验证（无 Key），这三处修复本身不改变「测试替身不做推理」的事实。
+
+### 2026-11-03 — [T8.1] 设置中心现状审查（先看清已有什么，再动手）
+- 做了什么：把现有「配置」相关代码全量过一遍，结论是能复用的很薄、要补的很多——`GET/PUT /api/v1/settings` 只有 4 个键（addr / llm_provider / llm_model / llm_api_key 等），`default_depth` 只做校验不接受写入，MCP 仅支持登记与 start/stop，前端只有 2 个页面且无设置页。据此确认不存在重复开发风险，把工作拆成 T8.2–T8.11 写进 `TASKS.md` 第八阶段，并定下三层配置模型（`deploy` / `hot` / `restart`）作为整个实现的骨架。
+- 测试结果：审查结论落表，无代码改动。这一条的价值在于防止「重写一遍已有的东西」——后来 13 个新端点里有 4 个是对旧端点的替换而非新增。
+
+### 2026-11-03 — [T8.2/T8.3] 配置 schema、加密与掩码
+- 做了什么：新增 `settings/schema.go`（4 组 27 个字段，每项带 `kind` / `scope` / `env` / 默认值 / 取值范围 / 中文帮助）与 `settings/manager.go`（`envBase` + `applied` 双层、`atomic.Pointer[Runtime]` 热更新、`Patch` 整批校验后落库、`__clear__` 清除覆盖）。新增 `secrets` 包：AES-256-GCM，密文前缀 `enc:v1:`，主密钥来自 `RESEARCHOS_SECRET_KEY` 或 `<DataDir>/secret.key`（0600，临时文件 + rename 落盘）。迁移 `0002_settings_center.sql` 给 `app_settings` 加 `section` / `encrypted` / `updated_by`，给 `mcp_servers` 加 `tools` / `last_error` / `updated_at`。
+- 测试结果：`secrets` 9 条、`settings` 15 条全绿。过程中修掉三个真缺陷：① 保存响应把提交的明文原样放进 `applied`（会进浏览器控制台和网络面板），改为敏感项只回掩码；② 清除 `__clear__` 只在 secret 分支被识别，普通字段走到 `Validate` 报「需要一个整数」；③ 纯星号 `***` 不含 `****`，被当成新密钥存进去了。
+- 实测：`python scripts/check-openapi.py` 通过；迁移实跑输出 `[0001_init.sql 0002_settings_center.sql]`，主密钥来源 `file:data\secret.key`。
+
+### 2026-11-03 — [T8.4/T8.5] 热更新打通到执行链 + MCP 工具发现
+- 做了什么：`settings.Manager` 的 `Runtime` 快照同时持有 `Cfg` / `LLM` / `Search` / `Planner`；`api.Server` 全部改为通过 `cfg()` / `llmClient()` / `searchEngine()` 访问器取值；`exec.Engine` 加 `SetRuntime(func)`，`analyze` / `synthesize` 每次调用取当时客户端——否则会出现「界面显示已切换、实际还在用旧配置」这种不报错但骗人的状态。MCP 侧新增 `mcp/discover.go`：真实 stdio JSON-RPC（`initialize` → `notifications/initialized` → `tools/list`），20s 硬超时、2MB 输出上限、只传显式 env、跳过穿插的通知行。
+- 测试结果：`mcp` 6 条全绿，其中用测试二进制自身当 MCP Server 起真实子进程，含 `silent` 模式验证超时、以及在 `tools/list` 前插通知验证鲁棒性。
+- 实测：登记 → 未批准 discover 返回 `409 not_approved` → 批准 → 真实拉起 Node 写的 MCP Server，161ms 拿回 2 个工具并回写库（状态 `ready`），列表里直接可读工具名与入参 schema。
+
+### 2026-11-03 — [T8.6/T8.7] 设置 API、系统信息与统计
+- 做了什么：新增 `api/settings_api.go`（分组读取 / 保存 / 清除 / LLM 试连 / 搜索试连 / `/system` / `/stats`）与 `api/hub_api.go`（MCP 列表、发现、批准、删除；跨任务的 sources / reports / agents 列表）。错误分三类映射：`ErrDeployField` → 403、`ErrUnknownSetting` → 422、校验失败 → 422。`/system` 返回 Go 版本、CPU、goroutine、连接池、迁移版本、主密钥来源；`/stats` 汇总任务 / 节点 / Agent / 来源 / 结论 / 报告与最近 8 个任务。
+- 测试结果：`api` 包 10 条设置相关用例全绿（鉴权、响应不泄露 Token 与数据库密码、保存返掩码、deploy 403、校验 422、`requires_restart`、清除回落、LLM 试连诚实失败、搜索无 Provider、掩码回传不改写）。全量 `go test -count=1 ./internal/researchos/...` 17 个包全绿。
+- 实测（真实服务 + 真实数据库）：保存 `sk-live-SECRET-abcdef1234567890` → 响应 `sk-l****7890`、`hot_applied=true`；GET 全文 6937 字节检索不到明文；库中该行 `encrypted=true`、值以 `enc:v1:` 开头、全文检索不到明文。改 `execution.workers=8` → `requires_restart=["execution.workers"]`、`restart_needed=true`。改 `system.addr` → 403；`max_agents=999` → 422「最大并发 Agent 必须在 1 到 8 之间」。停服务再启动 → `model.*` 四项 `source=web` 全部保留、`workers=8` 已生效、`restart_needed=[]`、`llm.key_set=true`（说明密文在主密钥不变时可正常解密）。
+- 过程中的坑与修复：端到端跑之前先撞上 8080 被上一轮遗留进程占着，新二进制根本没起来——`health` 却有响应，误以为已就绪。查 PID 才发现是旧实例。这类「探活成功但服务是旧的」最容易被当成测试通过。
+
+### 2026-11-03 — [T8.8/T8.9] 契约、前端与其他页面
+- 做了什么：`api/openapi.yaml` 把 settings 段整体重写并新增 system / stats / sources / reports / agents / tools 系列，补齐 `SettingsSnapshot` / `SettingsPatchResponse` / `SettingsField` / `SystemInfo` / `StatsResponse` / `MCPDiscoverResult` 等 schema 与 `Limit` / `Offset` / `Forbidden` / `ServiceUnavailable` 组件。前端新增 `SettingsSection.tsx`（schema 驱动渲染，按 `kind` 选控件、按 `scope` 标生效方式、按 `source` 决定能否清除覆盖）、`/settings` 五个分页（路由即分页，可收藏可刷新停在原地）、`/sources`、`/reports`。
+- 测试结果：新增 `scripts/check-openapi.py`，拒绝重复键 + 校验 `$ref` 不悬空 + 路径参数都声明，输出 `37 条路径 / 40 个操作 / 30 个 schema / 107 处引用，无重复键、无悬空引用`。`tsc --noEmit` 干净。
+- 过程中的坑与修复：契约文件里 `/api/v1/tools/servers` 被定义了两次，YAML 解析器静默保留最后一个——这正是新脚本要拦的东西，写完当场就抓到一条。顺带修掉状态条上「最近刷新」用 `new Date()` 充数（永远显示「刚刚」，等于假指标），改为记录真实拉取时刻，并补上「N 项已保存待重启」徽标。
+
+### 2026-11-03 — [T8.10/T8.11] 手册与决策落档
+- 做了什么：`docs/USAGE.md` 按真实界面操作顺序重排：先认路（六个入口表）→ 设置中心五页逐页说明（模型 / 搜索 / MCP Hub / 执行 / 系统）→ 优先级与生效规则 → 密钥怎么存 → 才进入建任务、批准、看过程、拿报告 → 跨任务回看 → API。新增「在设置里点了保存但任务行为没变」「`secrets.available: false`」「改了主密钥后所有 Key 失效」等排查条目。`DECISIONS.md` 追加 29–35 七条（三层配置、优先级、加密与掩码、原子快照热更新、MCP 批准闸门、整批落库）。
+- 测试结果：文档中的每条命令与返回都是本轮实测过的输出，不是照着代码想象写的。
+- 遗留问题 / 假设：Dashboard 与任务详情页的 UI 由人工在改，本轮未触碰、也未截图验收；真实大模型质量的验收仍卡在缺可用 Key（用假 Key 试连得到 `401`，恰好证明了「密钥确实被解密并使用」与「失败如实上报」两件事）。
