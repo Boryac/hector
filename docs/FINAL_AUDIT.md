@@ -12,7 +12,7 @@
 
 | 项 | 值 |
 |---|---|
-| 开发包仓库 | `hector-researchos-codex-pack`，分支 `main`，HEAD `91f2f7c`（工作树干净） |
+| 开发包仓库 | `hector-researchos-codex-pack`，分支 `main`，HEAD `6bc315b`（工作树干净） |
 | 上游仓库 | `upstream/hector`，分支 `feature/hector-researchos`，HEAD `b91c4df`（工作树干净） |
 | 远程 | 两仓均未推送（按约定不推远程） |
 | 技术栈 | Go 1.25（后端，`internal/researchos` 18.4k 行）· Next.js 14 静态导出（前端 5.9k 行 TSX）· PostgreSQL 16 · gopdf（PDF） |
@@ -92,6 +92,7 @@
 |---|---|---|---|---|
 | `upstream/hector` | `feature/hector-researchos` | `b91c4df` | PDF 导出（report 包 + 字体 + API + 测试）、/system /stats 前端接入、ParseBlocks 重构、gofmt 欠账、ui-functional.mjs；23 文件 +1873/−96 | 干净 |
 | 开发包 | `main` | `91f2f7c` | verify.sh 重写、check-compose.py、compose 两份修复、openapi report.pdf、INTEGRATION_MATRIX、截图重截、PDF 内容校验脚本 | 干净（本轮文档提交前） |
+| 开发包 | `main` | `6bc315b` | 最终审计与账本同步：FINAL_AUDIT.md 新建、TASKS（T10.1–T10.8）、PROGRESS（T10 三条）、DECISIONS（36–38）、README 状态表、USAGE 导出段 | 干净 |
 
 ## G. 仍需用户提供的事项
 
