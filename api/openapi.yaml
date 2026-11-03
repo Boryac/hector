@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: Hector ResearchOS API
+  version: 1.0.0
+  description: REST + SSE contract for Hector ResearchOS V1.0. See API_CONTRACT.md and EVENT_PROTOCOL.md.
+servers:
+  - url: http://localhost:8080/api/v1
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK with component status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: {type: string}
+                  database: {type: string}
+                  worker: {type: string}
+  /research:
+    post:
+      summary: Create research task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [goal]
+              properties:
+                goal: {type: string}
+                depth: {type: string, enum: [quick, standard, deep], default: standard}
+                scope: {type: object}
+                max_agents: {type: integer, default: 4}
+                max_duration: {type: string}
+                enable_verification: {type: boolean, default: true}
+      responses:
+        '201': {description: Created}
+        '422': {description: Validation failed}
+    get:
+      summary: List research tasks
+      parameters:
+        - {name: status, in: query, schema: {type: string}}
+        - {name: page, in: query, schema: {type: integer, default: 1}}
+        - {name: page_size, in: query, schema: {type: integer, default: 20}}
+      responses:
+        '200': {description: List}
+  /research/{id}:
+    get:
+      summary: Get research task detail with workflow snapshot
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string}}
+      responses:
+        '200': {description: Detail}
+        '404': {description: Not found}
+  /research/{id}/pause:
+    post: {summary: Pause task, responses: {'200': {description: Paused}}}
+  /research/{id}/resume:
+    post: {summary: Resume task, responses: {'200': {description: Resumed}}}
+  /research/{id}/cancel:
+    post: {summary: Cancel task, responses: {'200': {description: Cancelled}}}
+  /research/{id}/approve:
+    post: {summary: Approve plan, responses: {'200': {description: Approved}}}
+  /research/{id}/events:
+    get:
+      summary: SSE event stream, supports Last-Event-ID and after_sequence
+      responses:
+        '200': {description: text/event-stream}
+  /research/{id}/sources:
+    get: {summary: List sources, responses: {'200': {description: Sources}}}
+  /research/{id}/evidence:
+    get: {summary: List evidence claims, responses: {'200': {description: Evidence}}}
+  /research/{id}/report:
+    get: {summary: Latest report, responses: {'200': {description: Report}}}
+  /tools:
+    get: {summary: List MCP tools, responses: {'200': {description: Tools}}}
