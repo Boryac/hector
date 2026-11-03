@@ -210,7 +210,14 @@ func (w *Worker) execute(ctx context.Context, node *domain.Node) {
 		Payload: map[string]any{"role": node.AgentRole, "error": truncate(msg, 300), "agent_id": agentID},
 	})
 
-	if node.Attempts < node.MaxAttempts {
+	if exec.IsPermanent(runErr) {
+		// 确定性失败不排重试：同样的输入再跑一遍结果不会变，
+		// 只会白等退避、多写几条失败事件。人工可用 retry 接口强制重跑。
+		if err := w.Store.FailNode(ctx, node.TaskID, node.ID, runID, truncate(msg, 500)); err != nil {
+			slog.Error("fail node failed", "err", err)
+		}
+		slog.Error("node failed permanently (no retry)", "task", node.TaskID, "node", node.ID, "err", msg)
+	} else if node.Attempts < node.MaxAttempts {
 		backoff := backoffFor(node.Attempts)
 		if err := w.Store.ScheduleNodeRetry(ctx, node.TaskID, node.ID, runID, truncate(msg, 500), backoff, node.Attempts); err != nil {
 			slog.Error("schedule retry failed", "err", err)

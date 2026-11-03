@@ -453,16 +453,15 @@ func Sentence(text string, terms []string, maxLen int) string {
 		for end < len(runes) && !isStop(runes[end]) {
 			end++
 		}
-		reachedEOF := end >= len(runes)
 		if end < len(runes) {
 			end++
 		}
 		s := CleanText(string(runes[begin:end]))
+		// 截断与补标点都会破坏「引文必须逐字可定位」：补一个句号，引文就不再是
+		// 原文的子串，验收脚本会判为无据（实测 Codex 词条就是这样被判掉的）。
+		// 所以这里只做纯 rune 截断，不追加任何字符。
 		if r := []rune(s); len(r) > maxLen {
-			s = string(r[:maxLen]) + "…"
-		} else if reachedEOF && !isStop(lastRune(s)) {
-			// 已到文本末尾且没有句末标点：补句号，避免结论以逗号/单词中断结尾。
-			s += "。"
+			s = string(r[:maxLen])
 		}
 		if n := len([]rune(s)); n >= 6 {
 			return s

@@ -151,7 +151,7 @@ func (e *Engine) Run(ctx context.Context, task *domain.Task, node *domain.Node, 
 	case domain.NodeTypeSynthesize:
 		out, tokens, err = e.runSynthesize(s)
 	default:
-		err = fmt.Errorf("未知节点类型 %q", node.Type)
+		err = Permanent(fmt.Errorf("未知节点类型 %q", node.Type))
 	}
 	return out, tokens, err
 }
@@ -166,7 +166,7 @@ func (e *Engine) runSearch(s *Session) (map[string]any, int, error) {
 		query = s.Node.Title
 	}
 	if query == "" {
-		return nil, 0, fmt.Errorf("search 节点缺少 query")
+		return nil, 0, Permanent(fmt.Errorf("search 节点缺少 query"))
 	}
 	s.Progress(5, "检索中")
 

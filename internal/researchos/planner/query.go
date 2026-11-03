@@ -109,6 +109,22 @@ func condenseCJK(goal string) string {
 	return out
 }
 
+// NodeSearchQuery 决定 search 节点实际提交给搜索引擎的检索式。
+//
+// 优先级：规划器给出的 query（LLM 模式，模型按子问题写的检索式）> 模板检索式。
+// 之前无论哪种规划模式都用 SearchQueryFor(goal, index)，导致 LLM 拆出来的子问题
+// 对检索没有任何影响——问得再细，检索式还是「目标 + 维度词」的老三样。
+func NodeSearchQuery(goal, planned string, index int) string {
+	if q := strings.TrimSpace(planned); q != "" {
+		// 上限 200 rune：防止模型输出整段话被当成检索式交出去。
+		if r := []rune(q); len(r) > 200 {
+			q = string(r[:200])
+		}
+		return q
+	}
+	return SearchQueryFor(goal, index)
+}
+
 // FallbackQuery 在首选检索式无结果时使用的简化检索式。
 //
 // 中文目标截断时回退到最近的空格边界，避免把词切成半截。

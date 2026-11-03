@@ -101,3 +101,5 @@ web/.next/
 web/outbuild/
 *.exe
 web/node_modules/
+web/tsconfig.tsbuildinfo
+web/.tsbuildinfo

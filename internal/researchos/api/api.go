@@ -10,9 +10,11 @@ import (
 	"context"
 	"crypto/subtle"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -36,6 +38,10 @@ type Server struct {
 	Version   string
 
 	requireApproval bool
+
+	// tickets 存放 SSE 一次性 ticket（短时、绑定任务、用完即销毁）。
+	tickets    *ticketStore
+	ticketOnce sync.Once
 }
 
 // Options 是 Server 构造参数。
@@ -79,6 +85,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /api/v1/research/{id}/nodes/{node_id}/retry", s.handleRetryNode)
 
 	mux.HandleFunc("GET /api/v1/research/{id}/events", s.handleEvents)
+	mux.HandleFunc("POST /api/v1/research/{id}/events/ticket", s.handleIssueEventTicket)
 	mux.HandleFunc("GET /api/v1/research/{id}/agents", s.handleListAgents)
 	mux.HandleFunc("GET /api/v1/research/{id}/agents/{agent_id}", s.handleGetAgent)
 	mux.HandleFunc("GET /api/v1/research/{id}/sources", s.handleListSources)
@@ -98,7 +105,7 @@ func (s *Server) Handler() http.Handler {
 		mux.Handle("GET /", http.FileServer(http.Dir(s.Cfg.WebDir)))
 	}
 
-	return withRecover(withCORS(s.Cfg.Addr, withAuth(s.Cfg.APIToken, mux)))
+	return withRecover(withCORS(s.Cfg.Addr, s.withAuth(mux)))
 }
 
 // ---------------------------------------------------------------------------
@@ -107,10 +114,15 @@ func (s *Server) Handler() http.Handler {
 
 // withAuth 校验 Bearer Token。身份固定为服务端配置的本地用户，绝不读取客户端传入的 user_id。
 //
-// 例外：`/api/v1/health` 与静态前端资源（非 /api/ 前缀）不校验。浏览器无法为页面本身
-// 附加 Authorization 头，静态产物只含已编译的 JS/CSS/HTML，不含任何任务数据；所有数据
-// 读取仍必须带 Token。Token 由前端在首次进入时读取并缓存到 localStorage。
-func withAuth(token string, next http.Handler) http.Handler {
+// 例外：
+//   - `/api/v1/health` 免鉴权（探活）；
+//   - 非 `/api/` 前缀的静态资源免鉴权（浏览器无法为页面附加请求头，静态产物不含任务数据）；
+//   - `GET /api/v1/research/{id}/events` 接受一次性 SSE ticket（查询参数 `ticket`）。
+//     ticket 由 `POST /api/v1/research/{id}/events/ticket` 用 Bearer Token 换取，
+//     短时、绑定单一任务、校验通过即销毁，**不能**用于其他任何接口。
+//
+// 查询串里不再接受长期 API Token：`?token=` 会把凭据写进浏览器历史、Referer 与反代日志。
+func (s *Server) withAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/health" {
 			next.ServeHTTP(w, r)
@@ -120,8 +132,27 @@ func withAuth(token string, next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
+
+		// SSE：ticket 通道。只有这一个路由接受 ticket，且 ticket 不能替代 Bearer Token。
+		if taskID, ok := eventsTaskID(r.URL.Path); ok {
+			if tk := strings.TrimSpace(r.URL.Query().Get("ticket")); tk != "" {
+				switch err := s.tstore().Consume(tk, taskID); {
+				case err == nil:
+					next.ServeHTTP(w, r)
+				case errors.Is(err, ErrTicketExpired):
+					writeErr(w, http.StatusUnauthorized, "sse_ticket_expired", "SSE ticket 已过期，请重新签发")
+				case errors.Is(err, ErrTicketScope):
+					// 403 而非 404：ticket 本身有效，只是不能用于这个任务。
+					writeErr(w, http.StatusForbidden, "sse_ticket_scope", "SSE ticket 与任务不匹配")
+				default:
+					writeErr(w, http.StatusUnauthorized, "sse_ticket_invalid", "SSE ticket 无效或已被使用")
+				}
+				return
+			}
+		}
+
 		got := bearerToken(r)
-		if subtle.ConstantTimeCompare([]byte(got), []byte(token)) != 1 {
+		if subtle.ConstantTimeCompare([]byte(got), []byte(s.Cfg.APIToken)) != 1 {
 			writeErr(w, http.StatusUnauthorized, "unauthorized", "缺少或无效的 API Token")
 			return
 		}
@@ -129,16 +160,14 @@ func withAuth(token string, next http.Handler) http.Handler {
 	})
 }
 
+// bearerToken 只从请求头取凭据。查询参数一律不接受：
+// 长期凭据一旦进 URL，就会沉淀在浏览器历史、Referer 和各级代理日志里。
 func bearerToken(r *http.Request) string {
 	if h := r.Header.Get("Authorization"); strings.HasPrefix(h, "Bearer ") {
 		return strings.TrimSpace(strings.TrimPrefix(h, "Bearer "))
 	}
 	if h := r.Header.Get("X-API-Token"); h != "" {
 		return strings.TrimSpace(h)
-	}
-	// EventSource 无法自定义 Header，允许查询参数传递（仅限 SSE 端点，且仍走同一校验）。
-	if strings.HasSuffix(r.URL.Path, "/events") {
-		return strings.TrimSpace(r.URL.Query().Get("token"))
 	}
 	return ""
 }

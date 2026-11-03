@@ -198,13 +198,14 @@ func (s *Server) materializeNodes(ctx context.Context, taskID string, plan *doma
 					input["question_id"] = in
 				}
 			}
-			// search 节点：question 用于展示，query 用于真实检索（英文技术词优先）。
+			// search 节点：question 用于展示，query 用于真实检索。
+			// 规划器（LLM 模式）给了检索式就用它，否则按目标套模板。
 			if n.Type == domain.NodeTypeSearch {
 				q := stringValue(input["question"])
 				if q == "" {
 					q = n.Title
 				}
-				input["query"] = planner.SearchQueryFor(task.Goal, searchIdx)
+				input["query"] = planner.NodeSearchQuery(task.Goal, st.Query, searchIdx)
 				input["fallback_query"] = planner.FallbackQuery(task.Goal)
 				searchIdx++
 			}

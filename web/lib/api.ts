@@ -71,9 +71,18 @@ export async function apiSend<T>(
   return handle<T>(res);
 }
 
-export function eventsURL(taskId: string, after: number): string {
-  const token = encodeURIComponent(getToken());
-  return `${API_BASE}/api/v1/research/${taskId}/events?after_sequence=${after}&token=${token}`;
+// SSE 不能带请求头，只能把凭据放 URL。为了不把长期 API Token 写进 URL
+// （浏览器历史 / Referer / 代理日志），先用 Bearer 换一张一次性 ticket，
+// 再用 ticket 建流。每次重连都重新签发。
+export async function issueEventTicket(taskId: string): Promise<{ ticket: string; expires_in: number }> {
+  return apiSend<{ ticket: string; expires_in: number }>(
+    'POST',
+    `/api/v1/research/${taskId}/events/ticket`,
+  );
+}
+
+export function eventsURL(taskId: string, after: number, ticket: string): string {
+  return `${API_BASE}/api/v1/research/${taskId}/events?after_sequence=${after}&ticket=${encodeURIComponent(ticket)}`;
 }
 
 // 导出走带 Authorization 的 fetch 再落盘：Token 不进 URL，不会留在浏览历史与代理日志里。

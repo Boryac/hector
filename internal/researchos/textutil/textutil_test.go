@@ -133,3 +133,27 @@ func TestWordCount(t *testing.T) {
 		t.Fatalf("空串应为 0，实际 %d", n)
 	}
 }
+
+// 抽出的句子必须是原文的逐字子串。
+//
+// 回归用例：Sentence 在文本末尾补了一个「。」，导致证据引文不再等于原文，
+// 验收脚本逐字比对时判为「引文未在原文找到」（Codex 词条、Generative AI 词条各中一条）。
+func TestSentenceIsVerbatimSubstring(t *testing.T) {
+	cases := []struct {
+		text  string
+		terms []string
+	}{
+		{"Codex is an AI coding agent developed by Open AI for software engineering tasks", []string{"codex"}},
+		{"向量数据库通过近似最近邻索引加速检索，召回率与延迟需要权衡", []string{"向量数据库"}},
+		{strings.Repeat("这是一段很长的正文，用于验证截断路径不会追加省略号。", 30), []string{"正文"}},
+	}
+	for _, c := range cases {
+		got := Sentence(c.text, c.terms, 120)
+		if got == "" {
+			t.Fatalf("未抽出句子：%q", c.text[:20])
+		}
+		if !strings.Contains(c.text, got) {
+			t.Fatalf("句子不是原文子串：%q 不在 %q 中", got, c.text[:40])
+		}
+	}
+}

@@ -155,6 +155,12 @@ type Subtask struct {
 	Outputs   []string `json:"outputs"`
 	DependsOn []string `json:"depends_on"`
 	NodeType  string   `json:"node_type,omitempty"`
+	// Query 是 search 节点提交给搜索引擎的检索式。
+	//
+	// 由 LLM 规划器填写时优先使用：模型知道每个子问题该查什么词，比按
+	// 「目标 + 固定维度词」套模板更贴近问题。启发式规划器留空，此时回退到
+	// SearchQueryFor 的模板检索式。
+	Query string `json:"query,omitempty"`
 }
 
 // Source 是一条检索/抓取到的资料。

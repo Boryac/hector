@@ -18,7 +18,8 @@ func (e *Engine) runSynthesize(s *Session) (map[string]any, int, error) {
 		return nil, 0, err
 	}
 	if len(claims) == 0 {
-		return nil, 0, fmt.Errorf("没有结论可生成报告")
+		// 确定性失败：没有结论这件事不会因为重试而改变，直接判定永久失败。
+		return nil, 0, Permanent(fmt.Errorf("没有结论可生成报告"))
 	}
 
 	srcMap := map[string]*domain.Source{}

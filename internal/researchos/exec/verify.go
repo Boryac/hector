@@ -66,19 +66,7 @@ func (e *Engine) runVerify(s *Session) (map[string]any, int, error) {
 		siteCount := len(sites)
 
 		for _, c := range cluster {
-			status := domain.ClaimUnverified
-			conf := 0.3
-			switch {
-			case conflict:
-				status = domain.ClaimConflicting
-				conf = 0.4
-			case siteCount >= 2:
-				status = domain.ClaimSupported
-				conf = math.Min(0.95, 0.6+0.1*float64(siteCount-1))
-			case siteCount == 1 && len(c.Evidence) > 0:
-				status = domain.ClaimPartial
-				conf = math.Min(0.55, 0.5)
-			}
+			status, conf := verificationStatus(conflict, siteCount, len(c.Evidence))
 			c.Status = status
 			c.Confidence = conf
 			c.SourceCount = siteCount
@@ -218,4 +206,25 @@ func detectConflict(values []float64) (conflict bool, note, group string) {
 			"conflict:" + textutil.Hash(fmt.Sprintf("%.4g-%.4g", sorted[0], sorted[len(sorted)-1]))[:10]
 	}
 	return false, fmt.Sprintf("多来源数值一致（相对差异 %.0f%%）", ratio*100), ""
+}
+
+// verificationStatus 把「冲突 / 独立站点数 / 证据条数」映射为结论状态与置信度。
+//
+// 抽成纯函数是为了能逐分支验证：冲突识别、双来源支持、单来源部分支持、无证据未验证
+// 四条路径都必须可达，不能只靠真实网页数据碰运气。
+//   - 同一指标出现显著分歧（数值相对差 > 25%） → conflicting（置信度 0.4）
+//   - 独立站点 ≥ 2                            → supported（0.6 起，每多一站 +0.1，上限 0.95）
+//   - 单一站点且有证据                        → partially_supported（0.5，上限 0.55）
+//   - 其余（无证据）                          → unverified（0.3）
+func verificationStatus(conflict bool, siteCount, evidenceCount int) (string, float64) {
+	switch {
+	case conflict:
+		return domain.ClaimConflicting, 0.4
+	case siteCount >= 2:
+		return domain.ClaimSupported, math.Min(0.95, 0.6+0.1*float64(siteCount-1))
+	case siteCount == 1 && evidenceCount > 0:
+		return domain.ClaimPartial, math.Min(0.55, 0.5)
+	default:
+		return domain.ClaimUnverified, 0.3
+	}
 }

@@ -157,3 +157,34 @@ func TestRuleBasedClaimsRespectsLimitAndGrounding(t *testing.T) {
 		}
 	}
 }
+
+// 四条验证分支都必须可达。此前这段判定内联在循环里，只有 partially_supported
+// 在真实数据上出现过，其余三条无人验证过是否真的能落到。
+func TestVerificationStatusBranches(t *testing.T) {
+	cases := []struct {
+		name     string
+		conflict bool
+		sites    int
+		evidence int
+		want     string
+		minConf  float64
+		maxConf  float64
+	}{
+		{"冲突优先于来源数", true, 3, 3, domain.ClaimConflicting, 0.4, 0.4},
+		{"双来源支持", false, 2, 2, domain.ClaimSupported, 0.6, 0.7},
+		{"三来源支持", false, 3, 3, domain.ClaimSupported, 0.7, 0.8},
+		{"来源极多仍封顶 0.95", false, 10, 10, domain.ClaimSupported, 0.9, 0.95},
+		{"单来源有证据", false, 1, 2, domain.ClaimPartial, 0.5, 0.55},
+		{"无来源无证据", false, 0, 0, domain.ClaimUnverified, 0.3, 0.3},
+		{"单站点但零证据算未验证", false, 1, 0, domain.ClaimUnverified, 0.3, 0.3},
+	}
+	for _, c := range cases {
+		got, conf := verificationStatus(c.conflict, c.sites, c.evidence)
+		if got != c.want {
+			t.Fatalf("%s：状态应为 %s，实际 %s", c.name, c.want, got)
+		}
+		if conf < c.minConf || conf > c.maxConf {
+			t.Fatalf("%s：置信度应在 [%.2f,%.2f]，实际 %.2f", c.name, c.minConf, c.maxConf, conf)
+		}
+	}
+}

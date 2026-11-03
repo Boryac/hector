@@ -57,7 +57,7 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 			"enabled":  s.Cfg.LLMEnabled(),
 			"provider": string(s.Cfg.LLMProvider),
 			"model":    s.Cfg.LLMModel,
-			"note":     noteIf(!s.Cfg.LLMEnabled(), "未配置 LLM_API_KEY，规划与抽取降级为本地确定性流程"),
+			"note":     noteIf(!s.Cfg.LLMEnabled(), "未配置 RESEARCHOS_LLM_API_KEY（或 RESEARCHOS_LLM_PROVIDER=none），规划与抽取降级为本地确定性流程"),
 		},
 		"search": map[string]any{
 			"providers": s.Search.Names(),

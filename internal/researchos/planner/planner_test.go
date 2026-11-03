@@ -232,3 +232,40 @@ func TestFallbackQueryCutsAtWordBoundary(t *testing.T) {
 		t.Fatalf("兜底检索式应为压缩检索式的前缀，实际 %q", fb)
 	}
 }
+
+// 规划器给出的检索式必须优先于模板。
+//
+// 回归用例：LLM 模式拆出的子问题对检索毫无影响——api 层一律用
+// SearchQueryFor(goal, index)，模型写的 query 被丢弃。
+func TestNodeSearchQueryPrefersPlanned(t *testing.T) {
+	goal := "对比 pgvector 与 Qdrant 的召回率"
+	if got := NodeSearchQuery(goal, "pgvector vs qdrant recall benchmark", 0); got != "pgvector vs qdrant recall benchmark" {
+		t.Fatalf("应采用规划器检索式，实际 %q", got)
+	}
+	if got := NodeSearchQuery(goal, "   ", 0); got != SearchQueryFor(goal, 0) {
+		t.Fatalf("空检索式应回退模板，实际 %q", got)
+	}
+	long := strings.Repeat("量", 260)
+	if got := NodeSearchQuery(goal, long, 0); len([]rune(got)) != 200 {
+		t.Fatalf("超长检索式应截断到 200 rune，实际 %d", len([]rune(got)))
+	}
+}
+
+// LLM 计划的 query 字段要能落到 domain.Subtask 上。
+func TestNormalizeKeepsPlannedQuery(t *testing.T) {
+	plan := &domain.Plan{
+		Goal: "g",
+		ResearchQuestions: []domain.Question{{ID: "q1", Question: "q1", Priority: "high"}},
+		Subtasks: []domain.Subtask{
+			{ID: "search_1", NodeType: domain.NodeTypeSearch, Query: "vector db recall", Inputs: []string{"q1"}},
+			{ID: "analyze_1", NodeType: domain.NodeTypeAnalyze, DependsOn: []string{"search_1"}},
+			{ID: "synthesize", NodeType: domain.NodeTypeSynthesize, DependsOn: []string{"analyze_1"}},
+		},
+	}
+	if err := Normalize(plan, Options{Depth: "quick"}); err != nil {
+		t.Fatalf("规范化失败：%v", err)
+	}
+	if plan.Subtasks[0].Query != "vector db recall" {
+		t.Fatalf("query 字段被丢弃：%q", plan.Subtasks[0].Query)
+	}
+}

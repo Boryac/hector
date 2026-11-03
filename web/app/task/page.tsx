@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WorkflowCanvas } from '@/components/WorkflowCanvas';
 import { Markdown } from '@/components/Markdown';
-import { apiGet, apiSend, ApiError, downloadReport, eventsURL } from '@/lib/api';
+import { apiGet, apiSend, ApiError, downloadReport, eventsURL, issueEventTicket } from '@/lib/api';
 import { eventMeta, statusText } from '@/lib/event-map';
 import type {
   AgentExecution, Claim, EventItem, Node, Report, Source, TaskDetail,
@@ -52,9 +52,20 @@ function TaskView() {
     let stopped = false;
     let retry: ReturnType<typeof setTimeout> | null = null;
 
-    const connect = () => {
+    const connect = async () => {
       if (stopped) return;
-      es = new EventSource(eventsURL(id, lastSeq.current));
+      // 先用 Bearer 换一次性 ticket：EventSource 无法带请求头，
+      // 但绝不能让长期 API Token 出现在 URL 里。
+      let ticket: string;
+      try {
+        ticket = (await issueEventTicket(id)).ticket;
+      } catch {
+        setLive(false);
+        if (!stopped) retry = setTimeout(connect, 2500);
+        return;
+      }
+      if (stopped) return;
+      es = new EventSource(eventsURL(id, lastSeq.current, ticket));
       es.onopen = () => setLive(true);
       es.onerror = () => {
         setLive(false);
@@ -88,7 +99,7 @@ function TaskView() {
       }
     };
 
-    connect();
+    void connect();
     return () => {
       stopped = true;
       if (retry) clearTimeout(retry);

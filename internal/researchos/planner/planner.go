@@ -142,6 +142,7 @@ const plannerSystemPrompt = `你是 Hector ResearchOS 的研究规划器（Plann
   "subtasks": [{
      "id":"search_1","title":"string","agent_role":"researcher|analyst|verifier|synthesizer",
      "node_type":"search|analyze|verify|synthesize",
+     "query":"仅 search 节点需要：可直接提交给搜索引擎的关键词串",
      "inputs":["string"],"outputs":["string"],"depends_on":["string"]
   }],
   "risks_and_gaps": ["string"]
@@ -153,7 +154,8 @@ const plannerSystemPrompt = `你是 Hector ResearchOS 的研究规划器（Plann
 3. 若开启验证，必须有且仅有 1 个 node_type=verify 节点，依赖全部 analyze 节点。
 4. 必须有且仅有 1 个 node_type=synthesize 节点，位于最后。
 5. 节点 id 只能由字母、数字、下划线组成，且全图唯一；依赖必须构成无环图。
-6. 研究问题控制在 2-6 个，每个问题对应一组 search+analyze。`
+6. 研究问题控制在 2-6 个，每个问题对应一组 search+analyze。
+7. 每个 search 节点的 query 必须是直接可提交搜索引擎的检索式（名词性关键词，不要整句提问），且不同 search 节点的 query 应覆盖不同角度。`
 
 // Plan 调用模型生成计划并校验。
 func (l *LLM) Plan(ctx context.Context, goal string, opts Options) (*domain.Plan, llm.Usage, error) {
