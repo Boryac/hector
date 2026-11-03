@@ -53,6 +53,8 @@ export interface Node {
   progress: number;
   progress_text?: string;
   tokens_total: number;
+  created_at?: string;
+  updated_at?: string;
   started_at?: string;
   completed_at?: string;
 }
@@ -108,22 +110,23 @@ export interface EventItem {
 export interface Source {
   id: string;
   task_id: string;
-  node_id: string;
+  task_title?: string;
+  node_id?: string;
   url: string;
-  normalized_url: string;
+  normalized_url?: string;
   title: string;
   site: string;
   provider: string;
   snippet: string;
-  excerpt: string;
-  content_hash: string;
-  http_status: number;
+  excerpt?: string;
+  content_hash?: string;
+  http_status?: number;
   credibility: string;
   status: string;
   error?: string;
   fetched_at?: string;
   created_at: string;
-  evidence_count: number;
+  evidence_count?: number;
 }
 
 export interface Evidence {
@@ -187,7 +190,112 @@ export interface AgentExecution {
   started_at: string;
   duration_ms: number;
   token_usage: Record<string, number>;
+  tool_calls?: Array<Record<string, unknown>>;
   error?: string;
+}
+
+export interface SettingsEffective {
+  max_agents: number;
+  workers: number;
+  search_providers: string[];
+  search_results: number;
+  node_timeout: string;
+  task_timeout: string;
+  require_approval: boolean;
+  planner_mode: string;
+  respect_robots: boolean;
+}
+
+export interface SettingsResponse {
+  runtime: Record<string, unknown>;
+  effective: SettingsEffective;
+  credentials: Record<string, string>;
+}
+
+export interface SettingsFieldData {
+  key: string;
+  label: string;
+  help?: string;
+  kind: string;
+  scope: string;
+  env: string;
+  value: unknown;
+  source: string;
+  configured: boolean;
+  default?: unknown;
+  min?: number;
+  max?: number;
+  options?: string[];
+  unit?: string;
+  editable: boolean;
+}
+
+export interface SettingsSectionData {
+  id: string;
+  title: string;
+  description: string;
+  fields: SettingsFieldData[];
+}
+
+export interface SettingsSnapshot {
+  sections: SettingsSectionData[];
+  secrets: { available: boolean; key_source: string; cipher: string };
+  revision: number;
+  last_error?: string;
+  precedence: string;
+  restart_needed: boolean;
+  pending_restart?: string[];
+}
+
+export interface BuiltinTool {
+  name: string;
+  description: string;
+  risk: string;
+}
+
+export interface ToolCall {
+  id: string;
+  task_id?: string;
+  node_id?: string;
+  tool: string;
+  status?: string;
+  duration_ms?: number;
+  created_at?: string;
+  payload?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+export interface MCPServer {
+  id: string;
+  name: string;
+  command: string;
+  args?: string[] | null;
+  env?: Record<string, string> | null;
+  status: string;
+  approved: boolean;
+  created_at?: string;
+}
+
+export interface ToolsResponse {
+  servers: MCPServer[];
+  builtin: BuiltinTool[];
+  calls: ToolCall[];
+}
+
+export interface EventsResponse {
+  items: EventItem[];
+  latest_sequence: number;
+  task_status: string;
+}
+
+export interface ReportVersion {
+  version: number;
+  created_at?: string;
+}
+
+export interface ReportResponse {
+  report: Report;
+  versions: ReportVersion[];
 }
 
 export interface Health {
