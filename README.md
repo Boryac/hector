@@ -12,15 +12,18 @@
 
 | 能力 | 状态 | 证据 |
 |---|---|---|
-| Go 构建 / 全量单测 | ✅ 通过 | `go build ./...`；`go test ./...` 全绿（新增 10 个测试文件） |
+| Go 构建 / 全量单测 | ✅ 通过 | `go build ./...`；`go test ./...` 全绿（12 个包有测试，含 `-race` 跑 api 包） |
 | 数据库迁移 | ✅ 通过 | PostgreSQL 16.2 实跑，`schema_migrations` 记 `0001_init.sql` |
-| 端到端研究任务 | ✅ 通过 | 6/6 节点、报告生成、引用可回溯（真实外部检索） |
-| SSE 实时事件 | ✅ 通过 | `sequence` 连续；`Last-Event-ID` / `?after_sequence=` 可续接 |
+| 端到端研究任务 | ✅ 通过 | 8/8 节点、18 条证据逐字落地来源原文（`scripts/verify-citations.py` PASS） |
+| SSE 实时事件 | ✅ 通过 | `sequence` 连续无空洞；`Last-Event-ID` / `?after_sequence=` 续接实测；凭据改一次性 ticket |
+| SSE 凭据安全 | ✅ 通过 | ticket 一次性 / 60s 过期 / 绑任务 / 仅 events 端点，`?token=` 通道已删除，13 条 ticket 测试 + `-race` |
 | 前端构建 | ✅ 通过 | Next.js 静态导出 3 个路由：`/`、`/task/`、`/_not-found` |
 | 前端页面视觉 | ⚠️ **未截图验证** | 本机无法启动 Chrome/Edge（连 `--version` 都无输出），需按 `scripts/screenshot.sh` 人工截图 |
-| 真实 LLM 调用 | ⚠️ **未验证** | 未配 API Key，当前走本地确定性流程；UI 与报告标注 `heuristic` |
+| LLM 链路（客户端 → 规划 → 抽取 → 报告） | ✅ 已验证（用本地测试替身） | `planner_mode=llm`、`llm_used=true`、编造引文与伪造 `source_id` 被丢弃（`dropped_ungrounded=2`/次） |
+| 真实大模型质量 | ⚠️ **未验证** | 无 API Key。链路通 ≠ 效果好，报告质量仍需真实模型验收 |
 | 真实检索 | ✅ 已接通 | GitHub / Hacker News / Wikipedia / Bing 免密钥可用；Tavily·SerpAPI·Brave 需 Key |
 | 并发 5 任务 | ✅ 实测 | 数据见 [`docs/benchmark.md`](docs/benchmark.md) |
+| 中断恢复 / 节点重试 | ✅ 实测 | 强杀 Worker → 租约过期 → 接管完成，8/8 节点、已完成节点 attempts 不变 |
 | Docker Compose | ⚠️ **未在本机验证** | 本机未装 Docker；`docker-compose.yaml` 与 `Dockerfile.researchos` 已交付 |
 | 多用户隔离 | 🚫 **禁用** | A2A Issue #2 核心链路已修，会话归属校验未做，按决策保持单用户 |
 
@@ -138,10 +141,14 @@ hector-researchos-codex-pack/
 | `RESEARCHOS_DATABASE_URL` | 必填，PostgreSQL DSN | — |
 | `RESEARCHOS_API_TOKEN` | 必填（`serve`/`all` 强制），Bearer Token | — |
 | `RESEARCHOS_LOCAL_USER` | 服务端唯一身份，客户端不可指定 | `local-user` |
-| `RESEARCHOS_LLM_PROVIDER` / `_API_KEY` / `_MODEL` | 留空则走启发式流程 | `none` |
+| `RESEARCHOS_LLM_PROVIDER` | `openai` / `anthropic` / `none`；`none` 走本地确定性流程 | `none` |
+| `RESEARCHOS_LLM_API_KEY` | 模型服务密钥；为空时即使 provider 填了也不启用 | 空 |
+| `RESEARCHOS_LLM_MODEL` / `RESEARCHOS_LLM_BASE_URL` | 模型名 / 自建网关地址（OpenAI 兼容） | 空 |
 | `RESEARCHOS_SEARCH_PROVIDERS` | `github,hackernews,wikipedia,bing,tavily,serpapi,brave` | `bing,github,wikipedia` |
 | `RESEARCHOS_WORKERS` / `MAX_AGENTS` | 并发 Worker 数 / 单任务 Agent 上限 | `4` / `4` |
 | `RESEARCHOS_REQUIRE_APPROVAL` | 规划后是否需人工批准 | `true` |
+| `RESEARCHOS_ADDR` | 监听地址 | `:8080` |
+| `RESEARCHOS_SSE_TICKET_TTL` | SSE 一次性 ticket 有效期（上限 10 分钟） | `60s` |
 | `RESEARCHOS_WEB_DIR` | 前端静态产物目录 | 空（不托管 UI） |
 
 `.env.researchos` 在启动时自动加载，且**不覆盖**已存在的 shell 变量。

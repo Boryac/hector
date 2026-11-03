@@ -79,10 +79,15 @@ fi
 # 于是「杀死 Worker」根本没发生，恢复测试自然等不到结果。
 # 这里统一用 ps -W 里的 WINPID 定位真实进程，并用 taskkill //F //PID 终止。
 winpids() { ps -W 2>/dev/null | awk '/bin\/researchos/{print $4}' | sort -n; }
-new_winpid() { # $1 = 启动前快照
-  local after
-  after=$(winpids)
-  comm -13 <(printf '%s\n' "$1") <(printf '%s\n' "$after") | tail -1
+new_winpid() { # $1 = 启动前快照；返回快照里没有的最小 WINPID
+  # 不用 comm：它要求两份输入都按字典序排好，而 ps 的 PID 是变长的，
+  # sort -n 出来的顺序在 comm 看来不是字典序（实测报 "file 2 is not in sorted order"），
+  # 于是 diff 结果错位、抓到的可能是 serve 的 PID。这里改成直接做集合差。
+  local p
+  for p in $(winpids); do
+    printf '%s\n' "$1" | grep -qx "$p" || { printf '%s\n' "$p"; return 0; }
+  done
+  return 1
 }
 alive_winpid() { winpids | grep -qx "$1"; }
 kill_winpid() {

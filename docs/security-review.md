@@ -129,6 +129,46 @@ ok  github.com/verikod/hector/pkg/server
 
 ---
 
+### 1.8 SSE 的凭据泄露面与 ticket 方案（2026-11-03）
+
+**问题**：浏览器 `EventSource` 无法设置请求头，早期实现把**长期 API Token** 放进 `?token=`。
+
+**风险不在「被猜中」，而在「被沉淀」**：
+
+| 泄露面 | 后果 |
+|---|---|
+| 浏览器历史 / 用户复制分享地址 | Token 长期有效，等于交付了全部接口的读写权限 |
+| `Referer` 头 | 页面加载第三方资源（统计、字体、图片）时把带 Token 的 URL 发出去 |
+| 反向代理 / 网关 access log | URL 默认全量记录，日志留存期 = 泄露暴露期 |
+| 前端崩溃上报、错误截图 | URL 随上下文外泄 |
+
+对比之下，Bearer 头不会进 URL，也不会被 `Referer` 带出——这也是「Token 不进 URL」被定为硬规则的原因。
+
+**方案**：前端先用 Bearer Token 调 `POST /api/v1/research/{id}/events/ticket` 换一张 ticket，再用 `?ticket=` 建流。
+
+| 性质 | 实现 | 验证方式 |
+|---|---|---|
+| 短时 | `RESEARCHOS_SSE_TICKET_TTL` 默认 60s，配置层强制上限 10 分钟 | 用 2s TTL 实例实测：签发后 3s 使用 → `401 sse_ticket_expired` |
+| 受限（任务） | 签发时绑定 `task_id`，校验时比对 | 用 A 任务的 ticket 请求 B 任务 → `403 sse_ticket_scope` |
+| 受限（端点） | 只有 `GET /api/v1/research/{id}/events` 接受 ticket | ticket 调 `/research/{id}`、`/report.md`、`/settings` → 全部 `401 unauthorized` |
+| 一次性 | 校验通过即 `delete`，并发下只允许一个赢家 | 重放同一 ticket → `401 sse_ticket_invalid`；64 并发消费测试恰好 1 成功 |
+| 不可猜 | 32 字节 `crypto/rand` → base64url 43 字符 | 熵测试 200 次无重复、长度与字符集校验 |
+| 不存明文 | 内存表 key 为 sha256(ticket) | 单测直接检查表内不存在明文 key |
+| 抗刷 | 单任务未消费上限 16，超出淘汰最早过期项 | 签发 26 张后 `Len() <= 16` |
+| 无兼容通道 | `?token=` 解析逻辑**已删除** | 传 `?token=<真实 Token>` → `401 unauthorized` |
+
+**旧通道是删掉而不是保留兼容**：留着就等于风险还在，只是「推荐不用」。
+
+**剩余风险（已知，不粉饰）**：
+
+1. ticket 只在**建立连接时**校验一次。连接建立后长连接持续推送，期间不会复验——这是所有 ticket/WebSocket 方案的共同取舍。缓解：ticket 60s 内不过期即被使用，泄露的是一条**已经建立**的流的读取权，不能换成新连接。
+2. ticket 表在**进程内存**。多副本部署需要会话粘滞或换共享存储；本机单用户模式不涉及，已在 `DECISIONS.md` 第 22 条写明，不装作支持水平扩展。
+3. 签发接口本身没有独立限流。当前依赖 Bearer 鉴权 + 单任务 16 张上限；对外暴露前应加限流。
+
+**对应测试**：`internal/researchos/api/ticket_test.go`（13 条，含并发与熵）、`auth_test.go`（11 条，含「长期 Token 走查询串必须被拒」）。全部通过 `go test -race`。
+
+---
+
 ## 2. MCP 工具越权
 
 | 检查项 | 现状 | 结论 |

@@ -159,3 +159,45 @@
 - 做了什么：按界面真实点击顺序写使用手册（确认在跑 → 打开界面 → 建任务 → 批准 → 看五个 Tab → 导出报告 → API 调用 → FAQ → 停止清理）。README 增加入口与文档索引条目。
 - 事实核对：写完后逐条对照代码核了三个容易写错的点并改掉——端口变量是 `RESEARCHOS_ADDR`（不是 `RESEARCHOS_PORT`）、LLM 变量是 `RESEARCHOS_LLM_API_KEY` + `RESEARCHOS_LLM_PROVIDER`、来源状态是 `robots_blocked`（不是 `robots_denied`）；补充 `RESEARCHOS_REQUIRE_APPROVAL` 对批准闸门的控制，以及 `RESEARCHOS_ADDR` 改端口的方式。
 - 遗留问题 / 假设：手册里的耗时区间（quick 10–20s、standard 15–40s）取自本机此前实测任务，非本轮重新采集；外部检索配额波动时会明显偏长，已在正文标注为「本机实测」。
+
+### 2026-11-03 — [T7.1] 统一 LLM 配置变量名
+- 做了什么：重写 `scripts/bootstrap.sh`（原来生成的模板是 `DATABASE_URL` / `LLM_API_KEY` / `SEARCH_PROVIDER` 一整套无前缀变量名，服务一个都读不到，等于给了份废配置）；健康检查文案改为 `RESEARCHOS_LLM_API_KEY`；README 配置表把 `_API_KEY` / `_MODEL` 的简写拆成显式全名。
+- 测试结果：`bash scripts/bootstrap.sh` 实测输出 go 1.27.3 / node v22.22.2 / psql 缺失提示，`.env.researchos` 已存在时保持不变；全仓 grep 复查无残留（排除抓取快照与上游 `pkg/` 的 `OPENAI_API_KEY`）。
+- 过程中的坑与修复：脚本第一版 `check go "--version"` 传参错误（go 用 `go version`），实测报 `flag provided but not defined: -version`，改为按命令全串执行。
+- 下一步：SSE ticket。
+
+### 2026-11-03 — [T7.2] SSE 一次性 ticket
+- 做了什么：新增 `api/ticket.go`（进程内表、sha256 存 key、TTL、单任务上限 16、一次性、绑任务）；`withAuth` 改为方法并加入 ticket 通道，`bearerToken` 彻底不再读查询串；新增 `POST /api/v1/research/{id}/events/ticket`；配置项 `RESEARCHOS_SSE_TICKET_TTL`（默认 60s，强制上限 10 分钟）；前端 `eventsURL(taskId, after, ticket)`，每次（重）连前重新签发。
+- 测试结果：`go test -race ./internal/researchos/api/...` 24 条全绿（ticket 13 + 鉴权 11）。线上一串实测：签发 200（43 字符）→ 建流 200 → 重放 401 `sse_ticket_invalid` → 跨任务 403 `sse_ticket_scope` → 2s TTL 实例等 3s 后 401 `sse_ticket_expired` → 当 Bearer 调普通接口 401 → `?token=` 401。
+- 过程中的坑与修复：`auth_test.go` 原来断言「SSE 接受 query token」，与本轮目标相反——改写为「长期 Token 走查询串必须被拒」，并补「ticket 不能被非 events 接口消耗」的断言。
+- 下一步：LLM 链路验证。
+
+### 2026-11-03 — [T7.3] LLM 链路验证（无真实 Key）
+- 做了什么：新增 `scripts/mock-llm.py` 作为本地 OpenAI 兼容测试替身，按提示词类型返回预置 JSON，并**故意**注入一条编造引文 + 一条不存在的 `source_id` 来检验引擎的校验是否真的生效。以 `RESEARCHOS_ADDR=127.0.0.1:8082 + LLM_PROVIDER=openai + LLM_BASE_URL=.../v1` 起第二个实例跑任务 `b16455ba`。
+- 测试结果：`planner_mode=llm`；3 个 analyze 节点 `llm_used=true`、`dropped_ungrounded=2`/次（编造与伪造各 1 条被丢）、`kept=6/4/4`；verify 收 14 条、synthesize 出报告、报告 model 标注 `mock-1`；8/8 节点 completed，18s；报告中不含编造引文与伪造 source_id。补 `llm_test.go` 8 条，`llm` 覆盖率 0 → 94.5%。
+- 过程中的坑与修复：发现 LLM 规划的 `query` 被 api 层丢弃（检索式永远来自模板），新增 `domain.Subtask.Query` + `planner.NodeSearchQuery` 修正，并补 2 条回归用例。
+- 遗留问题 / 假设：没有真实 Key，**真实模型质量未验证**；测试替身只能证明链路通。
+- 下一步：复杂任务与引用验收。
+
+### 2026-11-03 — [T7.4] 复杂研究任务与引用可追溯性
+- 做了什么：跑 `ee9d550d`（standard + 交叉验证，目标「对比 pgvector / Qdrant / Milvus 在千万级向量下的召回率与写入吞吐」）；新增 `scripts/verify-citations.py` 做五项检查（引文逐字落地、来源不悬空、编号闭合、冲突披露自洽、核心发现可回溯）。
+- 测试结果：8/8 节点、18 条结论 / 18 条证据、18s；验收 PASS：18/18 逐字落地、18 个编号一一对应、核心发现 10/10 可回溯。
+- 过程中的坑与修复（真缺陷）：`textutil.Sentence` 在文本末尾补「。」、截断补「…」，引文因此不再等于原文；旧样本 7 条证据里 2 条被判无据（Codex、Generative AI 词条）。去掉合成字符，改纯 rune 截断，补 `TestSentenceIsVerbatimSubstring`。
+- 下一步：交叉验证集成测试。
+
+### 2026-11-03 — [T7.5] 交叉验证与冲突识别（集成测试）
+- 做了什么：真实网页数据几乎不会给出两条字面相近的结论，`supported` / `conflicting` 两条分支长期没有实际到达过。新增 `exec/verify_integration_test.go`：连真实库，造 4 个来源 + 5 条结论（双来源同事实、同指标冲突数值、无证据），直接跑 `runVerify` 再读回状态。`RESEARCHOS_TEST_DSN` 未设时跳过，不影响常规测试。
+- 测试结果：`clusters=3 supported=2 conflicting=2 unverified=1`，冲突双方共享冲突组 `conflict:7733b8e641`；四条结论状态与预期一一对应。
+- 过程中的坑与修复：`UpsertSource` / `InsertClaim` / `InsertEvidence` 都不自己生成主键，测试里没填 ID 直接撞 pkey；`Session` 的 `store` 字段未导出，构造字面量后 `Progress` 空指针 panic——改为同包注入真实 store。
+- 下一步：重试语义与恢复。
+
+### 2026-11-03 — [T7.6] 中断恢复、节点重试、事件续传
+- 做了什么：重跑故障注入；修 `fault-injection.sh` 的 PID 识别；把验证状态判定抽成 `verificationStatus` 并补 7 条分支用例；新增 `exec.PermanentError` 让确定性失败不重试。
+- 测试结果：故障注入 PASS（8/8 节点，杀前已完成的 `search_3`/`analyze_3` attempts 仍为 1，任务在 worker 重启后 5s 收敛 completed）。事件续接：`?after_sequence=10` → id 11 起、`Last-Event-ID: 50` → 51 起，116 条事件序列无空洞、`event_id` 唯一。重试：修复前 `synthesize` 确定性失败 attempts=3，修复后 attempts=1；人工 retry 202 → attempts=2 再次失败；对已完成任务节点 retry → 409 `invalid_state`。
+- 过程中的坑与修复：`new_winpid()` 用 `comm -13` 做集合差，但 `comm` 要求字典序、`winpids` 用 `sort -n`，实测报 `comm: file 2 is not in sorted order` 并抓错 PID（worker2 抓到的竟然是 serve 的 PID）；改为直接遍历做集合差。
+- 下一步：文档与提交。
+
+### 2026-11-03 — [T7.7] 手册、契约与安全文档同步
+- 做了什么：`docs/USAGE.md` 增加 ticket 四条硬规则表、ticket 报错排查、LLM 开启后三处可见变化、验收脚本清单（`verify-citations.py` / `load-test.sh` / `fault-injection.sh` / `mock-llm.py`）；`api/openapi.yaml` 加 ticket 端点与 401/403 语义；`docs/security-review.md` 新增 §1.8（泄露面、方案、验证表、剩余风险）；`ARCHITECTURE.md` §5 重写；README 状态表按本轮实测改（含「LLM 链路已验证 / 真实质量未验证」的区分）。
+- 测试结果：`python -c "yaml.safe_load(openapi.yaml)"` 通过，25 条 path、ticket 端点与 events 参数可读；`tsc --noEmit` 与 `next build` 通过。
+- 遗留问题 / 假设：真实大模型质量、Docker、浏览器截图仍是未验证项，已在 README 与 `docs/benchmark.md` §3.1 标注。

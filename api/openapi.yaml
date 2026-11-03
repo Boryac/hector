@@ -237,11 +237,22 @@ paths:
         - 显式：`?after_sequence=<n>`
 
         `?format=json` 时改为一次性返回 JSON 数组（便于脚本与测试）。
+
+        **鉴权**：与其他接口一样接受 `Authorization: Bearer <API Token>`。浏览器
+        EventSource 无法设置请求头，因此额外接受一次性 SSE ticket
+        （`?ticket=<ticket>`，由 `POST /api/v1/research/{id}/events/ticket` 签发）。
+        ticket 短时（默认 60s）、绑定单一任务、校验通过即销毁，**不能**用于其他接口。
+
+        `?token=` 传递长期 API Token 的旧方式已移除：那会让长期凭据进入浏览器历史、
+        Referer 与代理访问日志。
       parameters:
         - { $ref: '#/components/parameters/TaskID' }
         - { name: after_sequence, in: query, schema: { type: integer, default: 0 } }
         - { name: format, in: query, schema: { type: string, enum: [sse, json], default: sse } }
-        - { name: token, in: query, description: 仅 SSE 通道可用, schema: { type: string } }
+        - name: ticket
+          in: query
+          description: 一次性 SSE ticket（仅本端点接受；不能替代 Bearer Token）
+          schema: { type: string }
       responses:
         '200':
           description: 事件流或事件数组
@@ -254,6 +265,48 @@ paths:
                 properties:
                   items: { type: array, items: { $ref: '#/components/schemas/Event' } }
                   last_sequence: { type: integer }
+        '401':
+          description: 凭据无效；ticket 场景下 code 为 `sse_ticket_invalid` / `sse_ticket_expired`
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: ticket 与任务不匹配（code `sse_ticket_scope`）
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/research/{id}/events/ticket:
+    post:
+      tags: [events]
+      summary: 签发一次性 SSE ticket
+      description: |
+        用 Bearer Token 换取一张短时、绑定本任务的一次性 ticket，供浏览器
+        EventSource 建立事件流（EventSource 无法设置请求头）。
+
+        - 有效期：`RESEARCHOS_SSE_TICKET_TTL`，默认 60s，强制上限 10 分钟；
+        - 作用域：仅 `GET /api/v1/research/{id}/events`，且仅对签发时的 `{id}` 有效；
+        - 一次性：校验通过即销毁，无法重放；
+        - 熵：32 字节 `crypto/rand`，base64url 43 字符；服务端只存 sha256 摘要。
+
+        前端应在**每次**建流（含断线重连）前重新签发，不要缓存复用。
+      parameters:
+        - { $ref: '#/components/parameters/TaskID' }
+      responses:
+        '200':
+          description: 签发成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ticket, task_id, expires_at, expires_in]
+                properties:
+                  ticket: { type: string, example: lviUqD4EZad-VR3nhSWkkbQfm6PUU4XGODC1Jib_wKQ }
+                  task_id: { type: string, format: uuid }
+                  expires_at: { type: string, format: date-time }
+                  expires_in: { type: integer, description: 有效秒数, example: 60 }
+                  scope: { type: string, description: 使用范围说明 }
         '404': { $ref: '#/components/responses/NotFound' }
 
   /api/v1/research/{id}/sources:

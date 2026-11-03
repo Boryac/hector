@@ -68,24 +68,28 @@ search 节点，共 12 路外部请求并发打向 bing/wikipedia，多路触发
 | 包 | 覆盖率 | 说明 |
 |---|---|---|
 | `dag` | 96.2% | 依赖就绪、租约、退避、暂停闸门 |
+| `llm` | 94.5% | 请求形状、JSON 模式、围栏剥离、错误截断、上下文取消 |
 | `domain` | 90.5% | 状态机全矩阵、事件类型 |
-| `config` | 79.8% | 环境变量解析、默认值、非法值 |
+| `config` | 78.4% | 环境变量解析、默认值、非法值、TTL 上下限 |
 | `report` | 76.7% | 章节渲染、引用编号、争议列表 |
-| `textutil` | 72.8% | 正文清洗、模板剥离、截断、URL 规范化 |
-| `planner` | 72.5% | 计划归一化、环检测、检索式构造 |
+| `textutil` | 74.0% | 正文清洗、模板剥离、截断、逐字子串保证 |
+| `planner` | 73.3% | 计划归一化、环检测、检索式优先级 |
 | `fetch` | 37.8% | robots、SSRF 守卫、JSON 渲染 |
-| `exec` | 28.9% | 结论可用性判定、相关性、交叉验证 |
+| `exec` | 31.3% | 结论闸门、相关性、交叉验证状态映射、永久错误分类 |
 | `search` | 19.7% | 去重、降级、语言路由、市场选择 |
-| `api` | 3.7% | 仅鉴权与 query token 边界 |
-| `db` / `llm` / `store` / `worker` | 0.0% | 无测试文件 |
+| `api` | 12.7% | 鉴权中间件、SSE ticket 全生命周期（新增 24 条） |
+| `db` / `store` / `worker` | 0.0% | 以端到端与故障注入验证，见 §2.1 |
 
 ### 2.1 为什么 api / store / worker 覆盖率低
 
-- `api`：24 个路由处理器需要真实数据库连接才能跑通；当前只有 `auth_test.go`
-  用 `httptest` 覆盖鉴权分支。用 sqlmock 造一个假库只能覆盖分支形状，
-  验证不了 SQL 语义，因此没有为了数字堆这类测试。
+- `api`：25 个路由处理器需要真实数据库连接才能跑通。当前覆盖的是**不依赖数据库**
+  的部分：鉴权中间件与 SSE ticket 状态机（ticket 是独立内存结构，可以完整测）。
+  用 sqlmock 造假库只能覆盖分支形状、验证不了 SQL 语义，所以没有为数字堆这类测试。
 - `store` / `worker` / `db`：都是 `pgx` + `sqlc` 生成代码的直接封装。
-  真实语义靠 §1 的端到端压测与 `scripts/fault-injection.sh` 验证，而不是单测。
+  真实语义靠 §1 的端到端压测、`scripts/fault-injection.sh` 与
+  `exec` 包的集成测试（`RESEARCHOS_TEST_DSN=...` 直连真实库跑 verify 节点）验证。
+- `worker` 的重试分支不是靠覆盖率证明的：永久错误（`exec.IsPermanent`）走「失败不重试」，
+  实测把 `synthesize` 的 attempts 从 3 次降到 1 次。
 - `go test -cover` 对这四个包会报 `cmd/internal/cov is not in std`（Go 1.27.3
   工具链与 `go.mod` 声明的 1.24 不一致时的已知问题），`go test ./...` 本身正常。
 
@@ -101,14 +105,20 @@ search 节点，共 12 路外部请求并发打向 bing/wikipedia，多路触发
 | 报告导出 | `report.md` 200 / `text/markdown`；`report.html` 200 / `text/html` | `GET /api/v1/research/{id}/report.md` |
 | 报告体积 | 正常任务 8–15KB；异常样本曾达 284KB（书单罗列结论导致，修复后回落） | 实测对比 |
 | 静态页面免鉴权 | `/` 200、`/task/` 200；`/api/v1/research` 无 token → 401 | `curl -i` |
-| 单测规模 | 12 个包 100+ 用例，`go test ./internal/researchos/...` 全绿 | 见 §2 |
+| 单测规模 | 13 个包 140+ 用例，`go test ./internal/researchos/...` 全绿 | 见 §2 |
+| SSE ticket 全生命周期 | 签发 200 → 建流 200 → 重放 401 → 跨任务 403 → 过期 401 → 当 Token 用 401 | 实测 curl 序列，见 `docs/security-review.md` §1.8 |
+| 事件断点续接 | `?after_sequence=10` 从 id=11 开始；`Last-Event-ID: 50` 从 id=51 开始 | 116 条事件、序列严格递增无空洞、`event_id` 唯一 |
+| 报告引用可追溯性 | 18 条证据全部逐字落地来源原文，18 个编号一一对应，10 条核心发现全部可回溯 | `scripts/verify-citations.py --task ee9d550d` |
+| 交叉验证 / 冲突识别 | 集群 3 组：supported=2、conflicting=2、unverified=1，冲突双方共享冲突组 | `RESEARCHOS_TEST_DSN=... go test ./internal/researchos/exec -run TestVerifyIntegration` |
+| 中断恢复 | 强杀 Worker → 租约过期 → 接管，8/8 节点完成，停机前已完成节点 attempts 保持 1 | `scripts/fault-injection.sh`（PASS） |
+| 节点重试语义 | 确定性失败 attempts=1（修复前 3 次）；人工 retry 后 attempts=2；对已完成节点 retry → 409 | `POST /nodes/{id}/retry` 实测 |
 
 ### 3.1 未实测项（明确标注）
 
 | 项目 | 状态 | 原因 |
 |---|---|---|
 | Docker Compose 启动 | 未实测 | 本机未安装 Docker Desktop（用户决策：Phase 5 前不装），`docker-compose.yaml` 与 `Dockerfile.researchos` 已写好但只做过语法审阅 |
-| 真实 LLM 调用 | 未实测 | 未提供 LLM API Key；`/health` 明确返回 `llm.enabled=false` 并在 `note` 里说明「规划与抽取降级为本地确定性流程」 |
+| 真实大模型质量 | 未实测 | 未提供 LLM API Key。**链路**已用本地 OpenAI 兼容测试替身验证通（`planner_mode=llm`、`llm_used=true`、`dropped_ungrounded=2`/次），但「链路通」不等于「效果好」，报告质量仍需真实 Key 验收 |
 | 浏览器端 E2E | 未实测 | 本机 Chrome/Edge 无头模式无输出（环境限制），`scripts/screenshot.sh` 需人工在有桌面的环境执行 |
 | 大批量压测（≥20 并发） | 未实测 | 会把匿名检索 Provider 打到限流，压测脚本注释里已写明控制规模 |
 | Windows 以外平台 | 未实测 | 仅在 Windows 11 / AMD64 验证 |

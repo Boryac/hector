@@ -133,9 +133,19 @@ Worker 循环（N 并发）
 |---|---|
 | 幂等 | 每条事件有 `event_id`（UUID），客户端可去重 |
 | 顺序 | `research_tasks.latest_sequence` 单调自增，任务内严格递增 |
-| 断线续接 | 标准 `Last-Event-ID` 头，或 `?after_sequence=N`（仅 `/events` 接受 query token） |
-| 传输 | `text/event-stream`，15s 心跳注释帧 |
-| 鉴权 | `Authorization: Bearer`；`?token=` 只允许 SSE 端点，其余 401 |
+| 断线续接 | 标准 `Last-Event-ID` 头，或 `?after_sequence=N` |
+| 传输 | `text/event-stream`，15s 心跳注释帧；任务终态时主动 `stream.end` 收尾 |
+| 鉴权（首选） | `Authorization: Bearer <API Token>`，命令行与脚本走这条 |
+| 鉴权（浏览器） | `EventSource` 不能设头，改用一次性 ticket：`POST /api/v1/research/{id}/events/ticket` 用 Bearer 换取，再用 `?ticket=` 建流 |
+
+ticket 的实现落在 `api/ticket.go`：进程内表，key 是 `sha256(ticket)`（不存明文），
+默认 60s 过期，绑定单一 `task_id`，校验通过即删除；单任务未消费上限 16 张，防止签发接口刷内存。
+`withAuth` 里只有 `eventsTaskID(path)` 命中的那一个路由接受 ticket，ticket 不能替代 Bearer 调其他接口。
+`?token=` 通道已删除——长期凭据进 URL 会沉淀到浏览器历史、`Referer` 与代理日志，这一点写在
+`docs/security-review.md` §1.8。
+
+LLM 模式下 search 节点的检索式优先取规划器给出的 `subtask.query`（`planner.NodeSearchQuery`），
+只有它为空时才回退到「目标 + 维度词」模板——否则模型拆出来的子问题对检索毫无影响。
 
 事件类型见 `docs/DATA_MODEL.md` §3。前端 `web/lib/event-map.ts` 做类型 → 文案/图标映射，
 未识别的类型降级为原始 type 名显示，不丢事件。

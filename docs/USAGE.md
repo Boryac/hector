@@ -35,7 +35,9 @@ cd upstream/hector && ./bin/researchos.exe all
 
 页面左上角有个 **API Token** 输入框，默认值 `local-dev-token`，与 `.env.researchos` 里的 `RESEARCHOS_API_TOKEN` 一致，**不用手输**。换过 Token 的话在这里填一次，存在浏览器 localStorage 里，之后不再问。
 
-> 说明：页面本身免鉴权（否则浏览器加载不了静态资源），`/api/` 下的每个请求都带 Bearer Token。Token 不进 URL，唯一的例外是 SSE 长连接的 `?token=`——浏览器原生 EventSource 不支持自定义请求头，这是没有办法的折中。
+> 说明：页面本身免鉴权（否则浏览器加载不了静态资源），`/api/` 下的每个请求都带 Bearer Token。
+>
+> **Token 不进 URL。** 浏览器 `EventSource` 不支持自定义请求头，早期实现只能退而求其次把长期 Token 塞进 `?token=`，代价是它会沉淀在浏览器历史、Referer 和反向代理的 access log 里。现在改成：前端先用 Bearer Token 换一张**一次性 SSE ticket**（`POST /api/v1/research/{id}/events/ticket`），再用 `?ticket=` 建流。ticket 默认 60 秒过期、只对签发它的那个任务有效、用一次即销毁。`?token=` 通道已经删除，不保留兼容。
 
 ---
 
@@ -132,12 +134,32 @@ curl -s "$BASE/api/v1/research/$ID/report.md" -H "Authorization: Bearer $TOKEN" 
 订阅实时事件：
 
 ```bash
-# SSE（会一直挂着推增量）
-curl -N "$BASE/api/v1/research/$ID/events?token=$TOKEN"
+# 方式一：命令行/脚本，直接用 Bearer 头（推荐）
+curl -N "$BASE/api/v1/research/$ID/events" -H "Authorization: Bearer $TOKEN"
+
+# 方式二：浏览器 EventSource 这类无法设置头的场景，先换一次性 ticket
+TK=$(curl -s -X POST "$BASE/api/v1/research/$ID/events/ticket" \
+       -H "Authorization: Bearer $TOKEN" | python -c "import sys,json;print(json.load(sys.stdin)['ticket'])")
+curl -N "$BASE/api/v1/research/$ID/events?ticket=$TK"
+
+# 断点续接：两种都行
+curl -N "$BASE/api/v1/research/$ID/events?after_sequence=50" -H "Authorization: Bearer $TOKEN"
+curl -N "$BASE/api/v1/research/$ID/events" -H "Authorization: Bearer $TOKEN" -H "Last-Event-ID: 50"
 
 # 一次性拿历史事件，便于脚本处理
 curl -s "$BASE/api/v1/research/$ID/events?format=json" -H "Authorization: Bearer $TOKEN"
 ```
+
+ticket 的四条硬规则（写代码时别踩）：
+
+| 规则 | 违反后的返回 |
+|---|---|
+| 一次性，用过的不能重放 | `401 sse_ticket_invalid` |
+| 默认 60 秒过期（`RESEARCHOS_SSE_TICKET_TTL`，上限 10 分钟） | `401 sse_ticket_expired` |
+| 只能用于签发时绑定的那个任务 | `403 sse_ticket_scope` |
+| 只能访问 `GET .../events`，不能当 API Token 调其他接口 | `401 unauthorized` |
+
+所以：**每次建流都要重新签发**，不要缓存 ticket；断线重连也要换新的。
 
 状态机是硬约束：非法跃迁返回 `409 invalid_transition`，不会出现「已取消的任务又被跑起来」这种状态。合法跃迁表见 `docs/DATA_MODEL.md`。
 
@@ -147,6 +169,12 @@ curl -s "$BASE/api/v1/research/$ID/events?format=json" -H "Authorization: Bearer
 
 **401 Unauthorized**
 Token 不对或没带。检查 `.env.researchos` 的 `RESEARCHOS_API_TOKEN` 与界面输入框是否一致；改过 `.env` 要重启服务。
+
+**报 `sse_ticket_expired` / `sse_ticket_invalid`**
+ticket 过期或用过了。ticket 默认只活 60 秒且一次性，前端每次建流（含断线重连）都会重新签发；自己写脚本时别缓存 ticket，用一次就换一张。要调长有效期改 `RESEARCHOS_SSE_TICKET_TTL`（上限 10 分钟）。
+
+**报 `sse_ticket_scope`**
+拿着 A 任务的 ticket 去订阅 B 任务的事件流。ticket 与任务绑定，不能跨任务复用——这是防止 ticket 泄露后横向读取其他任务。
 
 **任务卡在 `awaiting_approval`**
 正常，它在等你批准。这是设计行为，不是卡死。
@@ -166,7 +194,17 @@ RESEARCHOS_LLM_MODEL=gpt-4o-mini
 # 接自建网关时再加 RESEARCHOS_LLM_BASE_URL
 ```
 
-改完重启服务，`/api/v1/health` 的 `checks.llm.enabled` 应变为 `true`。
+改完重启服务，`/api/v1/health` 的 `checks.llm.enabled` 应变为 `true`，`checks.llm.model` 会显示模型名。
+
+开启后行为有三处可见变化：
+
+1. 任务详情的 `planner_mode` 从 `heuristic` 变成 `llm`，研究问题由模型拆解；
+2. search 节点的检索式改为取模型给出的 `query`（原来固定用「目标 + 维度词」模板）；
+3. 每个 analyze 节点的输出里 `llm_used=true`，并且事件流会出现 `llm_claim_extraction`，
+   记录 `kept` 与 `dropped_ungrounded`——**后者是模型编造引文被丢弃的条数**，不是 0 才正常。
+
+> 边界声明：仓库里的 `scripts/mock-llm.py` 能让这条链路跑通，但它是测试替身、不做推理。
+> 「链路通」不等于「报告好」，真实质量必须用真实 Key 验收。
 
 **导出按钮点了没反应**
 看浏览器控制台。导出是带 Authorization 的 fetch，被浏览器插件拦截会静默失败，页面左上角会出现红色错误条。
@@ -176,7 +214,46 @@ RESEARCHOS_LLM_MODEL=gpt-4o-mini
 
 ---
 
-## 8. 停止与清理
+## 8. 验收与自检脚本
+
+仓库里四个脚本，各有明确用途，不是摆设：
+
+```bash
+# 报告可追溯性：逐条核对「结论 → 引文 → 来源原文」，并检查引用编号闭合、
+# 冲突披露是否与证据面板一致。退出码 0 才算通过。
+python scripts/verify-citations.py --task <task-id>
+
+# 并发压测：N 个任务同时跑，输出成功率 / P50 / P95 / 节点数 / 事件数
+bash scripts/load-test.sh 5 quick
+
+# 故障注入：强杀 Worker → 等租约过期 → 新 Worker 接管，
+# 校验「停机前已完成的节点不被重跑」。（需要独占 8080，先停常驻服务）
+bash scripts/fault-injection.sh
+
+# 本地 OpenAI 兼容测试替身（不是模型），用于验证 LLM 客户端链路
+python scripts/mock-llm.py --port 11434
+```
+
+`verify-citations.py` 的输出可以直接当验收记录用，例如：
+
+```
+-- 引文与来源 --
+  证据总条数=18 逐字落地=18 悬空来源=0 空引文=0
+  [PASS] 引文全部逐字落地  18/18
+-- 报告引用编号 --
+  [PASS] 引用编号闭合  18 个编号一一对应
+-- 交叉验证与冲突 --
+  结论状态分布：{'partially_supported': 18}
+  [PASS] 冲突披露  无冲突结论，报告声明一致
+-- 结论落地 --
+  [PASS] 核心发现全部可回溯  10/10
+```
+
+关于 `scripts/mock-llm.py` 的定位必须说清楚：它不做任何推理，只按提示词类型返回预置 JSON，并且**故意**在每次抽取里混一条编造引文和一条不存在的 `source_id`。它的作用是证明「引擎没有盲信模型输出」——正常跑完 `dropped_ungrounded` 应该 ≥2。用它产出的报告**不能**当作模型质量证据。
+
+---
+
+## 9. 停止与清理
 
 ```bash
 taskkill //F //IM researchos.exe            # 停服务
