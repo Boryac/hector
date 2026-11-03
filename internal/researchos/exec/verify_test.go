@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"math"
 	"strings"
 	"testing"
 
@@ -62,8 +63,37 @@ func TestClusterClaimsGroupsSimilar(t *testing.T) {
 	}
 }
 
+// 相对差异不能出现负数或天文数字：这两处都曾经算错，且错值会直接印进报告。
+func TestRelativeSpreadEdgeCases(t *testing.T) {
+	cases := []struct {
+		min, max float64
+		want     float64
+	}{
+		{100, 100, 0},   // 完全相同
+		{0, 0, 0},       // 全为 0：旧写法得 -1（印成 -100%）
+		{0, 23.6, 1},    // 最小值为 0：旧写法得 2.36e10（印成 2359999999900%）
+		{100, 110, 0.1}, // 常规
+		{100, 160, 0.6}, // 常规
+		{-5, 10, 3},     // 负最小值走绝对值分母
+	}
+	for _, c := range cases {
+		got := relativeSpread(c.min, c.max)
+		if math.Abs(got-c.want) > 1e-9 {
+			t.Fatalf("relativeSpread(%v,%v)=%v，期望 %v", c.min, c.max, got, c.want)
+		}
+	}
+
+	// 印到报告里的百分比不应带负号，也不应超过 100%（用 0 作基线时最大差异就是 100%）。
+	for _, v := range [][2]float64{{0, 0}, {0, 23.6}, {0, 9999}} {
+		_, note, _ := detectConflict([]float64{v[0], v[1]}, 2)
+		if strings.Contains(note, "-") {
+			t.Fatalf("差异说明出现负号：%q", note)
+		}
+	}
+}
+
 func TestDetectConflictNumericSpread(t *testing.T) {
-	conflict, note, group := detectConflict([]float64{100, 160})
+	conflict, note, group := detectConflict([]float64{100, 160}, 2)
 	if !conflict {
 		t.Fatalf("相差 60%% 的数值应判为冲突，note=%q", note)
 	}
@@ -73,16 +103,44 @@ func TestDetectConflictNumericSpread(t *testing.T) {
 	if !strings.Contains(note, "100") && !strings.Contains(note, "160") {
 		t.Fatalf("说明应包含具体数值，实际 %q", note)
 	}
+	if !strings.Contains(note, "2 个来源页面") {
+		t.Fatalf("冲突说明应写明涉及页面数，实际 %q", note)
+	}
 }
 
 func TestDetectConflictWithinTolerance(t *testing.T) {
-	conflict, _, _ := detectConflict([]float64{100, 110})
+	conflict, _, _ := detectConflict([]float64{100, 110}, 2)
 	if conflict {
 		t.Fatal("相差 10% 的数值不应判为冲突")
 	}
-	conflict, _, _ = detectConflict([]float64{100})
+	conflict, _, _ = detectConflict([]float64{100}, 1)
 	if conflict {
 		t.Fatal("单值不应判为冲突")
+	}
+}
+
+// 只有 1 个来源页面时，不能把「同一页内多处数值相同」说成「多来源印证」；
+// 也不能把同一页内的数值分歧说成「不同来源冲突」。
+func TestDetectConflictSingleSourceWording(t *testing.T) {
+	_, note, _ := detectConflict([]float64{16000, 16000}, 1)
+	if strings.Contains(note, "多来源") || strings.Contains(note, "数值一致") {
+		t.Fatalf("单页面不得声称多来源数值一致，实际 %q", note)
+	}
+	if !strings.Contains(note, "仅 1 个来源页面") {
+		t.Fatalf("应明确说明只有单页面，实际 %q", note)
+	}
+
+	_, note, _ = detectConflict([]float64{16000, 16000}, 2)
+	if !strings.Contains(note, "2 个来源页面数值一致") {
+		t.Fatalf("两页面应写明页面数，实际 %q", note)
+	}
+
+	conflict, note, _ := detectConflict([]float64{100, 160}, 1)
+	if !conflict {
+		t.Fatal("同页内的显著数值分歧仍应被识别")
+	}
+	if strings.Contains(note, "不同来源冲突") || !strings.Contains(note, "同一来源页面内") {
+		t.Fatalf("单页面的分歧不得说成不同来源冲突，实际 %q", note)
 	}
 }
 

@@ -51,18 +51,20 @@ func (e *Engine) runVerify(s *Session) (map[string]any, int, error) {
 	for _, cluster := range clusters {
 		// 汇总簇内独立站点与数值
 		sites := map[string]bool{}
+		srcIDs := map[string]bool{}
 		values := make([]float64, 0, len(cluster))
 		for _, c := range cluster {
 			for _, ev := range c.Evidence {
 				if src := loadSource(ev.SourceID); src != nil {
 					sites[src.Site] = true
+					srcIDs[ev.SourceID] = true
 				}
 			}
 			if c.NumericValue != nil {
 				values = append(values, *c.NumericValue)
 			}
 		}
-		conflict, note, group := detectConflict(values)
+		conflict, note, group := detectConflict(values, len(srcIDs))
 		siteCount := len(sites)
 
 		for _, c := range cluster {
@@ -187,25 +189,56 @@ func jaccard(a, b map[string]bool) float64 {
 	return float64(inter) / float64(union)
 }
 
+// relativeSpread 计算相对差异，返回 0~1 的比例（调用方乘 100 转百分比）。
+//
+// 以最小值为分母是原本的阈值语义（25% 判定冲突），但最小值可能是 0：
+//   - 全部为 0 时旧写法把分母替换成 1e-9，算出 -100%，符号都是错的；
+//   - 最小值 0 与 23.6 相比时算出 2.36e12%，这种数字没法读。
+//
+// 因此：最小值非零仍以它作分母；最小值近似 0 时改用最大值作分母（此时最大差异即 100%）。
+func relativeSpread(minV, maxV float64) float64 {
+	if minV == maxV {
+		return 0
+	}
+	denom := math.Abs(minV)
+	if denom < 1e-9 {
+		denom = math.Abs(maxV)
+	}
+	if denom < 1e-9 {
+		return 0
+	}
+	return (maxV - minV) / denom
+}
+
 // detectConflict 在同一簇内检测数值冲突。
-func detectConflict(values []float64) (conflict bool, note, group string) {
+//
+// distinctPages 是簇内证据涉及的独立来源页面数，用来把提示写准：
+//   - 站点数（SourceCount）与页面数不是一回事，github.com 下一个域名可以挂多个仓库页面；
+//   - 只有 1 个页面时，比较的只是同一页面内的多处数值，不能说成「不同来源冲突」。
+func detectConflict(values []float64, distinctPages int) (conflict bool, note, group string) {
 	if len(values) < 2 {
 		return false, "", ""
 	}
 	sorted := append([]float64(nil), values...)
 	sort.Float64s(sorted)
 	minV, maxV := sorted[0], sorted[len(sorted)-1]
-	if minV == 0 {
-		minV = 1e-9
-	}
-	ratio := (maxV - minV) / math.Abs(minV)
+	ratio := relativeSpread(minV, maxV)
 	if ratio > 0.25 {
+		scope := "不同来源页面上"
+		if distinctPages < 2 {
+			scope = "同一来源页面内"
+		}
 		return true,
-			fmt.Sprintf("同一结论在不同来源中的数值差异显著（最小 %.4g / 最大 %.4g，相对差异 %.0f%%）",
-				sorted[0], sorted[len(sorted)-1], ratio*100),
+			fmt.Sprintf("%s的数值差异显著（最小 %.4g / 最大 %.4g，相对差异 %.0f%%，涉及 %d 个来源页面）",
+				scope, sorted[0], sorted[len(sorted)-1], ratio*100, distinctPages),
 			"conflict:" + textutil.Hash(fmt.Sprintf("%.4g-%.4g", sorted[0], sorted[len(sorted)-1]))[:10]
 	}
-	return false, fmt.Sprintf("多来源数值一致（相对差异 %.0f%%）", ratio*100), ""
+	if distinctPages < 2 {
+		// 只有 1 个页面时没有可比对的独立来源，不能对外说成「数值一致、已印证」。
+		return false,
+			fmt.Sprintf("仅 1 个来源页面，数值无跨来源可比（相对差异 %.0f%%）", ratio*100), ""
+	}
+	return false, fmt.Sprintf("%d 个来源页面数值一致（相对差异 %.0f%%）", distinctPages, ratio*100), ""
 }
 
 // verificationStatus 把「冲突 / 独立站点数 / 证据条数」映射为结论状态与置信度。
