@@ -12,22 +12,20 @@
 
 | 能力 | 状态 | 证据 |
 |---|---|---|
-| Go 构建 / 全量单测 | ✅ 通过 | `go build ./...`；`go test ./...` 全绿（12 个包有测试，含 `-race` 跑 api 包） |
-| 数据库迁移 | ✅ 通过 | PostgreSQL 16.2 实跑，`schema_migrations` 记 `0001_init.sql` |
-| 端到端研究任务 | ✅ 通过 | 8/8 节点、18 条证据逐字落地来源原文（`scripts/verify-citations.py` PASS） |
-| SSE 实时事件 | ✅ 通过 | `sequence` 连续无空洞；`Last-Event-ID` / `?after_sequence=` 续接实测；凭据改一次性 ticket |
-| SSE 凭据安全 | ✅ 通过 | ticket 一次性 / 60s 过期 / 绑任务 / 仅 events 端点，`?token=` 通道已删除，13 条 ticket 测试 + `-race` |
-| 前端构建 | ✅ 通过 | Next.js 静态导出 3 个路由：`/`、`/task/`、`/_not-found` |
-| 前端页面视觉 | ⚠️ **未截图验证** | 本机无法启动 Chrome/Edge（连 `--version` 都无输出），需按 `scripts/screenshot.sh` 人工截图 |
-| LLM 链路（客户端 → 规划 → 抽取 → 报告） | ✅ 已验证（用本地测试替身） | `planner_mode=llm`、`llm_used=true`、编造引文与伪造 `source_id` 被丢弃（`dropped_ungrounded=2`/次） |
-| 真实大模型质量 | ⚠️ **未验证** | 无 API Key。链路通 ≠ 效果好，报告质量仍需真实模型验收 |
-| 真实检索 | ✅ 已接通 | GitHub / Hacker News / Wikipedia / Bing 免密钥可用；Tavily·SerpAPI·Brave 需 Key |
-| 并发 5 任务 | ✅ 实测 | 数据见 [`docs/benchmark.md`](docs/benchmark.md) |
-| 中断恢复 / 节点重试 | ✅ 实测 | 强杀 Worker → 租约过期 → 接管完成，8/8 节点、已完成节点 attempts 不变 |
-| Docker Compose | ⚠️ **未在本机验证** | 本机未装 Docker；`docker-compose.yaml` 与 `Dockerfile.researchos` 已交付 |
-| 多用户隔离 | 🚫 **禁用** | A2A Issue #2 核心链路已修，会话归属校验未做，按决策保持单用户 |
+| 统一校验 | ✅ 14 通过 / 0 失败 / 0 跳过 | `bash scripts/verify.sh`（含负向自检：注入坏文件确认校验器抓得到） |
+| Go 构建 / 全量单测 | ✅ 通过 | `go test -count=1 ./internal/researchos/...` 14 包全绿、196 个测试函数 |
+| 数据库迁移 | ✅ 通过 | `0001_init.sql` + `0002_settings_center.sql`，连续执行两次幂等 |
+| 端到端研究任务 | ✅ 通过 | 任务 `497ba966`：3 researcher 并发执行、7 来源全 `ok`、15 结论、PDF 4 页内容比对一致 |
+| 报告导出 md / html / pdf | ✅ 通过 | PDF 为服务端真实排版（内嵌中文字体、页码、表格跨页），`scripts/verify_pdf_content.py` 比对通过 |
+| SSE 实时事件 | ✅ 通过 | 一次性 ticket 通道，13 条 ticket 测试；浏览器审计确认事件流建立 |
+| 设置中心 | ✅ 通过 | 27 项配置入库持久化、热/需重启/部署三层、密钥 AES-256-GCM 加密、GET 只回掩码 |
+| 前端（7 页） | ✅ 通过 | `ui-audit.mjs` 双视口 14 项 + `ui-functional.mjs` 37 项断言（真实 API 调用、UI 创建任务落库）；截图见 `docs/screenshots/` |
+| LLM 链路（客户端 → 规划 → 抽取 → 报告） | ✅ 已验证（用本地测试替身） | `planner_mode=llm`、编造引文与伪造 `source_id` 被丢弃 |
+| 真实大模型质量 | ⚠️ **未验证** | 无 API Key（BLOCKED）。链路通 ≠ 效果好；配置方法见 `docs/FINAL_AUDIT.md` §G |
+| Docker Compose | ⚠️ **未在本机验证** | 本机无 Docker（BLOCKED）；compose 静态校验通过，部署清单已与实际镜像对齐 |
+| 多用户隔离 | 🚫 **禁用** | V1 保持单用户；身份只认服务端 Bearer Token，多用户能力在 A2A 身份隔离修复并回归前不开放 |
 
-> 表格中带 ⚠️ 的项**尚未真实验证**，不得当作已完成。
+> 表格中带 ⚠️ 的项**尚未真实验证**，不得当作已完成。逐项细节见 [`docs/FINAL_AUDIT.md`](docs/FINAL_AUDIT.md) 与 [`docs/INTEGRATION_MATRIX.md`](docs/INTEGRATION_MATRIX.md)。
 
 ---
 

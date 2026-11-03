@@ -174,3 +174,29 @@
 ### 收口说明
 - 未采用参考稿的青绿色 `#176d6b`，保持更克制的 `#526B7B` 作为唯一强调色；未引入任何装饰性插画或假图表。
 - 仍有开放项：PDF 导出（T6.1）、完整业务流浏览器 E2E（T6.10 仍为 `[~]`，当前脚本覆盖路由渲染与布局，不覆盖创建→批准→完成全链路）。
+
+## 第十阶段：最终集成、全项目审计与交付（2026-11-03 人工指派）
+
+目标：接管项目收尾——建立前后端对接矩阵、修复遗留缺陷、补齐 PDF 导出、统一校验入口、全项目审计，形成可交付版本。UI 视觉成果（T9）保持不动，只做功能性补齐。
+
+- [x] T10.1 全项目扫描：两仓 git 状态干净（UI Agent 工作已全部提交，T9.1–T9.8）；无 TODO/Mock/占位数据；后端 41 个路由操作与前端消费逐一对账
+- [x] T10.2 PDF 报告导出：服务端真实排版（gopdf + 内嵌 Noto Sans SC Regular OFL 字体 10.1MB），A4、CJK 断行、表格跨页重复表头、页码；`GET /research/{id}/report.pdf` + 前端按钮；10 条单测
+- [x] T10.3 集成缺陷修复：`/system` 接入设置页运行环境卡片；`/stats` 接入 Dashboard 指标卡（消除「只统计最近 100 条」口径失真）；html 与 pdf 共用 ParseBlocks
+- [x] T10.4 verify.sh 重写：gofmt/vet/test/tsc/build/契约/compose/迁移/集成/PDF 内容一致性，负向自检证明校验器抓得到真错误；实跑 14 通过 / 0 失败 / 0 跳过
+- [x] T10.5 部署资产修复：deployments/compose.yaml 从 phase-0 残骸重写；check-compose.py 静态校验；根 compose 补 healthcheck
+- [x] T10.6 浏览器审计：ui-functional.mjs 37 项断言（逐页真实 API 调用、懒加载 Tab、SSE ticket、UI 创建任务落库）；ui-audit.mjs 双视口 14 项
+- [x] T10.7 端到端真实任务：heuristic 模式全链路（3 researcher 并发 7.6–8.2s、7 来源全 ok、15 结论、PDF 3 页内容比对一致）
+- [x] T10.8 文档与审计：INTEGRATION_MATRIX、FINAL_AUDIT、USAGE/README/DECISIONS/PROGRESS 同步
+
+### 证据表
+
+| 任务 | 证据 |
+|---|---|
+| T10.2 | `verify_pdf_content.py`：PDF 4 页；比对章节 7、URL 5、正文抽样 49 全部命中；渲染留证 `.devtools/e2e/pdf_*.png`；同输入字节级一致（单测） |
+| T10.4 | `bash scripts/verify.sh` 输出 `14 通过 / 0 失败 / 0 跳过`，含负向自检 2 项 |
+| T10.6 | `node scripts/ui-functional.mjs` 输出 `37 通过 / 0 失败`；`ui-audit.mjs` 14 项全 ok（7 路由 × 1440/390） |
+| T10.7 | 任务 `497ba966` completed；agents 8 条（researcher×3 并发、analyst×3、verifier、synthesizer）；sources 7 条全 `ok`（bing 5 / github 1 / hackernews 1）；planner_mode=heuristic 如实标注 |
+
+BLOCKED（外部条件，非代码问题）：
+- 真实 LLM 研究质量：无可用 Key（`.env.researchos` 未配 `RESEARCHOS_LLM_*`）；链路已验证到「试连诚实返回上游 401、启发式全链路可交付」
+- Docker 实机部署：本机无 Docker；静态校验（构建上下文/依赖关系/健康检查）已过，Dockerfile 多阶段构建逻辑与 compose 依赖已人工核对

@@ -278,3 +278,16 @@
 - 做了什么：同步 `TASKS.md` 第九阶段与 T6.8/T6.10 状态，补 `PROGRESS.md` 本轮记录与 `docs/design-system.md`；按「设计系统 → 总览/工作台 → 资料页与设置 → 审计脚本与截图」拆小提交，均只提交到本地 `feature/hector-researchos`，不 push。
 - 测试结果：提交前重跑 `tsc --noEmit`、`next build` 与 `node scripts/ui-audit.mjs --shots=...`，全部通过；`git status` 无未提交的前端源码。
 - 遗留问题 / 假设：PDF 导出与全业务流 E2E 仍未完成，已在任务清单保留 `[~]`。
+
+### 2026-11-03 — [T10.2] 真实 PDF 报告导出（从零实现）
+- 做了什么：`report` 包新增 A4 排版器。字体决策是核心：gopdf 只认 glyf 型 TTF，而主流发行版的 CJK 字体几乎全是 TTC/OTF(CFF)，运行时扫系统字体等于把部署环境变成功能开关——所以内嵌 Noto Sans SC Regular 静态实例（google/fonts 官方 VF 经 fontTools 静态化 wght=400，OFL 授权全文随字体入库）。缺字行为是「报错」不是「静默丢字」，因此在排版前用生成的覆盖区间表把字体外的码点替换为 '□' 并计数。页码用两遍渲染（页脚占预留边距，不影响分页，两遍分页必然一致），同输入产出字节级相同的文件。
+- 过程中的坑：① 端到端内容比对抓到真缺陷——plainText 把 `[标题](URL)` 剥成只剩标题，来源列表的 URL 在纸面上全没了，违反「引用可识别」；改为渲染成「文本（URL）」。② 测试还抓到 res.pages 从未同步渲染器计数、`MeasureTextWidth` 在未设字体时 panic 两个问题。③ 这份启发式报告本身没有对比表（无数值结论），表格渲染的视觉证据用 `RESEARCHOS_PDF_SAMPLE` 守卫的测试单独产出。
+- 测试结果：report 包 19 条测试全绿；端到端 `verify_pdf_content.py` 比对章节 7、URL 5、正文抽样 49 全部命中；渲染留证 3 张 PNG。
+
+### 2026-11-03 — [T10.3/T10.6] 前后端对接矩阵与集成缺陷
+- 做了什么：写 `ui-functional.mjs`，用 CDP 抓每个页面真实发出的 API 请求逐个断言（不只看「页面能渲染」）。第一轮 37 项断言里抓出 7 个 FAIL，全部坐实：`/system` 和 `/stats` 是为前端建的但从来没有入口（stats 注释里就写着「供 Dashboard 使用」）；工作台五个 Tab 懒加载导致审计漏判（不是缺陷，审计脚本要切 Tab）；设置页字段数选择器写错。修复 = 接线 `/system`（设置页运行环境卡片）与 `/stats`（Dashboard 全量计数——原实现从最近 100 条任务客户端累加，任务多于 100 时卡片数字是错的）。
+- 测试结果：第二轮 `37 通过 / 0 失败`，含「UI 真实提交创建任务 → 落库 → 出现在列表 → 清理」的完整交互闭环。`ui-audit.mjs` 双视口 14 项全 ok。截图全量重截（真实服务 + 已完成任务数据）。
+
+### 2026-11-03 — [T10.4/T10.5] verify.sh 重写与部署资产修复
+- 做了什么：旧 verify.sh 是 4 步骨架（大量 skip、无退出码语义、有「verify.sh passing on skeleton does NOT mean V1.0 done」的自供状注释）。重写为统一校验：gofmt / vet / test / tsc / next build / openapi / compose / 迁移幂等（跑两次）/ 起真实服务打 /health 与 report.pdf / PDF 内容比对，并内置负向自检——故意注入悬空 $ref 和坏格式文件，校验器抓不到就算校验器 FAIL。部署侧：`deployments/compose.yaml` 原是 phase-0 残骸（引用不存在的 Dockerfile、./api、./worker、../web/Dockerfile），重写为与实际镜像一致的生产编排；本机无 Docker，`check-compose.py` 提供静态校验并把实机部署如实标 BLOCKED。
+- 测试结果：`bash scripts/verify.sh` 全量 14 通过 / 0 失败 / 0 跳过；负向自检 2 项通过（坏文件确实被抓到，exit 1）。
