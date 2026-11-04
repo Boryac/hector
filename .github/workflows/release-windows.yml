@@ -7,7 +7,12 @@ on:
   push:
     tags:
       - "v*"
-  workflow_dispatch: {} # 手动触发用于演练
+  workflow_dispatch: # 手动触发用于演练；可指定版本号（默认取 ref 名）
+    inputs:
+      version:
+        description: "打包版本号（如 v1.0.0-rc.1），留空则使用分支/标签名"
+        required: false
+        default: ""
 
 permissions:
   contents: read # 最小权限：只读源码；不授 release/packages 写权限
@@ -46,12 +51,16 @@ jobs:
       - name: Go 单元测试（ResearchOS 全包）
         run: go test -count=1 ./internal/researchos/...
 
+      - name: 前端依赖安装
+        run: npm ci --silent
+        working-directory: web
+
       - name: 前端类型检查
         run: npx tsc --noEmit
         working-directory: web
 
       - name: 打包（前端构建 + 后端 + 托盘 + ZIP + SHA256 + BUILD_INFO）
-        run: pwsh -File scripts/package-release.ps1 -Version "${{ github.ref_name }}"
+        run: pwsh -File scripts/package-release.ps1 -Version "${{ inputs.version || github.ref_name }}"
         env:
           NO_COLOR: "1"
 
