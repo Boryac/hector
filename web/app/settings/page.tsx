@@ -130,6 +130,20 @@ function validate(field: SettingsField, value: unknown): string | null {
   return null;
 }
 
+// 后端将 Go time.Duration 序列化为纳秒数字；显示时转回 "4m"/"1h30m" 形式
+function formatDurationDisplay(value: unknown): unknown {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return value;
+  let ns = Math.round(value);
+  const h = Math.floor(ns / 3.6e12); ns -= h * 3.6e12;
+  const m = Math.floor(ns / 6e10); ns -= m * 6e10;
+  const s = Math.round(ns / 1e9);
+  const parts: string[] = [];
+  if (h) parts.push(`${h}h`);
+  if (m) parts.push(`${m}m`);
+  if (s || parts.length === 0) parts.push(`${s}s`);
+  return parts.join('');
+}
+
 function SectionFields({
   section, drafts, errors, onDraft, onReset, resetting,
 }: {
@@ -143,7 +157,9 @@ function SectionFields({
   return (
     <div className="settings-rows">
       {section.fields.map((field) => {
-        const value = Object.prototype.hasOwnProperty.call(drafts, field.key) ? drafts[field.key] : field.value;
+        const value = Object.prototype.hasOwnProperty.call(drafts, field.key)
+          ? drafts[field.key]
+          : (field.kind === 'duration' ? formatDurationDisplay(field.value) : field.value);
         const error = errors[field.key];
         const id = `setting-${field.key.replace(/\./g, '-')}`;
         const dirty = Object.prototype.hasOwnProperty.call(drafts, field.key);

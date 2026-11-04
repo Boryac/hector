@@ -506,6 +506,26 @@ func coerceStored(f Field, v any) (any, error) {
 			return out, nil
 		}
 		return nil, fmt.Errorf("期望字符串数组，实际 %T", v)
+	case KindDuration:
+		// 保存路径会把 "4m" 解析成 time.Duration，JSON 序列化为纳秒数字；
+		// 装载时必须接受数字与字符串两种形态，否则保存成功、重启报错。
+		switch n := v.(type) {
+		case float64:
+			return time.Duration(n), nil
+		case int64:
+			return time.Duration(n), nil
+		case int:
+			return time.Duration(n), nil
+		case json.Number:
+			i, err := n.Int64()
+			if err != nil {
+				return nil, err
+			}
+			return time.Duration(i), nil
+		case string:
+			return time.ParseDuration(strings.TrimSpace(n))
+		}
+		return nil, fmt.Errorf("期望时长字符串或纳秒数值，实际 %T", v)
 	default:
 		if s, ok := v.(string); ok {
 			return s, nil
