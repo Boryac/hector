@@ -16,8 +16,11 @@ Pop-Location
 
 Write-Output "[2/5] 后端构建（内嵌前端/迁移/字体）"
 $env:CGO_ENABLED = "0"
-go build -trimpath -ldflags "-s -w -X main.Version=$Version" -o (Join-Path $stage "bin\researchos.exe") (Join-Path $root "cmd\researchos")
-if ($LASTEXITCODE -ne 0) { throw "后端构建失败" }
+Push-Location $root
+go build -trimpath -ldflags "-s -w -X main.Version=$Version" -o (Join-Path $stage "bin\researchos.exe") ".\cmd\researchos"
+$ok = ($LASTEXITCODE -eq 0)
+Pop-Location
+if (-not $ok) { throw "后端构建失败" }
 
 Write-Output "[3/5] 托盘构建（Wails）"
 Push-Location (Join-Path $root "desktop\traymanager")
@@ -26,8 +29,10 @@ Copy-Item "build\bin\researchos-tray.exe" $stage -Force
 Pop-Location
 
 Write-Output "[4/5] 组装资源"
-New-Item -ItemType Directory -Force -Path (Join-Path $stage "web"), (Join-Path $stage "config"), (Join-Path $stage "database\migrations"), (Join-Path $stage "assets\fonts"), (Join-Path $stage "assets\licenses"), (Join-Path $stage "scripts"), (Join-Path $stage "docs\release"), (Join-Path $stage "docs\installation") | Out-Null
-Copy-Item (Join-Path $root "web\.build\*") (Join-Path $stage "web") -Recurse -Force
+# 前端必须位于 bin\web\.build：托盘以后端 exe 所在目录（bin\）为工作目录注入 RESEARCHOS_WEB_DIR，
+# 后端据此挂载静态 UI；放错层级会导致界面 404（RC1 发行后实测发现）。
+New-Item -ItemType Directory -Force -Path (Join-Path $stage "bin\web\.build"), (Join-Path $stage "config"), (Join-Path $stage "database\migrations"), (Join-Path $stage "assets\fonts"), (Join-Path $stage "assets\licenses"), (Join-Path $stage "scripts"), (Join-Path $stage "docs\release"), (Join-Path $stage "docs\installation") | Out-Null
+Copy-Item (Join-Path $root "web\.build\*") (Join-Path $stage "bin\web\.build") -Recurse -Force
 Copy-Item (Join-Path $root "internal\researchos\db\migrations\*.sql") (Join-Path $stage "database\migrations")
 Copy-Item (Join-Path $root "internal\researchos\report\fonts\NotoSansSC-Regular.ttf") (Join-Path $stage "assets\fonts")
 Copy-Item (Join-Path $root "internal\researchos\report\fonts\OFL.txt") (Join-Path $stage "assets\licenses\NotoSansSC-OFL.txt")

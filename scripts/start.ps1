@@ -28,6 +28,10 @@ $env:RESEARCHOS_ADDR = $addr
 $env:RESEARCHOS_DATABASE_URL = $cfg.pgDsn
 $env:RESEARCHOS_API_TOKEN = $cfg.apiToken
 $env:RESEARCHOS_SECRET_KEY = $cfg.secretKey
+# 前端静态目录与托盘保持一致（bin\web\.build）；已显式设置时不覆盖
+if (-not $env:RESEARCHOS_WEB_DIR) {
+    $env:RESEARCHOS_WEB_DIR = Join-Path (Split-Path $exe) "web\.build"
+}
 
 $proc = Start-Process -FilePath $exe -ArgumentList "all" -WorkingDirectory (Split-Path $exe) `
     -WindowStyle Hidden -PassThru -RedirectStandardOutput $log -RedirectStandardError "$log.err"
